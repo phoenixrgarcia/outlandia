@@ -1,122 +1,114 @@
-# Incident on Planet Sinker 
+# Otherwordly Occurance in Outlandia
 
-A space western murder mystery party website built with Bootstrap and Alpine.js.
+A murder mystery party companion site, currently being adapted from the first space western iteration into a medieval fantasy royal court version.
 
-## Project Overview
+The current repository is both:
 
-This is a companion website for an interactive murder mystery party game set in a dystopian space western universe. Players assume character roles and investigate clues to solve a murder on Planet Sinker
+- A working static prototype from the original **Incident on Planet Sinker** game
+- A template/codebase for the next Outlandia iteration
 
-## Features
+The full implementation intent for the new version lives in:
 
-- **Character Selection**: Players select their character from a dropdown menu showing character name, blurb, and real player name
-- **Rules Page**: Clear instructions on how the murder mystery game works
-- **Character Profiles**: Detailed information on all 6 playable characters with extended bios
-- **Dark Space Western Theme**: Dramatic neon styling with a mysterious cosmic aesthetic
-- **Mobile Responsive**: Fully functional on mobile and desktop devices
-- **GitHub Pages Ready**: Automated deployment via GitHub Actions
+[agent/outlandia-update-spec.md](agent/outlandia-update-spec.md)
+
+## Project Direction
+
+The next version will retheme the site for a Dungeons & Dragons inspired royal court mystery. Creative story content, final character text, clues, and worldbuilding will be supplied later by human writers/actors. Placeholder text should be used until then.
+
+Planned high-level changes:
+
+- Medieval fantasy royal court visual theme
+- Searchable character login for around 40 playable characters
+- Placeholder character factions: Royal Court, Laborers, Knights, Fae
+- Private character sections for inventory, goals, secret, twist, and relationships
+- Node.js and Express backend
+- MongoDB-backed game data
+- Render deployment target
+- Simple character password login with local-storage tokens
+- GM/admin characters with both player features and admin dashboard access
+- Shop, inbox, websocket notifications, inventory management, abilities, statuses, and round support
+
+Implementation priority:
+
+1. Update the existing site style to the new medieval fantasy royal court theme.
+2. Add shop, inbox, and websocket/realtime functionality.
+3. Add rounds functionality.
+
+## Current Features
+
+The existing static site includes:
+
+- Home page with character login/selection
+- Rules page
+- Lore page
+- Character listing page
+- Database/evidence-style page
+- Character-specific authenticated details
+- Bootstrap and Alpine.js frontend behavior
+- Responsive styling
 
 ## Project Structure
 
-```
-incident_on_planet_sinker/
-├── index.html              # Landing page with character selection
-├── rules.html              # Game rules and how-to-play
-├── characters.html         # Full character profiles
+```text
+outlandia/
+├── agent/
+│   └── outlandia-update-spec.md  # AI-facing implementation intent
 ├── css/
-│   └── style.css          # Custom dark theme styles
+│   └── style.css                 # Current custom theme styles
+├── images/                       # Current image assets
 ├── js/
-│   └── app.js             # Alpine.js components
-├── .github/
-│   └── workflows/
-│       └── deploy.yml    # GitHub Pages auto-deploy
-├── package.json           # Dependencies and scripts
-└── README.md             # This file
+│   └── app.js                    # Current Alpine.js app logic
+├── index.html                    # Home and character login
+├── lore.html                     # Lore page
+├── rules.html                    # Rules page
+├── characters.html               # Public character list
+├── database.html                 # Current database/evidence page
+├── detail_characters.txt         # Current detailed character content
+├── package.json
+└── README.md
 ```
 
-## Setup
+## Local Setup
 
-1. **Install dependencies** (if not already installed):
-   ```bash
-   npm install
-   ```
+Install dependencies:
 
-2. **Development**: Simply serve the files locally:
-   ```bash
-   npm run dev
-   ```
-   Or open `index.html` directly in a browser.
-
-3. **Customize**:
-   - Edit character names and bios in `index.html` and `characters.html`
-   - Update player names in the character selection
-   - Modify rules content in `rules.html`
-   - Adjust the theme colors in `css/style.css` (CSS variables at the top)
-
-## Deployment to GitHub Pages
-
-1. Push to your `main` branch:
-   ```bash
-   git add .
-   git commit -m "Initial setup"
-   git push origin main
-   ```
-
-2. The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically:
-   - Install dependencies
-   - Deploy your site to GitHub Pages
-   - Your site will be available at: `https://yourusername.github.io/murder_site/`
-
-3. Enable GitHub Pages in your repository settings:
-   - Go to Settings → Pages
-   - Set source to "GitHub Actions"
-
-## Customization Guide
-
-### Change the Theme Colors
-Edit the CSS variables in `css/style.css`:
-```css
-:root {
-    --primary-neon: #00ff88;      /* Green neon */
-    --secondary-neon: #ff0080;    /* Pink neon */
-    --dark-bg: #0a0e27;          /* Dark space background */
-    /* ... more colors ... */
-}
+```bash
+npm install
 ```
 
-### Add/Edit Characters
-All 6 character slots are pre-built. To modify:
-1. Edit the character data in `js/app.js` 
-2. Update the character cards in `characters.html`
-3. Ensure the dropdown in `index.html` matches the character IDs
+Run the current static prototype locally:
 
-### Next Steps: Add Clue Pages
-Once you have the core site running, you can:
-- Create additional pages for clue investigations
-- Add interactive elements with Alpine.js
-- Create printable character sheets
-- Add a gallery for mystery photos
+```bash
+npm run dev
+```
 
-## Technologies Used
+You can also open `index.html` directly in a browser for the current static version.
 
-- **HTML5**: Semantic markup
-- **Bootstrap 5**: Responsive grid and components
-- **Alpine.js**: Lightweight reactive components
-- **CSS3**: Custom animations and theming
-- **GitHub Actions**: Automated deployment
+## Development Notes
 
-## Game Running Tips
+- Treat `agent/outlandia-update-spec.md` as the source of truth for upcoming changes.
+- Do not generate final mystery content, final clues, final character secrets, or final worldbuilding.
+- Use placeholders when implementation requires content.
+- Keep future server-side work aligned with Node.js, Express, MongoDB, and Render.
+- Avoid hard-coding assumptions that only work for the current six-character prototype.
 
-- Set the mood: Play the site on a big screen before gameplay
-- Make copies of character profiles for players
-- Print out any clue cards or evidence
-- Use the character selection screen as the "entry point" to the investigation
-- The site works offline once loaded
+## Technologies
+
+Current prototype:
+
+- HTML5
+- CSS3
+- Bootstrap 5
+- Alpine.js
+
+Planned backend direction:
+
+- Node.js
+- Express
+- MongoDB
+- Websockets or equivalent realtime channel
+- Render deployment
 
 ## License
 
-All content is your own. Feel free to modify and redistribute as needed.
-
----
-
-**Created for: Incident On Planet Sinker - A Space Western Mystery**  
-*2026*
+All custom content is project-owned and intended for adaptation within this murder mystery site.
