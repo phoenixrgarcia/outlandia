@@ -1,0 +1,17 @@
+{
+  "name": "murder-site",
+  "version": "1.0.0",
+  "description": "Murder in the Void - A Space Western Mystery Party Website",
+  "main": "index.html",
+  "scripts": {
+    "dev": "open index.html",
+    "build": "echo \"Build complete\"",
+    "deploy": "git push origin main"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "alpinejs": "^3.15.8",
+    "bootstrap": "^5.3.8"
+  }
+}

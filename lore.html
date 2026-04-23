@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Sinker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+<body x-data x-init="$store.auth.init()" class="dark-bg theme-lore">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Title Section -->
+                <div class="text-center mb-5">
+                    <h1 class="dramatic-title">Welcome to Planet Sinker</h1>
+                    <div class="divider"></div>
+                </div>
+
+                <!-- Rules Content -->
+                <div class="card dark-card border-glow mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Prologue</h2>
+                        <section class="text-light mb-4">
+                            <p>Humanity began expansion in 2027 to the outer reaches of space through the OPUS, Outer Planetary Universal Stargazing, project after the dimming of the Sun in 2026 led to a major push for the rushed advancement of human technology. The project consisted of a fleet of ships with the intent of delivering cryogenically frozen, sleeping human populations to planets capable of supporting life. The fleets were launched to major success, escaping the Solar System with ease. Although the project would not be without its failures. 
+                                <br><br>In year 83 of its planned 150 year journey, one ship within the fleet saw insubordination amongst its crew. A virus was uploaded to alter the trajectory of the fleet in an attempt to wipe the sinful human race off the face of the universe. Luck would have it the damage was mitigated by the work of another crew member who sadly lost their life protecting the rest of the population. The fleet would crash land on the planet Sinker, and the sleeping crew and inhabitants who survived awoke not to the land initially promised, but instead a desolate sand wasteland covered in massive insects, and creatures that resemble the sea creatures of Earth. 
+                                <br><br> Nonetheless, hope for the survival of the human race still remained. So once again human expansion began across the new frontier in the year 2110.
+                                <br><br>The date is now March 27, 2260, a century and a half after the Heavenly Shower, as some call it. Cities have popped up, using scavenged parts of the wrecked OPUS ships. In one such city, Univ Valley, lies the Shack-a-loon where our story takes place…
+                            </p>
+                        </section> 
+                    </div>
+                </div>
+
+                <div class="card dark-card border-glow mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Planet Sinker</h2>
+                        <section class="text-light mb-4">
+                            <p>Planet Sinker is a sand-covered planet with four Pluto-sized moons. Being a dry and sandy wasteland, the planet is ill-fit to sustain human life. To survive, humans have used B.G.s or Biological Generators found in the remains of crashed ships to process food and water from the finite sources they can find. Around these devices cities would be built, creating the cultural and political safe havens of the planet. These devices are remnants of technology used to sustain the space farers of the OPUS project, but were not expected to be used much longer past the initial journey of 150 years. Thus, conflicts break out when Biological Generators run into their Last Call when they show signs of irreparable fatigue. 
+                                <br><br>During the Last Call they are run at their max output and are no longer usable after the 24 hour Last Call procedure. There were originally 50 Biological Generators, but a majority have either been stolen, held for ransom or have begun to show massive fatigue.
+                            </p>
+                        </section> 
+                    </div>
+                </div>
+
+                <div class="card dark-card border-glow mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Fauna</h2>
+                        <section class="text-light mb-4">
+                                <br><br>The fauna consists of a group of sentient hive-minded insects called Buzzers, Humans have learned to utilize a select few species for daily tasks such as the large horse-sized lizard creatures called Hemas. They are used for long-distance travel and steered by their protruding spinal bone. For farming and heaving large objects humans have begun to use spiked, hard-shelled species resembling sea creatures found on earth such as Mollescks resembling nautiluses, and Enkai, resembling octopi. They have grown thick legs unakin to their Earth counterparts. These large trunks of legs make them great for heavy lifting and if the shell is cut through just right, their meat makes for a nutrient-rich meal. Before humanity landed upon this planet, the Buzzers were the original inhabiting species. Their high intelligence and hive-mind connection allowed them to connect with humans, at first hoping to live harmoniously with them. However, as time moves on and conflicts arise between the humans, they have become more inclined to an observational role keeping their distance. 
+                            </p>
+                        </section> 
+                    </div>
+                </div>
+
+                <div class="card dark-card border-glow mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Flora</h2>
+                        <section class="text-light mb-4">
+                            <p>The flora of Planet Sinker is very limited due to the scarce water and dry worldwide climate. In the north lies the Frigid Point, home to frozen glaciers and mountains, suggesting extreme climate change occurred at one point transforming the formerly wet planet as it lost its atmosphere and surface water. The rest of the planet is arid and suffers from extreme temperature swings. During the day the sand absorbs heat, and at night it escapes into space resulting in extreme cold even if day temperature is mild. 
+                                <br><br>Univ Valley lies in a region with massive sand storms with incredibly rare rains. Most water is trapped underground. Many cacti, and succulent litter the landscape thanks to their water storage capacity. Some drought tolerant trees can be found in oases like Lil’ Groveland surrounding the fertile springs, wells, and aquifers. 
+                            </p>
+                        </section> 
+                    </div>
+                </div>
+
+                <div class="card dark-card border-glow mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Astronomy</h2>
+                        <section class="text-light mb-4">
+                            <p>The planet is encircled by 4 pluto-sized moons causing extreme sand storms, sporadic flooding, violent tectonic changes, deep fissures stretching from The Chasm, massive sand dunes such as the Big Burn Out Sea, and the Burial Dunes. 
+                            </p>
+                        </section> 
+                    </div>
+                </div>
+
+                <div class="card dark-card border-glow">
+                    <div class="card-body">
+                        <h2 class="card-title mb-4">Map</h2>
+                        <img src="images/map.jpg" class="img-fluid rounded">
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="index.html" class="btn btn-neon">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Are you sure your character has died?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-light"
+                    @click="$store.auth.cancelLogout()"
+                >
+                    Im alive
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-neon"
+                    @click="$store.auth.logout()"
+                >
+                    Im dead
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

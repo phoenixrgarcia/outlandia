@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Sinker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+<body x-data x-init="$store.auth.init()" class="dark-bg theme-rules">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- Title Section -->
+                <div class="text-center mb-5">
+                    <h1 class="dramatic-title">GAMEPLAY RULES</h1>
+                    <div class="divider"></div>
+                </div>
+
+                <!-- Rules Content -->
+                <details class="card dark-card border-glow mb-4 rule-accordion" closed>
+                    <summary class="card-body rule-summary">
+                        <h3 class="section-title mb-0">How to Play:</h3>
+                        <span class="rule-summary-icon" aria-hidden="true"></span>
+                    </summary>
+                    <div class="card-body pt-0">
+                        <section class="text-light mb-4">
+                            <p>You decide whom to talk to and when. You also decide what you will tell them, and whether you want to tell them the truth or not. Though, that goes for everyone else in the game as well.
+                                <br><br>In-game you will pretend to be someone else, your character, in a fictional setting. You will meet and interact with other characters and everyone will be trying to achieve their own goals. No script is provided - it’s up to you!
+                            </p>
+                        </section>
+                    </div>
+                </details>
+                <details class="card dark-card border-glow mb-4 rule-accordion" closed>
+    <summary class="card-body rule-summary">
+        <h4 class="section-title mb-0">Game Mechanics & Rules:</h4>
+        <span class="rule-summary-icon" aria-hidden="true"></span>
+    </summary>
+    <div class="card-body pt-0">
+
+        <!-- Mechanics -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">Mechanics</h5>
+            <ul class="rule-list">
+                <li><b>Fighting:</b> To attack another player, you must have a weapon or appropriate ability, be within touching distance, and win a rock-paper-scissors match.</li>
+                <li><b>Success:</b> The victim becomes unconscious.</li>
+                <li><b>Failure or tie:</b> No effect. The defender may attack back or flee (cannot be attacked again for 10 minutes).</li>
+                <li><b>Recovery:</b> A First Aid Kit heals instantly. Otherwise:
+                    <ul>
+                        <li>Before Last Call: recover after 10 minutes.</li>
+                        <li>After Last Call: death occurs after 10 minutes.</li>
+                    </ul>
+                </li>
+                <li><b>Who goes first:</b> The player who declares first attacks first. Simultaneous actions are decided by the Bartender.</li>
+                <li><b>Multiple combat:</b> The Bartender determines order; resolve attacks one at a time.</li>
+                <li><b>High Noon:</b> Players may duel using best-of-3 rock-paper-scissors. Both are given guns if needed. Winner renders opponent unconscious. Sharpshooting allows winning on draws.</li>
+            </ul>
+        </section>
+
+        <!-- States -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">States</h5>
+            <ul class="rule-list">
+                <li><b>Alive:</b> No deaths occur before Last Call unless specified by the Bartender.</li>
+                <li><b>Well:</b> Not affected by poison or unconsciousness.</li>
+                <li><b>Impervious:</b> All attacks against you fail.</li>
+                <li><b>Mithridatism:</b> Immune to poison for 10 minutes.</li>
+                <li><b>Unconscious:</b> Sit still. Recovery follows the same 10-minute rules based on Last Call.</li>
+                <li><b>Poison:</b>
+                    <ul>
+                        <li>You lose all abilities.</li>
+                        <li>Requires an Antidote to cure.</li>
+                        <li>After Last Call: death in 10 minutes.</li>
+                        <li>Before Last Call: death occurs 10 minutes after Last Call.</li>
+                    </ul>
+                </li>
+            </ul>
+        </section>
+
+        <!-- Healing -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">Healing</h5>
+            <ul class="rule-list">
+                <li><b>First Aid Kit:</b> Instantly restores unconscious players. Cannot treat poison.</li>
+                <li><b>Antidote:</b> Required to cure poison. Can be used by anyone but must be crafted by a qualified player.</li>
+                <li><b>Restrictions:</b> Players cannot attack unconscious characters.</li>
+                <li><b>Searching:</b> Players may search unconscious characters via the Bartender (items and money only).</li>
+                <li><b>Poison Use:</b> Can be given directly or secretly administered via the Bartender.</li>
+            </ul>
+        </section>
+
+        <!-- Death -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">Death</h5>
+            <ul class="rule-list">
+                <li>No deaths occur before Last Call (unless ruled otherwise).</li>
+                <li>Dead players receive a “Last Dying Breath” action.</li>
+                <li>Dead players cannot reveal secrets, clues, or abilities.</li>
+                <li>Only items and money may be taken from the deceased.</li>
+            </ul>
+        </section>
+
+        <!-- Arrest -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">Arrest</h5>
+            <ul class="rule-list">
+                <li>The Sheriff and Deputy may make 3 arrests each (6 total).</li>
+                <li>Arrested players are placed in a holding cell.</li>
+                <li>Evidence must be presented or release occurs after 10 minutes (5 during Last Call).</li>
+                <li>Lawmen may confiscate items as evidence.</li>
+                <li>Arrested players cannot use abilities.</li>
+                <li><b>Escape:</b> Possible via outside help, clever plans, or Bartender-approved challenges.</li>
+            </ul>
+        </section>
+
+        <!-- Last Call -->
+        <section class="text-light mb-4">
+            <h5 class="section-title">Last Call</h5>
+            <ul class="rule-list">
+                <li>Announced during the final hour of the game.</li>
+                <li>Players now can die from all causes.</li>
+                <li>Poison and injuries take effect after 10 minutes.</li>
+                <li>Players must complete objectives before time runs out.</li>
+            </ul>
+        </section>
+
+    </div>
+</details>
+
+                <details class="card dark-card border-glow mb-4 rule-accordion" closed>
+                    <summary class="card-body rule-summary">
+                        <h4 class="section-title mb-0">Tips For Enjoying the Game:</h4>
+                        <span class="rule-summary-icon" aria-hidden="true"></span>
+                    </summary>
+                    <div class="card-body pt-0">
+                        <section class="text-light mb-4">
+                            <ul class="rule-list">
+                                <li><b>Three basic qualities:</b> Playing a murder mystery requires only three basic attributes: a sense of fun, an ability to strike up conversation, and the willingness to step into the shoes of someone else for an evening. If you can do these things, you should have no trouble. </li>
+                                <li><b>Dress the part:</b> You will receive information, including costume tips about your character beforehand. A good costume helps you get into the spirit of the game, be sure to take lots of pictures!</li>
+                                <li><b>Read your character information:</b> Your character sheet explains who you are, who you know and what your objectives are. However, your character sheet describes what your character believes, which might not necessarily be true. Keep your character sheet handy, or at the very least in mind, as you will probably need to refer to it during the game.</li>
+                                <li><b>Your goals:</b> Your goals describe the objectives that your character is trying to achieve during the game. You should attempt every goal, even though it is unlikely you will achieve them all, as other characters may be in opposition to you.</li>
+                                <li><b>Read your character information again:</b> This time, think about your goals. You should also take note of other characters, as you will probably need to speak to them sooner rather than later.</li>
+                                <li><b>Introduce yourself:</b> Once the game begins, you will need to talk to people whilst in character. The easiest way is to introduce yourself as your character to someone else. If you do not know anything about them, you can ask who they are and why they are here. If you do know something already, whether from your character sheet or from someone else, then you can ask them about that.</li>
+                                <li><b>Tips:</b> Meant to give you an idea of things you should do at the start of the game. These tips are optional, but they may help you get started.</li>
+                                <li><b>Find your friends and your enemies:</b> In this game there are those that will help you, and those that will oppose you. It is imperative you find both. Although your friends are there to help you, you may have to help them in return.</li>
+                                <li><b>Ability &amp; Action Cards:</b> You will have special ability cards that you can use to help achieve your goals. The cards are self-explanatory and will generally have a limited amount of uses. You should think carefully about who and what you want to use them on.</li>
+                                <li><b>The Bartender:</b> Generally, you should not need the Bartender to achieve your goals, as talking and negotiating with others can achieve most things. But you may consult the Bartender if you have a question about the rules, or if it is required to further your goals.</li>
+                                <li><b>Act the part:</b> In-game, try your hardest to maintain the illusion that the game is genuine. Do not start talking about football, current affairs, or anything else that is not really part of the game.</li>
+                                <li><b>Read your character information again:</b> If you find yourself at a wit’s end, find a quiet place to re-read your character sheet. You may find that there is someone you have not spoken to yet, or something you need to do.</li>
+                                <li><b>The murder:</b> Everyone’s goal is to answer the question: “Who carried out the murder?” The solution is a matter of talking to people, picking up the clues, and carrying out negotiations for information.</li>
+                                <li><b>In conclusion:</b> Good luck, have fun, do not die!</li>
+                            </ul>
+                        </section>
+                    </div>
+                </details>
+
+                <details class="card dark-card border-glow mb-4 rule-accordion" closed>
+                    <summary class="card-body rule-summary">
+                        <h4 class="section-title mb-0">Abilities:</h4>
+                        <span class="rule-summary-icon" aria-hidden="true"></span>
+                    </summary>
+                    <div class="card-body pt-0">
+                        <section class="text-light mb-4">
+                            <ul class="rule-list">
+                                <li><b>Open Wide:</b> A character must show you all their item cards and money. (You can’t take their items or money-just look at them.) <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Share What You Know:</b> After talking to another player, share your clue. They must then show you their clue. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Medicine Maker:</b> You can craft Antidotes for poisoned players, or craft Poisons. <br><br><b>&nbsp;&nbsp;Crafting:</b> Antidote: 1x Green Herb, 1x Catalyst <br><b>&nbsp;&nbsp;Crafting:</b> Poison: 1x Purple Herb, 1x Catalyst</li>
+                                <li><b>Sharpshooting:</b> You can make a failed or tied rock-paper-scissors challenge succeed. Does not have to be a challenge you’re involved in. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>Keep the Change:</b> Another character has to reveal a secret to you. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$75</li>
+                                <li><b>Payment for my services:</b> Play a lil diddy and receive payment of $$$100, if they ain’t got the cash knock them unconscious. <br><br><b>&nbsp;&nbsp;Uses:</b> 4</li>
+                                <li><b>I’ve Had Worse:</b> Use this after another player has defeated you in combat. The wound has no effect: you are not injured and can now take an action. Does not work against poison. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>Have Some Copper:</b> Another has to reveal their clue to you. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Intimidate:</b> A character must reveal a secret to you. <br><br><b>&nbsp;&nbsp;Uses:</b> 2</li>
+                                <li><b>Is it Luck? / Is it Cheats?</b> Make any failed card games related challenge a success. <br><br><b>&nbsp;&nbsp;Uses:</b> 3 <br><b>&nbsp;&nbsp;Note:</b> Unlimited uses if you find your confiscated marked cards.</li>
+                                <li><b>Tis’ Just a Flesh Wound!:</b> Use this after another player has defeated you in combat. The wound has no effect: you are not injured and can now take an action. Does not work against poison. <br><br><b>&nbsp;&nbsp;Uses:</b> 2</li>
+                                <li><b>Arrest:</b> You may arrest someone under suspicion and throw them in jail. The Bartender sends them to the holding cell and prevents them from using their abilities. However, if you cannot present suitable evidence to the Bartender within 10 minutes (or 5 minutes if before Last Call), they will be released.</li>
+                                <li><b>Pickpocket:</b> Tell the Bartender which item you want to take from another player. If that player does not have what you seek, the Bartender will take something else at random. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Thorough Appraisal:</b> After speaking to another player, they must show you all their item cards and money. (You can’t take their items or money-just look at them.) <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Lockpick:</b> Attempt to unlock any locked object. 3 coin flip attempts per object. <br><br><b>&nbsp;&nbsp;Uses:</b> 3 attempts per object</li>
+                                <li><b>This is a Hold Up!:</b> While speaking to another player, they may show you all of their item cards and money. (You can’t take their items or money-just look at them.) If they refuse, knock them unconscious. <br><br><b>&nbsp;&nbsp;Uses:</b> 4</li>
+                                <li><b>Investigate:</b> While speaking to another player, they must show you all of their item cards and money. (You can’t take their items or money-just look at them.) <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Tight-Lipped:</b> If another player plays an ability on you that forces you to reveal your secret or clue, it has no effect-give nothing up and their attempt fails. They still have to check off a use. <br><br><b>&nbsp;&nbsp;Uses:</b> 2</li>
+                                <li><b>Fly on the Wall:</b> You can spit out a buzzer that can spy on other players’ conversations. Let the bartender know who you want to listen in on, and he’ll relay the information. <br><br><b>&nbsp;&nbsp;Uses:</b> 2</li>
+                                <li><b>Not So Fast!:</b> An ability played by another player has no effect! However, it still costs a use and they cannot use that ability on you again. Cannot be used to cancel out another Not so fast!. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$100</li>
+                                <li><b>Let’s share what we know:</b> After talking to another player, show them your clue. They must then show you their clue. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50</li>
+                                <li><b>Intuition:</b> Use your intuition and might (your wallet) to change a failed or tied rock-paper-scissors challenge into a success. It needn’t be a challenge you are involved in. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$150</li>
+                                <li><b>I’ve Bared Mine, Bare Yours:</b> Reveal a secret to another player - they must reveal a secret to you. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$150</li>
+                                <li><b>The Fever:</b> Make any failed card games related challenge a success. <br><br><b>&nbsp;&nbsp;Uses:</b> 3 <br><b>&nbsp;&nbsp;Note:</b> Unlimited uses if you can find the marked cards.</li>
+                                <li><b>Judge of Character:</b> Another player must reveal their secret to you. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$150</li>
+                                <li><b>A Lil’ Off the Top:</b> Ambitious isn’t here, you can take a little taste. An attempt to send you unconscious fails. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>Flannelmouthing:</b> If another player plays an ability on you that forces you to reveal your secret or clue, you instead talk about your day. Their effort has no effect-give nothing up and their attempt fails. They still have to check off their use of ability. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>Religious Fever:</b> You’ve got a way with words, a character must reveal their clue and consider joining your community. <br><br><b>&nbsp;&nbsp;Cost:</b> $$$50 <br><b>&nbsp;&nbsp;Note:</b> Ability can be recharged with a successful knockout of another character. Using this ability on a character 3 times converts them to an Old Blood Order member.</li>
+                                <li><b>Tithe:</b> Tell the Bartender which item you want to pickpocket from a prospective or promised follower. If that follower does not have what you seek, the Bartender will take something else at random. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>For a Price:</b> If anyone pulls a skill on you to force you to reveal your Secret or Clue to them, you instead can charge a toll for the information. Toll starts at $$$100 but drops by $$$20 with every use. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                                <li><b>According to my report…</b> Another player has revealed more than they intended and must reveal their Secret to you. <br><br><b>&nbsp;&nbsp;Uses:</b> 3</li>
+                            </ul>
+                            <p class="mt-4 mb-0"><b>Secret Traits:</b> Some character types will have specific special traits. These will be given to you along with your abilities. Keep them close to your chest, but feel free to share with those you can trust.</p>
+                        </section>
+                    </div>
+                </details>
+
+                <div class="text-center mt-5">
+                    <a href="index.html" class="btn btn-neon">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Are you sure your character has died?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-light"
+                    @click="$store.auth.cancelLogout()"
+                >
+                    Im alive
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-neon"
+                    @click="$store.auth.logout()"
+                >
+                    Im dead
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

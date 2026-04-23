@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Sinker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+
+<body  x-data x-init="$store.auth.init()" class="dark-bg theme-home">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <!-- Title Section -->
+                <div class="text-center mb-5">
+                    <h1 class="dramatic-title">Welcome to the <br>Shack-a-loon</h1>
+                    <p class="subtitle">The best brews on <br>Planet Sinker</p>
+                    <div class="divider"></div>
+                </div>
+
+                <!-- Character Selection -->
+                <div x-data="characterSelector()" class="card dark-card border-glow">
+                    <div class="card-body" x-show="!$store.auth.loggedIn" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <h2 class="card-title text-center mb-4">Log in with your Space-X credentials</h2>
+
+                        <div class="mb-3">
+                            <label for="characterSelect" class="form-label"> > Username:</label>
+                            <select id="characterSelect" x-model="selectedCharacterId"
+                                class="form-select dark-select" :disabled="$store.auth.loggedIn">
+                                <option value="">-- Select a Character --</option>
+                                <template x-for="character in characters" :key="character.id">
+                                    <option :value="character.id" x-text="character.name"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <label for="characterPassword" class="form-label"> > Password:</label>
+                        <input id="characterPassword" x-model="selectedCharacterPassword"
+                            class="form-control dark-select" 
+                            placeholder="-- Enter password --" :disabled="!selectedCharacterId">
+
+                    </div>
+
+                    <!-- Character Info Display -->
+                    <template x-if="selectedCharacter">
+                        <div class="character-info mt-4 pt-4">
+                            <h3 class="character-name mb-2" x-text="selectedCharacter.name"></h3>
+                            <p class="text-muted mb-3">
+                                <small>Played by: <strong x-text="selectedCharacter.player"></strong></small>
+                            </p>
+                            <p class="character-blurb" x-text="selectedCharacter.blurb"></p>
+                            <button x-show="!$store.auth.loggedIn" class="btn btn-neon mt-3 w-100" @click="loginOnClick()">Enter as <span
+                                    x-text="selectedCharacter.name"></span></button>
+                            <button x-show="$store.auth.loggedIn" class="btn btn-neon mt-3 w-100">Logged in as <span
+                                    x-text="selectedCharacter.name"></span></button>
+                        </div>
+                    </template>
+
+                    <template x-if="!selectedCharacter">
+                        <div class="text-center text-muted mt-4 pt-4"
+                            style="border-top: 1px solid rgba(255,255,255,0.1);">
+                            <p>Select a character to begin your investigation...</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="col-12 mt-5" x-data="loggedInCharacterDetails()" x-show="$store.auth.loggedIn && detailedCharacter" x-transition.opacity>
+                <section class="dark-card border-glow rounded-4 dossier-panel p-4 p-lg-5">
+                    <div class="dossier-header mb-4">
+                        <p class="dossier-kicker mb-2">Authenticated Character File</p>
+                        <h2 class="dramatic-title dossier-title mb-2" x-text="character?.name"></h2>
+                        <p class="subtitle dossier-subtitle mb-0">
+                            Played by <span x-text="detailedCharacter?.player || character?.player"></span>
+                        </p>
+                    </div>
+
+                    <div class="dossier-sections">
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('occupation')" :aria-expanded="sections.occupation">
+                                <span>Occupation</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.occupation }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.occupation" x-transition>
+                                <div class="detail-copy" x-html="formatText(detailedCharacter?.occupationAndClothingTypeSuggestions)"></div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('character')" :aria-expanded="sections.character">
+                                <span>Character</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.character }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.character" x-transition>
+                                <div class="detail-copy" x-html="formatText(detailedCharacter?.characterDetails)"></div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('goals')" :aria-expanded="sections.goals">
+                                <span>Goals</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.goals }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.goals" x-transition>
+                                <div class="detail-card-grid">
+                                    <template x-for="(goal, index) in createListItems(detailedCharacter?.goals)" :key="`goal-${index}`">
+                                        <div class="detail-chip">
+                                            <p class="mb-0" x-html="formatText(goal)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(detailedCharacter?.goals).length">No goals available.</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('abilities')" :aria-expanded="sections.abilities">
+                                <span>Abilities</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.abilities }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.abilities" x-transition>
+                                <div class="detail-card-grid">
+                                    <template x-for="(ability, index) in createListItems(detailedCharacter?.abilities)" :key="`ability-${index}`">
+                                        <div class="detail-chip detail-chip-ability">
+                                            <p class="mb-0" x-html="formatText(ability)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(detailedCharacter?.abilities).length">No abilities available.</p>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Info Links -->
+            <!-- <div class="text-center mt-5">
+                <p class="text-muted">New to this investigation? <a href="rules.html" class="glow-link">Read the
+                        rules</a></p>
+            </div> -->
+        </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Are you sure your character has died?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-light"
+                    @click="$store.auth.cancelLogout()"
+                >
+                    Im alive
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-neon"
+                    @click="$store.auth.logout()"
+                >
+                    Im dead
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

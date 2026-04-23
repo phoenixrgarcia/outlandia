@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planet Sinker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+
+<body x-data x-init="$store.auth.init()" class="dark-bg theme-characters">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Title Section -->
+                <div class="text-center mb-5">
+                    <h1 class="dramatic-title">THE WRANGLED</h1>
+                    <p class="subtitle">Meet the players in this cosmic crime</p>
+                    <div class="divider"></div>
+                </div>
+
+                <!-- Character Cards List -->
+                <div x-data="charactersDisplay()" class="characters-list">
+                    <template x-for="faction in factions" :key="faction.id">
+                        <section class="faction-section dark-card border-glow">
+                            <button
+                                type="button"
+                                class="faction-toggle"
+                                @click="toggleFaction(faction.id)"
+                                :aria-expanded="openFactions[faction.id]"
+                                :aria-controls="`faction-panel-${faction.id}`"
+                            >
+                                <div>
+                                    <h2 class="faction-title mb-0" x-text="faction.name"></h2>
+                                </div>
+                                <div class="faction-meta">
+                                    <span class="faction-count" x-text="`${faction.characters.length} characters`"></span>
+                                    <span class="faction-chevron" :class="{ 'is-open': openFactions[faction.id] }">+</span>
+                                </div>
+                            </button>
+
+                            <div
+                                x-show="openFactions[faction.id]"
+                                x-transition.opacity.duration.250ms
+                                :id="`faction-panel-${faction.id}`"
+                                class="faction-panel"
+                            >
+                                <template x-for="character in faction.characters" :key="character.id">
+                                    <div class="card dark-card border-glow character-card">
+                                        <div class="card-body">
+                                            <h2 class="card-title character-role" x-text="character.id.replaceAll('_', ' ').toUpperCase()"></h2>
+                                            <h3 class="character-name mb-2" x-text="character.name"></h3>
+                                            <p class="text-muted mb-3">
+                                                <small>Played by: <strong x-text="character.player"></strong></small>
+                                            </p>
+                                            <p class="character-blurb" x-text="character.blurb"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="index.html" class="btn btn-neon">Back to Selection</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Are you sure your character has died?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-light"
+                    @click="$store.auth.cancelLogout()"
+                >
+                    Im alive
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-neon"
+                    @click="$store.auth.logout()"
+                >
+                    Im dead
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

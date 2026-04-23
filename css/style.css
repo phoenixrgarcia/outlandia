@@ -1,0 +1,804 @@
+/* ==========================================
+   Incident On Planet Sinker - Custom Styles
+   Dark Space Western Theme
+   ========================================== */
+
+:root {
+    --primary-neon: #00ff88;
+    --secondary-neon: #ff0080;
+    --danger-neon: #ff1744;
+    --warning-neon: #ffb300;
+    --dark-bg: #0a0e27;
+    --darker-bg: #050812;
+    --card-bg: #1a1f3a;
+    --text-primary: #e0e0e0;
+    --text-muted: #8a8a9e;
+    --border-glow: rgba(0, 255, 136, 0.3);
+    --border-danger: rgba(255, 23, 68, 0.3);
+    --bs-secondary-color: #8f8f8f;
+}
+
+.theme-home{
+    --primary-neon: #00ff88;
+    --secondary-neon: #FF0060;
+    --border-glow: rgb(from var(--primary-neon) r g b / 0.3)
+}
+
+.theme-rules{
+    --primary-neon: #00f7ff;
+    --secondary-neon: #ff0087;
+    --border-glow: rgb(from var(--primary-neon) r g b / 0.3)
+}
+
+.theme-characters{
+    --primary-neon: #A555EC;
+    --secondary-neon: #F3CCFF;
+    --border-glow: rgb(from var(--primary-neon) r g b / 0.3)
+}
+
+.theme-lore{
+    --primary-neon: #FAEF5D;
+    --secondary-neon: #7E2553;
+    --border-glow: rgb(from var(--primary-neon) r g b / 0.3)
+}
+
+.theme-database{
+    --primary-neon: #FF0000;
+    --secondary-neon: #443737;
+    --border-glow: rgb(from var(--primary-neon) r g b / 0.3);
+    --third-color: #A98B76;
+}
+
+.clue-hint{
+    color: #A98B76;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ==========================================
+   GENERAL
+   ========================================== */
+
+body {
+    font-family: 'Courier New', monospace;
+    background-color: var(--darker-bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+.dark-bg {
+    background: linear-gradient(135deg, var(--darker-bg) 0%, #1a0033 100%);
+    min-height: 100vh;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* ==========================================
+   TYPOGRAPHY
+   ========================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+    text-shadow: 0 0 10px rgb(from var(--primary-neon) r g b / 0.3)
+;
+}
+
+.dramatic-title {
+    font-size: 3.5rem;
+    letter-spacing: 3px;
+    color: var(--primary-neon);
+    text-transform: uppercase;
+    font-weight: 900;
+    text-shadow: 0 0 20px var(--primary-neon), 0 0 40px rgb(from var(--primary-neon) r g b / 0.5);
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.3rem;
+    color: var(--secondary-neon);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.brand-title {
+    font-size: 1.1rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--primary-neon);
+    text-shadow: 0 0 10px var(--primary-neon);
+    font-weight: 900;
+    text-align: right;
+    word-spacing: 3px;
+}
+
+.section-title {
+    color: var(--primary-neon);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.character-name {
+    color: var(--secondary-neon);
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.character-role {
+    color: var(--primary-neon);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+/* ==========================================
+   NAVIGATION
+   ========================================== */
+
+.navbar {
+    background: rgba(10, 14, 39, 0.95);
+    border-bottom: 2px solid var(--border-glow);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: var(--text-primary) !important;
+    margin: 0 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover,
+.navbar-dark .navbar-nav .nav-link.active {
+    color: var(--primary-neon) !important;
+    text-shadow: 0 0 10px var(--primary-neon);
+}
+
+/* ==========================================
+   CARDS & CONTAINERS
+   ========================================== */
+
+.dark-card {
+    background-color: var(--card-bg) !important;
+    border: 1px solid var(--border-glow) !important;
+    box-shadow: 0 8px 32px rgb(from var(--primary-neon) r g b / 0.1);
+    transition: all 0.3s ease;
+}
+
+.dark-card:hover {
+    box-shadow: 0 12px 48px rgb(from var(--primary-neon) r g b / 0.2);
+    border-color: var(--primary-neon) !important;
+}
+
+.border-glow {
+    border: 1px solid var(--border-glow) !important;
+}
+
+.card-title {
+    color: var(--primary-neon);
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.card-body {
+    padding: 50px;
+}
+
+.rule-accordion {
+    overflow: hidden;
+}
+
+.rule-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    cursor: pointer;
+    list-style: none;
+}
+
+.rule-summary::-webkit-details-marker {
+    display: none;
+}
+
+.rule-summary:hover .section-title {
+    text-shadow: 0 0 12px var(--primary-neon);
+}
+
+.rule-summary-icon {
+    flex-shrink: 0;
+    width: 1rem;
+    height: 1rem;
+    border-right: 2px solid var(--primary-neon);
+    border-bottom: 2px solid var(--primary-neon);
+    transform: rotate(45deg);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 0 10px rgb(from var(--primary-neon) r g b / 0.35);
+}
+
+.rule-accordion[open] .rule-summary-icon {
+    transform: rotate(225deg);
+}
+
+@media (max-width: 576px) {
+    .rule-summary {
+        align-items: flex-start;
+    }
+}
+
+/* ==========================================
+   FORMS
+   ========================================== */
+
+.form-label {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.dark-select {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-glow) !important;
+    padding: 0.75rem;
+    font-family: 'Courier New', monospace;
+    transition: all 0.3s ease;
+}
+
+.dark-select:focus {
+    background-color: var(--card-bg) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--primary-neon) !important;
+    box-shadow: 0 0 15px rgb(from var(--primary-neon) r g b / 0.5);
+}
+
+.dark-select option {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* images inside the select2 dropdown */
+.character-option-img {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.form-control:focus {
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    border-color: var(--primary-neon);
+    box-shadow: 0 0 15px rgb(from var(--primary-neon) r g b / 0.5);
+}
+
+.database-access-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 100%;
+}
+
+.database-access-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    pointer-events: none;
+    transition: opacity 0.3s ease, background 0.3s ease;
+}
+
+.database-access-card-locked::before {
+    background: linear-gradient(160deg, rgba(255, 23, 68, 0.28), transparent 55%);
+}
+
+.database-access-card-unlocked::before {
+    background: linear-gradient(160deg, rgba(0, 255, 136, 0.22), transparent 55%);
+}
+
+.database-access-status {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.database-access-kicker {
+    color: var(--text-muted);
+    letter-spacing: 0.2rem;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.database-lock-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.database-lock-icon-locked {
+    background: rgba(255, 23, 68, 0.12);
+    border-color: rgba(255, 23, 68, 0.45);
+    box-shadow: 0 0 20px rgba(255, 23, 68, 0.18);
+}
+
+.database-lock-icon-unlocked {
+    background: rgba(0, 255, 136, 0.12);
+    border-color: rgba(0, 255, 136, 0.45);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.18);
+}
+
+.database-password-input {
+    background-color: rgba(5, 8, 18, 0.7) !important;
+    color: var(--text-primary) !important;
+    transition: all 0.3s ease;
+}
+
+.database-password-input-danger {
+    border: 1px solid rgba(255, 23, 68, 0.7) !important;
+    box-shadow: inset 0 0 0 999px rgba(255, 23, 68, 0.08);
+}
+
+.database-password-input-danger:focus {
+    border-color: rgba(255, 90, 120, 0.95) !important;
+    box-shadow: 0 0 18px rgba(255, 23, 68, 0.28), inset 0 0 0 999px rgba(255, 23, 68, 0.08);
+}
+
+.database-password-input-success {
+    border: 1px solid rgba(0, 255, 136, 0.7) !important;
+    box-shadow: inset 0 0 0 999px rgba(0, 255, 136, 0.08);
+}
+
+.database-password-input-success:focus {
+    border-color: rgba(0, 255, 136, 0.95) !important;
+    box-shadow: 0 0 18px rgba(0, 255, 136, 0.28), inset 0 0 0 999px rgba(0, 255, 136, 0.08);
+}
+
+.database-access-feedback {
+    color: #ff8aa1;
+    min-height: 1.5rem;
+}
+
+/* ==========================================
+   BUTTONS
+   ========================================== */
+
+.btn-neon {
+    background: linear-gradient(135deg, var(--primary-neon) 0%, var(--secondary-neon) 100%);
+    color: var(--darker-bg);
+    border: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 0.75rem 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgb(from var(--primary-neon) r g b / 0.5);
+}
+
+.btn-neon:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 40px rgb(from var(--primary-neon) r g b / 0.7), 0 0 60px rgb(from var(--secondary-neon) r g b / 0.5);
+    color: var(--darker-bg);
+}
+
+.btn-neon:active {
+    transform: scale(0.98);
+}
+
+/* ==========================================
+   CHARACTER INFO
+   ========================================== */
+
+.character-info {
+    animation: slideIn 0.3s ease;
+}
+
+.character-blurb {
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.8;
+    font-style: italic;
+}
+
+.character-card {
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.character-card:hover {
+    transform: translateY(-5px);
+}
+
+.character-details p {
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.character-details strong {
+    color: var(--primary-neon);
+}
+
+.dossier-panel {
+    background:
+        linear-gradient(135deg, rgb(from var(--card-bg) r g b / 0.96), rgb(from var(--darker-bg) r g b / 0.92)),
+        radial-gradient(circle at top right, rgb(from var(--secondary-neon) r g b / 0.16), transparent 38%);
+    overflow: hidden;
+}
+
+.dossier-header {
+    border-bottom: 1px solid rgb(from var(--primary-neon) r g b / 0.22);
+    padding-bottom: 1.5rem;
+}
+
+.dossier-kicker {
+    color: var(--primary-neon);
+    font-size: 0.82rem;
+    letter-spacing: 0.28rem;
+    text-transform: uppercase;
+}
+
+.dossier-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    letter-spacing: 0.18rem;
+}
+
+.dossier-subtitle {
+    font-size: 1rem;
+    letter-spacing: 0.16rem;
+}
+
+.dossier-sections {
+    display: grid;
+    gap: 1rem;
+}
+
+.detail-section {
+    border: 1px solid rgb(from var(--primary-neon) r g b / 0.18);
+    border-radius: 1.25rem;
+    background: linear-gradient(180deg, rgb(from var(--darker-bg) r g b / 0.52), rgb(from var(--card-bg) r g b / 0.72));
+    overflow: hidden;
+}
+
+.detail-toggle {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 700;
+    letter-spacing: 0.12rem;
+    padding: 1rem 1.25rem;
+    text-transform: uppercase;
+}
+
+.detail-toggle:hover {
+    background: rgb(from var(--primary-neon) r g b / 0.06);
+}
+
+.detail-toggle-icon {
+    align-items: center;
+    background: rgb(from var(--secondary-neon) r g b / 0.16);
+    border: 1px solid rgb(from var(--secondary-neon) r g b / 0.25);
+    border-radius: 999px;
+    color: var(--secondary-neon);
+    display: inline-flex;
+    font-size: 1.15rem;
+    height: 2rem;
+    justify-content: center;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+    width: 2rem;
+}
+
+.detail-toggle-icon.is-open {
+    transform: rotate(45deg);
+    background: rgb(from var(--primary-neon) r g b / 0.18);
+    color: var(--primary-neon);
+}
+
+.detail-content {
+    border-top: 1px solid rgb(from var(--primary-neon) r g b / 0.12);
+    padding: 1.25rem;
+}
+
+.detail-copy {
+    color: var(--text-primary);
+    line-height: 1.8;
+}
+
+.detail-card-grid {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.detail-chip {
+    background: linear-gradient(135deg, rgb(from var(--primary-neon) r g b / 0.08), rgb(from var(--secondary-neon) r g b / 0.12));
+    border: 1px solid rgb(from var(--primary-neon) r g b / 0.2);
+    border-radius: 1rem;
+    box-shadow: inset 0 1px 0 rgb(from var(--primary-neon) r g b / 0.12);
+    color: var(--text-primary);
+    padding: 1rem;
+}
+
+.detail-chip-ability {
+    border-color: rgb(from var(--secondary-neon) r g b / 0.28);
+    box-shadow: inset 0 1px 0 rgb(from var(--secondary-neon) r g b / 0.14);
+}
+
+.detail-chip p,
+.detail-copy {
+    margin: 0;
+}
+
+/* ==========================================
+   RULES PAGE
+   ========================================== */
+
+.rule-list {
+    list-style: none;
+    padding-left: 0;
+}
+
+.rule-list li {
+    padding: 0.75rem 0 0.75rem 2rem;
+    position: relative;
+    color: var(--text-primary);
+}
+
+.rule-list li:before {
+    content: "●";
+    position: absolute;
+    left: 0;
+    color: var(--secondary-neon);
+}
+
+section {
+    animation: fadeIn 0.5s ease;
+}
+
+/* ==========================================
+   DIVIDERS
+   ========================================== */
+
+.divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary-neon), transparent);
+    margin: 1rem 0;
+}
+
+/* ==========================================
+   LINKS & INTERACTIVE
+   ========================================== */
+
+a {
+    color: var(--primary-neon);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    color: var(--secondary-neon);
+    text-shadow: 0 0 10px var(--primary-neon);
+}
+
+.glow-link {
+    border-bottom: 1px dotted var(--primary-neon);
+    padding-bottom: 2px;
+}
+
+.glow-link:hover {
+    text-shadow: 0 0 15px var(--primary-neon);
+    border-bottom-color: var(--secondary-neon);
+}
+
+.spoiler {
+    color: var(--text-muted);
+    cursor: help;
+    border-bottom: 1px dotted var(--text-muted);
+}
+
+/* ==========================================
+   CHARACTERS LIST
+   ========================================== */
+
+.characters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.faction-section {
+    overflow: hidden;
+}
+
+.faction-toggle {
+    width: 100%;
+    background: linear-gradient(90deg, rgba(165, 85, 236, 0.15), rgba(243, 204, 255, 0.08));
+    border: 0;
+    color: inherit;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem 2rem;
+    text-align: left;
+}
+
+.faction-toggle:hover {
+    background: linear-gradient(90deg, rgba(165, 85, 236, 0.24), rgba(243, 204, 255, 0.12));
+}
+
+.faction-kicker {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    letter-spacing: 0.3rem;
+    text-transform: uppercase;
+}
+
+.faction-title {
+    color: var(--primary-neon);
+    font-size: 1.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12rem;
+}
+
+.faction-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.faction-count {
+    color: var(--secondary-neon);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+}
+
+.faction-chevron {
+    color: var(--primary-neon);
+    font-size: 2rem;
+    line-height: 1;
+    transition: transform 0.3s ease;
+}
+
+.faction-chevron.is-open {
+    transform: rotate(45deg);
+}
+
+.faction-panel {
+    padding: 0 1.5rem 1.5rem;
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+
+.footer {
+    background: rgba(10, 14, 39, 0.95);
+    border-top: 1px solid var(--border-glow);
+    margin-top: auto;
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 768px) {
+    .dramatic-title {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    .navbar-nav {
+        margin-top: 1rem;
+    }
+
+    .navbar-dark .navbar-nav .nav-link {
+        margin: 0.5rem 0;
+    }
+
+    .characters-list .card-body {
+        padding: 2rem;
+    }
+
+    .faction-toggle {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .faction-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .faction-panel {
+        padding: 0 1rem 1rem;
+    }
+
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* ==========================================
+   BOOTSTRAP OVERRIDES
+   ========================================== */
+
+.btn-close {
+    filter: invert(1) brightness(1.2);
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--darker-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-glow);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-neon);
+}
