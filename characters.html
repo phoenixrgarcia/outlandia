@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Sinker</title>
+    <title>Outlandia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
 </head>
@@ -13,7 +13,7 @@
     <nav class="navbar navbar-dark navbar-expand-lg mb-5">
         <div class="container-fluid">
             <a class="navbar-brand mx-auto" href="index.html">
-                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+                <span class="brand-title"> Otherwordly Occurance in Outlandia  </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -30,13 +30,13 @@
                         <a class="nav-link" href="rules.html">Rules</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="characters.html">Characters</a>
+                        <a class="nav-link" style="color: var(--court-accent) !important;" href="characters.html">Characters</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                        <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
                     <li class="nav-item" x-show="$store.auth.loggedIn">
-                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
                 </ul>
             </div>
@@ -48,15 +48,27 @@
             <div class="col-lg-10">
                 <!-- Title Section -->
                 <div class="text-center mb-5">
-                    <h1 class="dramatic-title">THE WRANGLED</h1>
-                    <p class="subtitle">Meet the players in this cosmic crime</p>
+                    <h1 class="dramatic-title">Court Roster</h1>
+                    <p class="subtitle">Public faces of the Outlandia court</p>
                     <div class="divider"></div>
                 </div>
 
                 <!-- Character Cards List -->
                 <div x-data="charactersDisplay()" class="characters-list">
-                    <template x-for="faction in factions" :key="faction.id">
-                        <section class="faction-section dark-card border-glow">
+                    <div class="character-roster-tools dark-card border-court">
+                        <label for="characterRosterSearch" class="form-label"> > Search Roster:</label>
+                        <input
+                            id="characterRosterSearch"
+                            type="search"
+                            x-model="query"
+                            @input="syncOpenFactions()"
+                            class="form-control dark-select"
+                            placeholder="-- Search name, player, class, or faction --"
+                        >
+                    </div>
+
+                    <template x-for="faction in filteredFactions" :key="faction.id">
+                        <section class="faction-section dark-card border-court">
                             <button
                                 type="button"
                                 class="faction-toggle"
@@ -80,24 +92,33 @@
                                 class="faction-panel"
                             >
                                 <template x-for="character in faction.characters" :key="character.id">
-                                    <div class="card dark-card border-glow character-card">
+                                    <div class="card dark-card border-court character-card">
                                         <div class="card-body">
-                                            <h2 class="card-title character-role" x-text="character.id.replaceAll('_', ' ').toUpperCase()"></h2>
+                                            <h2 class="card-title character-role" x-text="character.class || character.className || character.id.replaceAll('_', ' ').toUpperCase()"></h2>
                                             <h3 class="character-name mb-2" x-text="character.name"></h3>
                                             <p class="text-muted mb-3">
                                                 <small>Played by: <strong x-text="character.player"></strong></small>
                                             </p>
-                                            <p class="character-blurb" x-text="character.blurb"></p>
+                                            <p class="text-muted mb-3">
+                                                <small>Faction: <strong x-text="character.faction"></strong></small>
+                                            </p>
+                                            <p class="text-muted mb-3 character-status-line">
+                                                <small>Status: <strong class="character-status" :class="{ 'character-status-dead': character.isDead }" x-text="character.isDead ? 'Dead' : 'Alive'"></strong></small>
+                                            </p>
+                                            <p class="character-blurb" x-text="character.publicBlurb || character.blurb"></p>
                                         </div>
                                     </div>
                                 </template>
                             </div>
                         </section>
                     </template>
+                    <p class="text-center text-muted mb-0" x-show="!filteredFactions.length">
+                        No public characters match that search.
+                    </p>
                 </div>
 
                 <div class="text-center mt-5">
-                    <a href="index.html" class="btn btn-neon">Back to Selection</a>
+                    <a href="index.html" class="btn btn-court">Back to Selection</a>
                 </div>
             </div>
         </div>
@@ -106,7 +127,7 @@
     <!-- Footer -->
     <footer class="footer mt-5 py-4 text-center text-muted">
         <div class="container">
-            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+            <p>&copy; 2026 Otherwordly Occurance in Outlandia. All mysteries reserved.</p>
         </div>
     </footer>
 
@@ -121,9 +142,9 @@
         aria-modal="true"
         aria-labelledby="logout-modal-title"
     >
-        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+        <div class="dark-card border-court rounded-3 w-100" style="max-width: 32rem;">
             <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
-                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <h5 id="logout-modal-title" class="mb-0">Leave Character</h5>
                 <button
                     type="button"
                     class="btn-close btn-close-white"
@@ -132,7 +153,7 @@
                 ></button>
             </div>
             <div class="p-4">
-                <p class="mb-0">Are you sure your character has died?</p>
+                <p class="mb-0">Leave this character session?</p>
             </div>
             <div class="d-flex justify-content-end gap-2 p-4 pt-0">
                 <button
@@ -140,14 +161,14 @@
                     class="btn btn-outline-light"
                     @click="$store.auth.cancelLogout()"
                 >
-                    Im alive
+                    Stay
                 </button>
                 <button
                     type="button"
-                    class="btn btn-neon"
+                    class="btn btn-court"
                     @click="$store.auth.logout()"
                 >
-                    Im dead
+                    Leave
                 </button>
             </div>
         </div>

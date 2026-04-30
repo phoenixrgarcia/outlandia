@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planet Sinker</title>
+    <title>Outlandia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
 </head>
@@ -14,7 +14,7 @@
     <nav class="navbar navbar-dark navbar-expand-lg mb-5">
         <div class="container-fluid">
             <a class="navbar-brand mx-auto" href="index.html">
-                <span class="brand-title"> INCIDENT OF STARDATE-2260  </span>
+                <span class="brand-title"> Otherwordly Occurance in Outlandia  </span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -22,7 +22,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" style="color: var(--primary-neon) !important;" href="index.html">Home</a>
+                        <a class="nav-link" style="color: var(--court-accent) !important;" href="index.html">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="lore.html">Lore</a>
@@ -34,10 +34,10 @@
                         <a class="nav-link" href="characters.html">Characters</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="database.html">Shack-a-loon Database</a>
+                        <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
                     <li class="nav-item" x-show="$store.auth.loggedIn">
-                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">☠️⚠️Terminate Session⚠️☠️</a>
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
                 </ul>
             </div>
@@ -49,25 +49,75 @@
             <div class="col-lg-6">
                 <!-- Title Section -->
                 <div class="text-center mb-5">
-                    <h1 class="dramatic-title">Welcome to the <br>Shack-a-loon</h1>
-                    <p class="subtitle">The best brews on <br>Planet Sinker</p>
+                    <h1 class="dramatic-title">Welcome to <br>Outlandia</h1>
+                    <p class="subtitle">The finest brews in the<br>High Kingdom</p>
                     <div class="divider"></div>
                 </div>
 
                 <!-- Character Selection -->
-                <div x-data="characterSelector()" class="card dark-card border-glow">
+                <div x-data="characterSelector()" class="card dark-card border-court">
                     <div class="card-body" x-show="!$store.auth.loggedIn" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                        <h2 class="card-title text-center mb-4">Log in with your Space-X credentials</h2>
+                        <h2 class="card-title text-center mb-4">Present your royal seal</h2>
 
-                        <div class="mb-3">
-                            <label for="characterSelect" class="form-label"> > Username:</label>
-                            <select id="characterSelect" x-model="selectedCharacterId"
-                                class="form-select dark-select" :disabled="$store.auth.loggedIn">
-                                <option value="">-- Select a Character --</option>
-                                <template x-for="character in characters" :key="character.id">
-                                    <option :value="character.id" x-text="character.name"></option>
+                        <div class="mb-3 character-search" @click.outside="closeResults()">
+                            <label for="characterSearch" class="form-label"> > Character:</label>
+                            <input
+                                id="characterSearch"
+                                x-model="query"
+                                @focus="openResults()"
+                                @input="handleSearchInput()"
+                                @keydown.arrow-down.prevent="moveActive(1)"
+                                @keydown.arrow-up.prevent="moveActive(-1)"
+                                @keydown.enter.prevent="selectActive()"
+                                @keydown.escape="closeResults()"
+                                class="form-control dark-select"
+                                placeholder="-- Search name, player, class, or faction --"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-controls="characterSearchResults"
+                                :aria-expanded="resultsOpen.toString()"
+                                :aria-activedescendant="activeCharacterId ? `character-option-${activeCharacterId}` : null"
+                                :disabled="$store.auth.loggedIn"
+                            >
+                            <div
+                                id="characterSearchResults"
+                                x-show="resultsOpen"
+                                x-transition
+                                class="character-search-results mt-2"
+                                role="listbox"
+                                aria-label="Character search results"
+                            >
+                                <template x-if="groupedResults.length">
+                                    <div>
+                                        <template x-for="group in groupedResults" :key="group.faction">
+                                            <div class="character-search-group" role="group" :aria-label="group.faction">
+                                                <p class="character-search-faction" x-text="group.faction"></p>
+                                                <template x-for="character in group.characters" :key="character.id">
+                                                    <button
+                                                        type="button"
+                                                        class="character-search-option"
+                                                        :id="`character-option-${character.id}`"
+                                                        :class="{ 'is-active': activeCharacterId === character.id }"
+                                                        @click="selectCharacter(character)"
+                                                        role="option"
+                                                        :aria-selected="selectedCharacterId === character.id"
+                                                    >
+                                                        <span class="character-search-name" x-text="character.name"></span>
+                                                        <span class="character-search-meta">
+                                                            <span x-text="character.player"></span>
+                                                            <span aria-hidden="true"> | </span>
+                                                            <span x-text="getCharacterClass(character)"></span>
+                                                        </span>
+                                                    </button>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </template>
-                            </select>
+                                <p class="character-search-empty mb-0" x-show="!groupedResults.length">
+                                    No matching characters found.
+                                </p>
+                            </div>
                         </div>
                         <label for="characterPassword" class="form-label"> > Password:</label>
                         <input id="characterPassword" x-model="selectedCharacterPassword"
@@ -83,10 +133,13 @@
                             <p class="text-muted mb-3">
                                 <small>Played by: <strong x-text="selectedCharacter.player"></strong></small>
                             </p>
-                            <p class="character-blurb" x-text="selectedCharacter.blurb"></p>
-                            <button x-show="!$store.auth.loggedIn" class="btn btn-neon mt-3 w-100" @click="loginOnClick()">Enter as <span
+                            <p class="text-muted mb-3">
+                                <small>Class: <strong x-text="selectedCharacter.class || selectedCharacter.className"></strong></small>
+                            </p>
+                            <p class="character-blurb" x-text="selectedCharacter.publicBlurb || selectedCharacter.blurb"></p>
+                            <button x-show="!$store.auth.loggedIn" class="btn btn-court mt-3 w-100" @click="loginOnClick()">Enter as <span
                                     x-text="selectedCharacter.name"></span></button>
-                            <button x-show="$store.auth.loggedIn" class="btn btn-neon mt-3 w-100">Logged in as <span
+                            <button x-show="$store.auth.loggedIn" class="btn btn-court mt-3 w-100">Logged in as <span
                                     x-text="selectedCharacter.name"></span></button>
                         </div>
                     </template>
@@ -99,34 +152,66 @@
                     </template>
                 </div>
             </div>
-            <div class="col-12 mt-5" x-data="loggedInCharacterDetails()" x-show="$store.auth.loggedIn && detailedCharacter" x-transition.opacity>
-                <section class="dark-card border-glow rounded-4 dossier-panel p-4 p-lg-5">
+            <div class="col-12 mt-5" x-data="loggedInCharacterDetails()" x-show="$store.auth.loggedIn && character" x-transition.opacity>
+                <section class="dark-card border-court rounded-4 dossier-panel p-4 p-lg-5" :class="{ 'dossier-panel-dead': character?.isDead }">
                     <div class="dossier-header mb-4">
                         <p class="dossier-kicker mb-2">Authenticated Character File</p>
                         <h2 class="dramatic-title dossier-title mb-2" x-text="character?.name"></h2>
                         <p class="subtitle dossier-subtitle mb-0">
-                            Played by <span x-text="detailedCharacter?.player || character?.player"></span>
+                            Played by <span x-text="character?.player"></span>
                         </p>
+
+                        <div class="dead-state-banner mt-4" x-show="character?.isDead" role="status">
+                            This character is marked dead for the current game state.
+                        </div>
+
+                        <div class="dossier-meta-grid mt-4">
+                            <div class="dossier-meta-item">
+                                <span>Class</span>
+                                <strong x-text="character?.class"></strong>
+                            </div>
+                            <div class="dossier-meta-item">
+                                <span>Faction</span>
+                                <strong x-text="character?.faction"></strong>
+                            </div>
+                            <div class="dossier-meta-item">
+                                <span>Money</span>
+                                <strong x-text="formatMoney(character?.money)"></strong>
+                            </div>
+                            <div class="dossier-meta-item">
+                                <span>Status</span>
+                                <strong x-text="character?.isDead ? 'Dead' : 'Alive'"></strong>
+                            </div>
+                        </div>
+
+                        <div class="detail-card-grid mt-4" x-show="createListItems(character?.statuses).length">
+                            <template x-for="(status, index) in createListItems(character?.statuses)" :key="`status-${index}`">
+                                <div class="detail-chip detail-chip-status">
+                                    <p class="mb-0" x-html="formatText(status)"></p>
+                                </div>
+                            </template>
+                        </div>
+
+                        <a x-show="character?.isAdmin" href="admin.html" class="btn btn-court mt-4">
+                            Open Admin Dashboard
+                        </a>
                     </div>
 
                     <div class="dossier-sections">
                         <article class="detail-section">
-                            <button type="button" class="detail-toggle" @click="toggleSection('occupation')" :aria-expanded="sections.occupation">
-                                <span>Occupation</span>
-                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.occupation }">+</span>
+                            <button type="button" class="detail-toggle" @click="toggleSection('inventory')" :aria-expanded="sections.inventory">
+                                <span>Inventory</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.inventory }">+</span>
                             </button>
-                            <div class="detail-content" x-show="sections.occupation" x-transition>
-                                <div class="detail-copy" x-html="formatText(detailedCharacter?.occupationAndClothingTypeSuggestions)"></div>
-                            </div>
-                        </article>
-
-                        <article class="detail-section">
-                            <button type="button" class="detail-toggle" @click="toggleSection('character')" :aria-expanded="sections.character">
-                                <span>Character</span>
-                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.character }">+</span>
-                            </button>
-                            <div class="detail-content" x-show="sections.character" x-transition>
-                                <div class="detail-copy" x-html="formatText(detailedCharacter?.characterDetails)"></div>
+                            <div class="detail-content" x-show="sections.inventory" x-transition>
+                                <div class="detail-card-grid">
+                                    <template x-for="(item, index) in createListItems(character?.inventory)" :key="`inventory-${index}`">
+                                        <div class="detail-chip">
+                                            <p class="mb-0" x-html="formatText(item)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.inventory).length">No inventory available.</p>
+                                </div>
                             </div>
                         </article>
 
@@ -137,29 +222,66 @@
                             </button>
                             <div class="detail-content" x-show="sections.goals" x-transition>
                                 <div class="detail-card-grid">
-                                    <template x-for="(goal, index) in createListItems(detailedCharacter?.goals)" :key="`goal-${index}`">
+                                    <template x-for="(goal, index) in createListItems(character?.goals)" :key="`goal-${index}`">
                                         <div class="detail-chip">
                                             <p class="mb-0" x-html="formatText(goal)"></p>
                                         </div>
                                     </template>
-                                    <p class="text-muted mb-0" x-show="!createListItems(detailedCharacter?.goals).length">No goals available.</p>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.goals).length">No goals available.</p>
                                 </div>
                             </div>
                         </article>
 
                         <article class="detail-section">
-                            <button type="button" class="detail-toggle" @click="toggleSection('abilities')" :aria-expanded="sections.abilities">
-                                <span>Abilities</span>
-                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.abilities }">+</span>
+                            <button type="button" class="detail-toggle" @click="toggleSection('secret')" :aria-expanded="sections.secret">
+                                <span>Secret</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.secret }">+</span>
                             </button>
-                            <div class="detail-content" x-show="sections.abilities" x-transition>
+                            <div class="detail-content" x-show="sections.secret" x-transition>
+                                <div class="detail-copy" x-html="formatText(character?.secret)"></div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('twist')" :aria-expanded="sections.twist">
+                                <span>Twist</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.twist }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.twist" x-transition>
+                                <div class="detail-copy" x-html="formatText(character?.twist)"></div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('relationships')" :aria-expanded="sections.relationships">
+                                <span>Relationships</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.relationships }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.relationships" x-transition>
                                 <div class="detail-card-grid">
-                                    <template x-for="(ability, index) in createListItems(detailedCharacter?.abilities)" :key="`ability-${index}`">
-                                        <div class="detail-chip detail-chip-ability">
-                                            <p class="mb-0" x-html="formatText(ability)"></p>
+                                    <template x-for="(relationship, index) in createListItems(character?.relationships)" :key="`relationship-${index}`">
+                                        <div class="detail-chip">
+                                            <p class="mb-0" x-html="formatText(relationship)"></p>
                                         </div>
                                     </template>
-                                    <p class="text-muted mb-0" x-show="!createListItems(detailedCharacter?.abilities).length">No abilities available.</p>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.relationships).length">No relationships available.</p>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('clues')" :aria-expanded="sections.clues">
+                                <span>Character Clues</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.clues }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.clues" x-transition>
+                                <div class="detail-card-grid">
+                                    <template x-for="(clue, index) in createListItems(character?.clues)" :key="`clue-${index}`">
+                                        <div class="detail-chip detail-chip-ability">
+                                            <p class="mb-0" x-html="formatText(clue)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.clues).length">No character clues available.</p>
                                 </div>
                             </div>
                         </article>
@@ -169,7 +291,7 @@
 
             <!-- Info Links -->
             <!-- <div class="text-center mt-5">
-                <p class="text-muted">New to this investigation? <a href="rules.html" class="glow-link">Read the
+                <p class="text-muted">New to this investigation? <a href="rules.html" class="court-link">Read the
                         rules</a></p>
             </div> -->
         </div>
@@ -179,7 +301,7 @@
     <!-- Footer -->
     <footer class="footer mt-5 py-4 text-center text-muted">
         <div class="container">
-            <p>&copy; 2026 Incident On Planet Sinker. All mysteries reserved.</p>
+            <p>&copy; 2026 Otherwordly Occurance in Outlandia. All mysteries reserved.</p>
         </div>
     </footer>
 
@@ -194,9 +316,9 @@
         aria-modal="true"
         aria-labelledby="logout-modal-title"
     >
-        <div class="dark-card border-glow rounded-3 w-100" style="max-width: 32rem;">
+        <div class="dark-card border-court rounded-3 w-100" style="max-width: 32rem;">
             <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
-                <h5 id="logout-modal-title" class="mb-0">Terminate Session</h5>
+                <h5 id="logout-modal-title" class="mb-0">Leave Character</h5>
                 <button
                     type="button"
                     class="btn-close btn-close-white"
@@ -205,7 +327,7 @@
                 ></button>
             </div>
             <div class="p-4">
-                <p class="mb-0">Are you sure your character has died?</p>
+                <p class="mb-0">Leave this character session?</p>
             </div>
             <div class="d-flex justify-content-end gap-2 p-4 pt-0">
                 <button
@@ -213,14 +335,14 @@
                     class="btn btn-outline-light"
                     @click="$store.auth.cancelLogout()"
                 >
-                    Im alive
+                    Stay
                 </button>
                 <button
                     type="button"
-                    class="btn btn-neon"
+                    class="btn btn-court"
                     @click="$store.auth.logout()"
                 >
-                    Im dead
+                    Leave
                 </button>
             </div>
         </div>

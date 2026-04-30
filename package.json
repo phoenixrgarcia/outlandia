@@ -1,7 +1,7 @@
 {
   "name": "murder-site",
   "version": "1.0.0",
-  "description": "Murder in the Void - A Space Western Mystery Party Website",
+  "description": "Outlandia fantasy royal court mystery party website",
   "main": "index.html",
   "scripts": {
     "dev": "open index.html",

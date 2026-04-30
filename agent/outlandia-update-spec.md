@@ -86,12 +86,17 @@ Character login/selection must be searchable. A plain non-searchable dropdown is
 
 Characters should be grouped by placeholder factions.
 
-Confirmed initial placeholder factions:
+Confirmed placeholder factions:
 
+- GMs
+- Royalty
 - Royal Court
-- Laborers
-- Knights
-- Fae
+- The Guards
+- Alchemical Expressionist
+- Magicians
+- The Clergy
+- The Workers
+- The Streets
 
 ## Placeholder Content Model
 
@@ -178,7 +183,7 @@ Retain the public character browsing page.
 
 The character list must support around 40 characters grouped by placeholder faction.
 
-Use the initial placeholder factions Royal Court, Laborers, Knights, and Fae unless later requirements replace them.
+Use the confirmed placeholder factions GMs, Royalty, Royal Court, The Guards, ALCHEMICAL EXPRESSIONIST, Magicians, The Clergy, The Workers, and The Streets unless later requirements replace them.
 
 The public character list should remain similar to the existing characters page and use dropdown/accordion-style grouped sections.
 
@@ -495,7 +500,7 @@ Initial confirmed requirements:
 - Theme: Dungeons & Dragons inspired royal court intrigue
 - Character count: around 40
 - Character selection must be searchable
-- Placeholder factions: Royal Court, Laborers, Knights, Fae
+- Placeholder factions: GMs, Royalty, Royal Court, The Guards, ALCHEMICAL EXPRESSIONIST, Magicians, The Clergy, The Workers, The Streets
 - Authenticated sections: Inventory, Goals, Secret, Twist, Relationships
 - Clues are logged-in character specific
 - Shared evidence/archive may be added later

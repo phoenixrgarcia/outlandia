@@ -87,7 +87,7 @@ Convert the existing static prototype from space western/neon terminology into a
 3. Replace home login UI with a searchable character selector.
    - Replace the plain `<select>` with a search input plus grouped result list.
    - Support filtering by character name, player name, class, and faction.
-   - Show faction grouping in results using Royal Court, Laborers, Knights, and Fae.
+   - Show faction grouping in results using GMs, Royalty, Royal Court, The Guards, Alchemical Expressionist, Magicians, The Clergy, The Workers, and The Streets.
    - Preserve password entry and login behavior for the static phase.
    - Keep keyboard/mouse accessible controls with labels and button states.
 
@@ -130,7 +130,7 @@ Convert the existing static prototype from space western/neon terminology into a
 
 6. Retheme `characters.html`.
    - Keep grouped accordion behavior.
-   - Group by the four placeholder factions.
+   - Group by the confirmed placeholder factions.
    - Display public fields only: character name, player placeholder, class, faction, public blurb, dead/alive indicator.
    - Do not expose private fields.
    - Add search/filter if the grouped list feels unwieldy with 40 records.
@@ -192,7 +192,7 @@ Convert the existing static prototype from space western/neon terminology into a
 - The home character selector is searchable and practical for around 40 characters.
 - Public and private character data are separated in the UI model.
 - Authenticated private view contains Inventory, Goals, Secret, Twist, Relationships, and Character Clues sections.
-- Placeholder factions are Royal Court, Laborers, Knights, and Fae.
+- Placeholder factions are GMs, Royalty, Royal Court, The Guards, ALCHEMICAL EXPRESSIONIST, Magicians, The Clergy, The Workers, and The Streets.
 - No final mystery content has been invented.
 - The code remains ready for a backend migration.
 
@@ -601,4 +601,3 @@ Realtime events:
 - Dead characters cannot be ability targets.
 - Prefer simple, explicit server-side services over complex rule engines until final content and abilities are known.
 - Keep all placeholder seeds easy for writers to replace later.
-
