@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlandia Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+
+<body x-data x-init="$store.auth.init()" class="dark-bg theme-home">
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title brand-title-full">Otherwordly Occurance in Outlandia</span>
+                <span class="brand-title brand-title-short">Otherwordly Occurance<br>in Outlandia</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Court Archive</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.character?.isAdmin" x-cloak>
+                        <a class="nav-link" style="color: var(--court-accent) !important;" href="admin.html">Admin</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5" x-data="adminDashboard()">
+        <section class="text-center mb-5">
+            <h1 class="dramatic-title">Admin Dashboard</h1>
+            <p class="subtitle">Live game state tools for GM characters</p>
+            <div class="divider"></div>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 p-lg-5" x-show="isLoading" x-cloak>
+            <p class="text-muted mb-0 text-center">Loading admin ledger...</p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 p-lg-5" x-show="error && !isLoading && !summary" x-cloak>
+            <h2 class="section-title mb-3">Access Restricted</h2>
+            <p class="text-muted" x-text="error"></p>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <a href="index.html" class="btn btn-court">Return to Character Sheet</a>
+                <a href="characters.html" class="btn btn-outline-light">View Public Roster</a>
+            </div>
+        </section>
+
+        <section x-show="summary && !isLoading" x-cloak>
+            <p class="alert alert-success" x-show="notice" x-text="notice" x-cloak></p>
+            <p class="alert alert-danger" x-show="error" x-text="error" x-cloak></p>
+
+            <div class="dark-card border-court rounded-3 p-4 p-lg-5 mb-4">
+                <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start">
+                    <div>
+                        <p class="dossier-kicker mb-2">Signed in admin</p>
+                        <h2 class="section-title mb-2" x-text="$store.auth.character?.name || summary?.adminCharacter?.characterId"></h2>
+                        <p class="text-muted mb-0">Use this dashboard to monitor live state. Editing tools arrive in later Phase 3 tasks.</p>
+                    </div>
+                    <a href="index.html" class="btn btn-court">Return to Character Sheet</a>
+                </div>
+            </div>
+
+            <div class="dossier-meta-grid mb-4">
+                <div class="dossier-meta-item">
+                    <span>Current Round</span>
+                    <strong x-text="summary?.gameState?.currentRound || 1"></strong>
+                </div>
+                <div class="dossier-meta-item">
+                    <span>Characters</span>
+                    <strong x-text="totalCharacters"></strong>
+                </div>
+                <div class="dossier-meta-item">
+                    <span>Dead</span>
+                    <strong x-text="deadCharacters.length"></strong>
+                </div>
+                <div class="dossier-meta-item">
+                    <span>Global Clues</span>
+                    <strong x-text="globalClueCount"></strong>
+                </div>
+            </div>
+
+            <div class="admin-tabs mb-4" role="tablist" aria-label="Admin dashboard sections">
+                <button
+                    type="button"
+                    class="admin-tab"
+                    :class="{ 'is-active': activeAdminTab === 'overview' }"
+                    @click="activeAdminTab = 'overview'"
+                >
+                    Overview
+                </button>
+                <button
+                    type="button"
+                    class="admin-tab"
+                    :class="{ 'is-active': activeAdminTab === 'characters' }"
+                    @click="activeAdminTab = 'characters'"
+                >
+                    Characters
+                </button>
+                <button
+                    type="button"
+                    class="admin-tab"
+                    :class="{ 'is-active': activeAdminTab === 'clues' }"
+                    @click="activeAdminTab = 'clues'"
+                >
+                    Global Clues
+                </button>
+            </div>
+
+            <section x-show="activeAdminTab === 'overview'" x-cloak>
+            <div class="row g-4">
+                <div class="col-12 col-lg-4">
+                    <article class="dark-card border-court rounded-3 p-4 h-100">
+                        <h2 class="section-title mb-3">Admin Characters</h2>
+                        <template x-for="character in adminCharacters" :key="character.id">
+                            <p class="text-muted mb-2">
+                                <strong x-text="character.name"></strong>
+                                <span x-show="character.canAdvanceRound"> can advance rounds</span>
+                            </p>
+                        </template>
+                    </article>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <article class="dark-card border-court rounded-3 p-4 h-100">
+                        <h2 class="section-title mb-3">Dead Characters</h2>
+                        <template x-for="character in deadCharacters" :key="character.id">
+                            <p class="text-muted mb-2" x-text="character.name"></p>
+                        </template>
+                        <p class="text-muted mb-0" x-show="!deadCharacters.length">No characters are currently marked dead.</p>
+                    </article>
+                </div>
+                <div class="col-12 col-lg-4">
+                    <article class="dark-card border-court rounded-3 p-4 h-100">
+                        <h2 class="section-title mb-3">Round Control</h2>
+                        <template x-for="character in roundAdvancers" :key="character.id">
+                            <p class="text-muted mb-2" x-text="character.name"></p>
+                        </template>
+                        <p class="text-muted mb-0" x-show="!roundAdvancers.length">No round advancer is configured.</p>
+                    </article>
+                </div>
+            </div>
+            </section>
+
+            <article class="dark-card border-court rounded-3 p-4 mt-4" x-show="activeAdminTab === 'characters'" x-cloak>
+                <div class="d-flex flex-wrap justify-content-between gap-3 align-items-end mb-3">
+                    <div>
+                        <h2 class="section-title mb-2">Admin Character List</h2>
+                        <p class="text-muted mb-0">Search by character or player name.</p>
+                    </div>
+                    <div style="min-width: min(100%, 22rem);">
+                        <label for="adminCharacterSearch" class="form-label">Search Characters</label>
+                        <input
+                            id="adminCharacterSearch"
+                            type="search"
+                            class="form-control dark-select"
+                            x-model="characterSearch"
+                            placeholder="Name or player"
+                        >
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <template x-for="character in filteredCharacters" :key="character.id">
+                        <div class="col-12">
+                            <article
+                                class="dark-card border-court rounded-3 p-3"
+                                x-data="{
+                                    moneyValue: character.money,
+                                    inventoryValue: inventoryText(character),
+                                    statusName: '',
+                                    statusNote: ''
+                                }"
+                            >
+                                <div class="d-flex flex-wrap justify-content-between gap-3 mb-3">
+                                    <div>
+                                        <h3 class="section-title mb-1" x-text="character.name"></h3>
+                                        <p class="text-muted mb-0">
+                                            <span x-text="character.player"></span>
+                                            <span aria-hidden="true"> | </span>
+                                            <span x-text="character.faction"></span>
+                                            <span aria-hidden="true"> | </span>
+                                            <span x-text="character.class"></span>
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-light"
+                                        @click="toggleDeath(character)"
+                                        x-text="character.isDead ? 'Mark Alive' : 'Mark Dead'"
+                                    ></button>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-12 col-lg-3">
+                                        <label class="form-label" :for="`money-${character.id}`">Money</label>
+                                        <div class="input-group">
+                                            <input
+                                                :id="`money-${character.id}`"
+                                                type="number"
+                                                min="0"
+                                                class="form-control dark-select"
+                                                x-model="moneyValue"
+                                            >
+                                            <button class="btn btn-court" type="button" @click="updateMoney(character.id, moneyValue)">Save</button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-lg-5">
+                                        <label class="form-label" :for="`inventory-${character.id}`">Inventory</label>
+                                        <textarea
+                                            :id="`inventory-${character.id}`"
+                                            class="form-control dark-select"
+                                            rows="3"
+                                            x-model="inventoryValue"
+                                        ></textarea>
+                                        <p class="form-helper mt-1 mb-2">One item per line. Use `Item name | 2` for quantity.</p>
+                                        <button class="btn btn-court btn-sm" type="button" @click="updateInventory(character.id, inventoryValue)">Save Inventory</button>
+                                    </div>
+
+                                    <div class="col-12 col-lg-4">
+                                        <label class="form-label" :for="`status-${character.id}`">Add Status</label>
+                                        <input
+                                            :id="`status-${character.id}`"
+                                            class="form-control dark-select mb-2"
+                                            x-model="statusName"
+                                            placeholder="Status name"
+                                        >
+                                        <input
+                                            class="form-control dark-select mb-2"
+                                            x-model="statusNote"
+                                            placeholder="Optional note"
+                                        >
+                                        <button class="btn btn-court btn-sm" type="button" @click="addStatus(character.id, statusName, statusNote); statusName = ''; statusNote = ''">Add Status</button>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-1">
+                                    <div class="col-12 col-lg-6">
+                                        <p class="dossier-kicker mb-2">Statuses</p>
+                                        <template x-for="status in character.statuses" :key="status.statusId">
+                                            <span class="detail-chip detail-chip-status d-inline-flex align-items-center gap-2 me-2 mb-2">
+                                                <span x-text="status.name"></span>
+                                                <button class="btn btn-sm btn-outline-light" type="button" @click="removeStatus(character.id, status.statusId)">Remove</button>
+                                            </span>
+                                        </template>
+                                        <p class="text-muted mb-0" x-show="!character.statuses.length">No statuses.</p>
+                                    </div>
+
+                                    <div class="col-12 col-lg-6">
+                                        <p class="dossier-kicker mb-2">Modifiers</p>
+                                        <template x-for="modifier in character.modifiers" :key="modifier.modifierId">
+                                            <span class="detail-chip d-inline-flex align-items-center gap-2 me-2 mb-2">
+                                                <span>
+                                                    <span x-text="modifier.name"></span>
+                                                    (<span x-text="modifier.usesRemaining"></span>)
+                                                </span>
+                                                <button
+                                                    class="btn btn-sm btn-outline-light"
+                                                    type="button"
+                                                    :disabled="modifier.usesRemaining <= 0"
+                                                    @click="consumeModifier(character.id, modifier.modifierId)"
+                                                >Consume</button>
+                                            </span>
+                                        </template>
+                                        <p class="text-muted mb-0" x-show="!character.modifiers.length">No modifiers.</p>
+                                    </div>
+                                </div>
+                            </article>
+                        </div>
+                    </template>
+                </div>
+                <p class="text-muted text-center mb-0 mt-3" x-show="!filteredCharacters.length">
+                    No admin characters match that search.
+                </p>
+            </article>
+
+            <article class="dark-card border-court rounded-3 p-4 mt-4" x-show="activeAdminTab === 'clues'" x-cloak>
+                <h2 class="section-title mb-3">Global Clue Reveals</h2>
+                <div class="row g-3">
+                    <template x-for="clue in globalClues" :key="clue.id">
+                        <div class="col-12 col-lg-4">
+                            <div class="dark-card border-court rounded-3 p-3 h-100">
+                                <p class="dossier-kicker mb-2" x-text="clue.isRevealedGlobally ? 'Revealed' : 'Hidden'"></p>
+                                <h3 class="section-title mb-2" x-text="clue.title"></h3>
+                                <p class="text-muted" x-text="clue.summary"></p>
+                                <button
+                                    type="button"
+                                    class="btn btn-court w-100"
+                                    @click="revealClue(clue)"
+                                    x-text="clue.isRevealedGlobally ? 'Hide Global Clue' : 'Reveal Global Clue'"
+                                ></button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <p class="text-muted mb-0" x-show="!globalClues.length">No global clues are seeded yet.</p>
+            </article>
+        </section>
+    </main>
+
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Otherwordly Occurance in Outlandia. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-cloak
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-court rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Leave Character</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Leave this character session?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button type="button" class="btn btn-outline-light" @click="$store.auth.cancelLogout()">Stay</button>
+                <button type="button" class="btn btn-court" @click="$store.auth.logout()">Leave</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

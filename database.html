@@ -37,6 +37,9 @@
                     <li class="nav-item">
                         <a class="nav-link" style="color: var(--court-accent) !important;" href="database.html">Court Archive</a>
                     </li>
+                    <li class="nav-item" x-show="$store.auth.character?.isAdmin" x-cloak>
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
                     <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
                         <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
@@ -48,65 +51,50 @@
     <main class="container py-5" x-data="databaseAccess()">
         <section class="text-center mb-5">
             <h1 class="dramatic-title">Court Archive</h1>
-            <p class="subtitle" style="color: --var(--third-color)">Placeholder global records for Phase 1</p>
+            <p class="subtitle archive-subtitle">Public records revealed during play</p>
             <div class="divider"></div>
-            <p class="text-muted mt-3 mb-0">
-                TODO: Admin-revealed global clues become public archive records. Shop-purchased clues stay private to the buyer and should not appear here.
+            <p class="archive-intro mt-3 mb-0">
+                Admin-revealed global clues appear here for everyone. Shop-purchased clues stay private to the buyer and do not appear here.
             </p>
         </section>
 
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="isLoading" x-cloak>
+            <p class="text-muted mb-0">Loading revealed archive records...</p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="error && !isLoading" x-cloak>
+            <h2 class="section-title mb-2">Archive Unavailable</h2>
+            <p class="text-muted mb-0" x-text="error"></p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="!isLoading && !error && !clues.length" x-cloak>
+            <h2 class="section-title mb-2">No Records Revealed</h2>
+            <p class="text-muted mb-0">No global clues have been revealed by an admin yet.</p>
+        </section>
+
         <section class="row g-4 justify-content-center">
-            <template x-for="portal in portals" :key="portal.id">
+            <template x-for="clue in clues" :key="clue.id">
                 <div class="col-12 col-lg-4">
                     <article
                         class="dark-card rounded-4 database-access-card h-100 p-4"
-                        :class="portal.unlocked ? 'database-access-card-unlocked' : 'database-access-card-locked'"
+                        :class="'database-access-card-unlocked'"
                     >
                         <div class="database-access-status">
                             <div>
-                                <p class="database-access-kicker mb-2" x-text="portal.unlocked ? 'Access Granted' : 'Access Restricted'"></p>
-                                <h2 class="card-title mb-2" x-text="portal.title"></h2>
-                                <p class="text-muted mb-0" x-text="portal.description"></p>
+                                <p class="database-access-kicker mb-2">Revealed Record</p>
+                                <h2 class="card-title mb-2" x-text="clue.title"></h2>
+                                <p class="text-muted mb-0" x-text="clue.summary"></p>
                             </div>
                             <div
-                                class="database-lock-icon"
-                                :class="portal.unlocked ? 'database-lock-icon-unlocked' : 'database-lock-icon-locked'"
-                                x-text="portal.unlocked ? '🔓' : '🔒'"
+                                class="database-revealed-badge"
+                                x-text="'Open'"
                                 aria-hidden="true"
                             ></div>
                         </div>
 
-                        <label class="form-label mt-4" :for="`portal-password-${portal.id}`">Archive Access Code</label>
-                        <input
-                            :id="`portal-password-${portal.id}`"
-                            x-model="portal.value"
-                            type="password"
-                            class="form-control database-password-input"
-                            :class="portal.unlocked ? 'database-password-input-success' : 'database-password-input-danger'"
-                            :placeholder="portal.unlocked ? 'Authorization accepted' : 'Enter access code'"
-                            @input="portal.hasError = false"
-                            @keydown.enter.prevent="submitPortal(portal)"
-                        >
-
-                        <p class="database-access-feedback mt-3 mb-0" x-show="portal.hasError && !portal.unlocked">
-                            Incorrect password. Try again.
-                        </p>
-
-                        <button
-                            type="button"
-                            class="btn btn-court w-100 mt-4"
-                            @click="submitPortal(portal)"
-                            x-text="portal.unlocked ? portal.cta : 'Unseal Record'"
-                            x-show="!portal.unlocked"
-                        ></button>
-                        <br>
-                        <div class="card dark-card border-court mb-4" x-show="portal.unlocked">
-                            <div class="card-body">
-                                <h2 class="card-title mb-4"><i>Archive Record</i></h2>
-                                <section class="text-light mb-4">
-                                    <div x-html="portal.clue"></div>
-                                </section> 
-                            </div>
+                        <div class="archive-record-body mt-4">
+                            <p class="archive-record-label mb-3">Archive Record</p>
+                            <div x-html="formatArchiveBody(clue.body)"></div>
                         </div>
                     </article>
                 </div>

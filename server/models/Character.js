@@ -76,6 +76,12 @@ const abilitySchema = new mongoose.Schema(
 
 const statusSchema = new mongoose.Schema(
   {
+    statusId: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+    },
     name: { type: String, required: true },
     note: { type: String, default: "" },
     expiresAt: Date,

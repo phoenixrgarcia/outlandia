@@ -10,6 +10,9 @@ const PLACEHOLDER_FACTIONS = [
   "The Streets"
 ];
 
+const AUTH_TOKEN_STORAGE_KEY = "outlandiaAuthToken";
+const LEGACY_CHARACTER_STORAGE_KEY = "loggedInCharacter";
+
 const PLACEHOLDER_CHARACTER_SEEDS = [
   ["gm_01", "Placeholder GM 01", "GM", "GMs"],
   ["royalty_01", "Placeholder Royalty 01", "Monarch", "Royalty"],
@@ -56,7 +59,6 @@ const PLACEHOLDER_CHARACTER_SEEDS = [
 function createPlaceholderCharacter(seed, index) {
   const [id, name, characterClass, faction] = seed;
   const number = String(index + 1).padStart(2, "0");
-  const isAdmin = faction === "GMs";
 
   return {
     id,
@@ -67,19 +69,7 @@ function createPlaceholderCharacter(seed, index) {
     faction,
     publicBlurb: "TODO public character blurb placeholder for " + name + ".",
     blurb: "TODO public character blurb placeholder for " + name + ".",
-    password: "10" + number,
-    inventory: ["TODO inventory placeholder"],
-    secret: "TODO secret placeholder.",
-    twist: "TODO twist placeholder.",
-    goals: ["TODO goal placeholder."],
-    clues: ["TODO character clue placeholder."],
-    privateInformation: "TODO private information placeholder.",
-    relationships: ["TODO relationship placeholder."],
-    money: index === 0 ? 0 : 25 + index * 5,
-    isAdmin,
-    canAdvanceRound: index === 0,
     isDead: id === "street_07",
-    statuses: id === "street_07" ? ["Dead placeholder for UI testing"] : [],
     image: "default.png"
   };
 }
@@ -91,46 +81,6 @@ const CHARACTERS = Object.fromEntries(
   })
 );
 
-
-// TODO Phase 2: replace this static list with GET /api/clues/global.
-// Admin-revealed global clues should become public to everyone.
-// Shop-purchased clues must remain private to the purchasing character and should not be merged into this global archive.
-const DATABASE_PORTALS = [
-  {
-    id: "global-archive-record-01",
-    title: "Global Archive Record 01",
-    description: "TODO placeholder for an admin-revealed global clue record.",
-    password: "archive01",
-    href: "#",
-    cta: "View Record",
-    visibility: "global",
-    apiRoute: "/api/clues/global",
-    clue: "<p><b>TODO Global Clue Placeholder:</b> This record represents information that an admin may reveal to all players during the event.</p>"
-  },
-  {
-    id: "global-archive-record-02",
-    title: "Global Archive Record 02",
-    description: "TODO placeholder for a public archive entry unlocked during play.",
-    password: "archive02",
-    href: "#",
-    cta: "View Record",
-    visibility: "global",
-    apiRoute: "/api/clues/global",
-    clue: "<p><b>TODO Archive Entry Placeholder:</b> Replace this with final public clue text after writers provide approved content.</p>"
-  },
-  {
-    id: "global-archive-record-03",
-    title: "Global Archive Record 03",
-    description: "TODO placeholder for a sealed court archive record.",
-    password: "archive03",
-    href: "#",
-    cta: "View Record",
-    visibility: "global",
-    apiRoute: "/api/clues/global",
-    clue: "<p><b>TODO Sealed Record Placeholder:</b> This static record emulates a future admin-revealed global clue.</p>"
-  },
-  
-];
 
 function createCharacterDetails(
   player,
@@ -150,47 +100,35 @@ function createCharacterDetails(
   };
 }
 
-const CHARACTERS_DETAILED = Object.fromEntries(
-  Object.values(CHARACTERS).map((character) => [
-    character.id,
-    createCharacterDetails(
-      character.player,
-      character.name,
-      character.class,
-      character.privateInformation,
-      character.goals.join("\n\n"),
-      character.clues.join("\n\n")
-    )
-  ])
-);
+const CHARACTERS_DETAILED = {};
 
 document.addEventListener("alpine:init", () => {
   Alpine.store("auth", createAuthStore());
   Alpine.data("characterSelector", characterSelector);
   Alpine.data("charactersDisplay", charactersDisplay);
   Alpine.data("loggedInCharacterDetails", loggedInCharacterDetails);
+  Alpine.data("adminDashboard", adminDashboard);
 });
 
 function createAuthStore(){
   return{
     character: null,
-    characters: CHARACTERS,
+    characters: {},
     characterDetails: CHARACTERS_DETAILED,
+    authToken: localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || "",
+    error: "",
+    isLoadingCharacters: false,
+    isRestoringSession: false,
+    isLoggingIn: false,
     showLogoutConfirm: false,
 
-    init() {
-      const storedCharacter = localStorage.getItem("loggedInCharacter");
+    async init() {
       this.showLogoutConfirm = false;
-      if(storedCharacter) {
-        const character = JSON.parse(storedCharacter);
+      localStorage.removeItem(LEGACY_CHARACTER_STORAGE_KEY);
+      await this.fetchPublicCharacters();
 
-        if (this.characters[character.id]) {
-          this.character = this.characters[character.id];
-          localStorage.setItem("loggedInCharacter", JSON.stringify(this.character));
-          return;
-        }
-
-        localStorage.removeItem("loggedInCharacter");
+      if (this.authToken) {
+        await this.restoreSessionFromToken();
       }
     },
 
@@ -199,29 +137,95 @@ function createAuthStore(){
     },
 
     get detailedCharacter() {
-      if (!this.character) {
-        return null;
-      }
-
-      return this.characterDetails[this.character.id] || null;
+      return this.character;
     },
 
-     attemptLogin(characterId, password) {
+    async fetchPublicCharacters() {
+      this.isLoadingCharacters = true;
+      this.error = "";
+
+      try {
+        const response = await fetch("/api/characters/public");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load the character roster.");
+        }
+
+        this.characters = Object.fromEntries(
+          data.characters.map((character) => [character.id, character])
+        );
+      } catch (error) {
+        this.characters = {};
+        this.error = error.message || "Unable to load the character roster.";
+      } finally {
+        this.isLoadingCharacters = false;
+      }
+    },
+
+    async restoreSessionFromToken() {
+      this.isRestoringSession = true;
+
+      try {
+        const response = await fetch("/api/me", {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Token restore failed.");
+        }
+
+        const data = await response.json();
+        this.character = data.character;
+      } catch (error) {
+        this.clearSession();
+      } finally {
+        this.isRestoringSession = false;
+      }
+    },
+
+    async attemptLogin(characterId, password) {
+      this.error = "";
+
       if (!characterId || !password) {
-        alert("Please select a character and enter a password.");
+        this.showLoginError("Please select a character and enter a password.");
         return;
       }
 
-      const character = this.characters[characterId];
+      this.isLoggingIn = true;
 
-      if (!character || character.password !== password) {
-        alert("Access denied. Incorrect password.");
-        return;
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ characterId, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.showLoginError(data.error || "Access denied. Incorrect password.");
+          return;
+        }
+
+        this.authToken = data.token;
+        this.character = data.character;
+        localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, data.token);
+        alert(`Login successful! Welcome, ${data.character.name}.`);
+      } catch (error) {
+        this.showLoginError("Unable to reach the login service. Please try again.");
+      } finally {
+        this.isLoggingIn = false;
       }
+    },
 
-      this.character = character;
-      localStorage.setItem("loggedInCharacter", JSON.stringify(character));
-      alert(`Login successful! Welcome, ${character.name}.`);
+    showLoginError(message) {
+      this.error = message;
+      alert(message);
     },
 
     requestLogout() {
@@ -234,25 +238,34 @@ function createAuthStore(){
 
     logout() {
       this.showLogoutConfirm = false;
-      localStorage.removeItem("loggedInCharacter");
-      this.character = null;
+      this.clearSession();
       alert("Character session closed.");
       window.location.href = "index.html";
+    },
+
+    clearSession() {
+      this.authToken = "";
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_CHARACTER_STORAGE_KEY);
+      this.character = null;
     }
   }
 }
 
 function characterSelector() {
   return {
-    characters: Object.values(CHARACTERS),
     selectedCharacterId: "",
     selectedCharacterPassword: "",
     query: "",
     resultsOpen: false,
     activeCharacterId: "",
 
+    get characters() {
+      return Object.values(this.$store.auth.characters);
+    },
+
     get selectedCharacter() {
-      return CHARACTERS[this.selectedCharacterId] || null;
+      return this.$store.auth.characters[this.selectedCharacterId] || null;
     },
 
     get filteredCharacters() {
@@ -294,16 +307,10 @@ function characterSelector() {
     },
 
     init() {
-      const stored = localStorage.getItem("loggedInCharacter");
-
-      if (stored) {
-        const character = JSON.parse(stored);
-
-        if (CHARACTERS[character.id]) {
-          this.selectedCharacterId = character.id;
-          this.query = CHARACTERS[character.id].name;
-          this.activeCharacterId = character.id;
-        }
+      if (this.$store.auth.character) {
+        this.selectedCharacterId = this.$store.auth.character.id;
+        this.query = this.$store.auth.character.name;
+        this.activeCharacterId = this.$store.auth.character.id;
       }
     },
 
@@ -438,13 +445,28 @@ function loggedInCharacterDetails() {
       }
 
       if (Array.isArray(value)) {
-        return value.map((item) => String(item).trim()).filter(Boolean);
+        return value.map((item) => this.formatListItem(item)).filter(Boolean);
       }
 
       return String(value)
         .split(/\n\s*\n/)
         .map((item) => item.trim())
         .filter(Boolean);
+    },
+
+    formatListItem(item) {
+      if (!item) {
+        return "";
+      }
+
+      if (typeof item === "object") {
+        return [item.name, item.note, item.description]
+          .filter(Boolean)
+          .join(": ")
+          .trim();
+      }
+
+      return String(item).trim();
     },
 
     escapeHtml(text) {
@@ -459,80 +481,325 @@ function loggedInCharacterDetails() {
 }
 
 function databaseAccess() {
-  const storageKey = "databaseAccessState";
-
   return {
-    portals: DATABASE_PORTALS.map((portal) => ({
-      ...portal,
-      value: "",
-      unlocked: false,
-      hasError: false
-    })),
+    clues: [],
+    isLoading: true,
+    error: "",
 
-    init() {
-      const storedState = localStorage.getItem(storageKey);
+    async init() {
+      await this.loadGlobalClues();
+    },
 
-      if (!storedState) {
-        return;
-      }
+    async loadGlobalClues() {
+      this.isLoading = true;
+      this.error = "";
 
       try {
-        const portalState = JSON.parse(storedState);
+        const response = await fetch("/api/clues/global");
+        const data = await response.json();
 
-        this.portals = this.portals.map((portal) => ({
-          ...portal,
-          unlocked: !!portalState[portal.id],
-          hasError: false
-        }));
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load the Court Archive.");
+        }
+
+        this.clues = data.clues;
       } catch (error) {
-        localStorage.removeItem(storageKey);
+        this.error = error.message || "Unable to load the Court Archive.";
+      } finally {
+        this.isLoading = false;
       }
     },
 
-    saveState() {
-      const portalState = Object.fromEntries(
-        this.portals.map((portal) => [portal.id, portal.unlocked])
-      );
-
-      localStorage.setItem(storageKey, JSON.stringify(portalState));
+    formatArchiveBody(body) {
+      return this.escapeHtml(body || "No archive text available.").replace(/\n/g, "<br>");
     },
 
-    submitPortal(portal) {
-      if (portal.unlocked) {
-        window.location.href = portal.href;
-        return;
-      }
-
-      if (portal.value === portal.password) {
-        portal.unlocked = true;
-        portal.hasError = false;
-        portal.value = "";
-        this.saveState();
-        return;
-      }
-
-      portal.hasError = true;
-    }
+    escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    },
   };
 }
 
+function adminDashboard() {
+  return {
+    isLoading: true,
+    error: "",
+    notice: "",
+    summary: null,
+    characters: [],
+    clues: [],
+    characterSearch: "",
+    activeAdminTab: "overview",
+
+    async init() {
+      await Promise.all([
+        this.loadSummary(),
+        this.loadCharacters(),
+        this.loadClues(),
+      ]);
+    },
+
+    get token() {
+      return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+    },
+
+    async adminRequest(path, options = {}) {
+      if (!this.token) {
+        throw new Error("Log in as an admin character to use admin controls.");
+      }
+
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.token}`,
+          ...(options.headers || {}),
+        },
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || "Admin action failed.");
+      }
+
+      return data;
+    },
+
+    async loadSummary() {
+      this.isLoading = true;
+      this.error = "";
+
+      try {
+        if (!this.token) {
+          this.error = "Log in as an admin character to view the admin dashboard.";
+          return;
+        }
+
+        const response = await fetch("/api/admin/summary", {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.error = data.error || "Admin dashboard access denied.";
+          return;
+        }
+
+        this.summary = data;
+      } catch (error) {
+        this.error = "Unable to load the admin dashboard.";
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async loadCharacters() {
+      try {
+        if (!this.token) {
+          this.characters = [];
+          return;
+        }
+
+        const response = await fetch("/api/admin/characters", {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.characters = [];
+          return;
+        }
+
+        this.characters = data.characters;
+      } catch (error) {
+        this.characters = [];
+      }
+    },
+
+    async loadClues() {
+      try {
+        if (!this.token) {
+          this.clues = [];
+          return;
+        }
+
+        const response = await fetch("/api/admin/clues", {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          this.clues = [];
+          return;
+        }
+
+        this.clues = data.clues;
+      } catch (error) {
+        this.clues = [];
+      }
+    },
+
+    async refetchAdminState() {
+      await Promise.all([
+        this.loadSummary(),
+        this.loadCharacters(),
+        this.loadClues(),
+      ]);
+    },
+
+    async mutate(action) {
+      this.error = "";
+      this.notice = "";
+
+      try {
+        await action();
+        await this.refetchAdminState();
+        this.notice = "Admin update saved.";
+      } catch (error) {
+        this.error = error.message || "Admin update failed.";
+      }
+    },
+
+    updateMoney(characterId, money) {
+      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/money`, {
+        method: "PATCH",
+        body: JSON.stringify({ money: Number(money) }),
+      }));
+    },
+
+    updateInventory(characterId, inventoryText) {
+      const inventory = String(inventoryText || "")
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const [namePart, quantityPart] = line.split("|").map((part) => part.trim());
+          return {
+            name: namePart,
+            quantity: quantityPart ? Number(quantityPart) : 1,
+          };
+        });
+
+      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/inventory`, {
+        method: "PATCH",
+        body: JSON.stringify({ inventory }),
+      }));
+    },
+
+    toggleDeath(character) {
+      return this.mutate(() => this.adminRequest(`/api/admin/characters/${character.id}/death`, {
+        method: "PATCH",
+        body: JSON.stringify({ isDead: !character.isDead }),
+      }));
+    },
+
+    addStatus(characterId, statusName, statusNote) {
+      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/statuses`, {
+        method: "POST",
+        body: JSON.stringify({ name: statusName, note: statusNote }),
+      }));
+    },
+
+    removeStatus(characterId, statusId) {
+      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/statuses/${statusId}`, {
+        method: "DELETE",
+      }));
+    },
+
+    consumeModifier(characterId, modifierId) {
+      return this.mutate(() => this.adminRequest(`/api/admin/modifiers/${modifierId}/consume`, {
+        method: "POST",
+        body: JSON.stringify({ characterId }),
+      }));
+    },
+
+    revealClue(clue) {
+      return this.mutate(() => this.adminRequest(`/api/admin/clues/${clue.id}/reveal`, {
+        method: "PATCH",
+        body: JSON.stringify({ isRevealedGlobally: !clue.isRevealedGlobally }),
+      }));
+    },
+
+    get totalCharacters() {
+      return this.characters.length || this.summary?.characters?.length || 0;
+    },
+
+    get deadCharacters() {
+      return this.characters.filter((character) => character.isDead);
+    },
+
+    get adminCharacters() {
+      return this.characters.filter((character) => character.isAdmin);
+    },
+
+    get roundAdvancers() {
+      return this.characters.filter((character) => character.canAdvanceRound);
+    },
+
+    get filteredCharacters() {
+      const search = this.normalizeSearch(this.characterSearch);
+
+      if (!search) {
+        return this.characters;
+      }
+
+      return this.characters.filter((character) => {
+        return [character.name, character.player]
+          .filter(Boolean)
+          .some((value) => this.normalizeSearch(value).includes(search));
+      });
+    },
+
+    get globalClueCount() {
+      const globalClues = this.summary?.clueCounts?.find((item) => item.type === "global");
+      return globalClues?.count || 0;
+    },
+
+    get globalClues() {
+      return this.clues.filter((clue) => clue.clueType === "global");
+    },
+
+    inventoryText(character) {
+      return (character.inventory || [])
+        .map((item) => `${item.name}${item.quantity && item.quantity !== 1 ? ` | ${item.quantity}` : ""}`)
+        .join("\n");
+    },
+
+    normalizeSearch(value) {
+      return String(value || "").trim().toLowerCase();
+    },
+  };
+}
 
 // Characters display for the characters page
 function charactersDisplay() {
-  const characters = Object.values(CHARACTERS);
-  const factionNames = PLACEHOLDER_FACTIONS.filter((factionName) =>
-    characters.some((character) => character.faction === factionName)
-  );
-  const factions = factionNames.map((factionName) => ({
-    id: factionName.toLowerCase().replaceAll(" ", "-"),
-    name: factionName,
-    characters: characters.filter((character) => character.faction === factionName)
-  }));
-
   return {
-    factions,
     query: "",
-    openFactions: Object.fromEntries(factions.map((faction) => [faction.id, false])),
+    openFactions: {},
+
+    get factions() {
+      const characters = Object.values(this.$store.auth.characters);
+      const factionNames = PLACEHOLDER_FACTIONS.filter((factionName) =>
+        characters.some((character) => character.faction === factionName)
+      );
+
+      return factionNames.map((factionName) => ({
+        id: factionName.toLowerCase().replaceAll(" ", "-"),
+        name: factionName,
+        characters: characters.filter((character) => character.faction === factionName)
+      }));
+    },
 
     get filteredFactions() {
       const search = this.normalizeSearch(this.query);

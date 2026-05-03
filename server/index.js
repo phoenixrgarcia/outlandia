@@ -4,6 +4,9 @@ const env = require("./config/env");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const characterRoutes = require("./routes/characters");
+const meRoutes = require("./routes/me");
+const adminRoutes = require("./routes/admin");
+const clueRoutes = require("./routes/clues");
 
 const app = express();
 const rootDir = path.join(__dirname, "..");
@@ -17,6 +20,9 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/characters", characterRoutes);
+app.use("/api/me", meRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/clues", clueRoutes);
 
 app.use(express.static(rootDir, staticOptions));
 

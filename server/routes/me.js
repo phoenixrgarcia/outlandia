@@ -2,33 +2,11 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Character = require("../models/Character");
 const { requireAuth } = require("../middleware/auth");
-const { toPublicCharacter, toSafeLoggedInCharacter } = require("../utils/characterPayload");
+const { toSafeLoggedInCharacter } = require("../utils/characterPayload");
 
 const router = express.Router();
 
-router.get("/public", async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({
-        error: "Database is not connected yet.",
-        characters: [],
-      });
-    }
-
-    const characters = await Character.find()
-      .sort({ faction: 1, name: 1 })
-      .select("characterId name player class faction publicBlurb isDead")
-      .lean();
-
-    res.json({
-      characters: characters.map(toPublicCharacter),
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.get("/me", requireAuth, async (req, res, next) => {
+router.get("/", requireAuth, async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
       return res.status(503).json({

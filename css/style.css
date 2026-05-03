@@ -58,6 +58,22 @@
     --third-color: var(--antique-gold);
 }
 
+.theme-database .subtitle,
+.archive-subtitle {
+    color: #d7a94a;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.34);
+}
+
+.archive-intro {
+    color: #f5e8c7;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.6;
+    margin-inline: auto;
+    max-width: 78rem;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+}
+
 .clue-hint{
     color: var(--royal-burgundy);
 }
@@ -530,6 +546,44 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: none;
 }
 
+.database-revealed-badge {
+    align-items: center;
+    background: rgba(36, 74, 54, 0.12);
+    border: 1px solid rgba(36, 74, 54, 0.45);
+    border-radius: 0.5rem;
+    color: var(--deep-green);
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    justify-content: center;
+    letter-spacing: 0.08rem;
+    min-height: 2.25rem;
+    padding: 0.4rem 0.7rem;
+    text-transform: uppercase;
+}
+
+.archive-record-body {
+    background: rgba(255, 248, 232, 0.46);
+    border: 1px solid rgba(111, 29, 45, 0.18);
+    border-left: 0.25rem solid var(--court-accent);
+    border-radius: 0.5rem;
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    padding: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.archive-record-label {
+    color: var(--court-accent);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.16rem;
+    text-transform: uppercase;
+}
+
 .database-password-input {
     background-color: #fff8e8 !important;
     color: var(--text-primary) !important;
@@ -559,6 +613,44 @@ h1, h2, h3, h4, h5, h6 {
 .database-access-feedback {
     color: var(--royal-burgundy);
     min-height: 1.5rem;
+}
+
+.admin-tabs {
+    background: rgba(244, 234, 210, 0.08);
+    border: 1px solid rgba(184, 137, 53, 0.24);
+    border-radius: 0.5rem;
+    display: grid;
+    gap: 0.35rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0.35rem;
+    position: sticky;
+    top: 0.75rem;
+    z-index: 8;
+}
+
+.admin-tab {
+    background: rgba(255, 248, 232, 0.9);
+    border: 1px solid transparent;
+    border-radius: 0.4rem;
+    color: var(--ink);
+    font-size: 0.85rem;
+    font-weight: 800;
+    letter-spacing: 0.06rem;
+    line-height: 1.15;
+    min-height: 2.65rem;
+    padding: 0.55rem 0.5rem;
+    text-transform: uppercase;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.admin-tab.is-active,
+.admin-tab:hover,
+.admin-tab:focus {
+    background: var(--royal-burgundy);
+    border-color: rgba(255, 248, 232, 0.42);
+    color: #fff8e8;
+    outline: none;
 }
 
 /* ==========================================
@@ -662,6 +754,21 @@ h1, h2, h3, h4, h5, h6 {
 .dossier-title {
     font-size: clamp(2rem, 4vw, 3rem);
     letter-spacing: 0.18rem;
+    line-height: 1.05;
+    max-width: 100%;
+    overflow-wrap: normal;
+    word-break: keep-all;
+    hyphens: none;
+}
+
+.dossier-title-long {
+    font-size: clamp(1.85rem, 6.5vw, 3rem);
+    letter-spacing: 0.08rem;
+}
+
+.dossier-title-extra-long {
+    font-size: clamp(1.55rem, 5.4vw, 2.45rem);
+    letter-spacing: 0.04rem;
 }
 
 .dossier-subtitle {
@@ -1045,6 +1152,38 @@ a:hover {
     .dramatic-title {
         font-size: 2.5rem;
         letter-spacing: 2px;
+    }
+
+    .dossier-title {
+        font-size: clamp(2rem, 10vw, 3.25rem);
+        letter-spacing: 0.05rem;
+        line-height: 1;
+    }
+
+    .dossier-title-long {
+        font-size: clamp(1.75rem, 8.5vw, 2.8rem);
+        letter-spacing: 0.02rem;
+    }
+
+    .dossier-title-extra-long {
+        font-size: clamp(1.35rem, 6.5vw, 2.15rem);
+        letter-spacing: 0;
+    }
+
+    .dossier-kicker {
+        letter-spacing: 0.2rem;
+    }
+
+    .admin-tabs {
+        gap: 0.25rem;
+        padding: 0.25rem;
+    }
+
+    .admin-tab {
+        font-size: clamp(0.68rem, 3.15vw, 0.82rem);
+        letter-spacing: 0.02rem;
+        min-height: 3.2rem;
+        padding: 0.45rem 0.25rem;
     }
 
     .subtitle {

@@ -36,6 +36,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
+                    <li class="nav-item" x-show="$store.auth.character?.isAdmin" x-cloak>
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
                     <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
                         <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>

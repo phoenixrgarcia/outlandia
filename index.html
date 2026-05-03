@@ -37,6 +37,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
+                    <li class="nav-item" x-show="$store.auth.character?.isAdmin" x-cloak>
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
                     <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
                         <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
@@ -59,6 +62,10 @@
                 <div x-data="characterSelector()" class="card dark-card border-court">
                     <div class="card-body" x-show="!$store.auth.loggedIn" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                         <h2 class="card-title text-center mb-4">Present your royal seal</h2>
+                        <p class="text-muted text-center" x-show="$store.auth.isLoadingCharacters" x-cloak>
+                            Loading the court roster...
+                        </p>
+                        <p class="text-danger text-center" x-show="$store.auth.error" x-text="$store.auth.error" x-cloak></p>
 
                         <div class="mb-3 character-search" @click.outside="closeResults()">
                             <label for="characterSearch" class="form-label"> > Character:</label>
@@ -78,7 +85,7 @@
                                 :aria-expanded="resultsOpen.toString()"
                                 :aria-activedescendant="activeCharacterId ? `character-option-${activeCharacterId}` : null"
                                 :placeholder="window.innerWidth <= 576 ? '-- Search character --' : '-- Search name, player, class, or faction --'"
-                                :disabled="$store.auth.loggedIn"
+                                :disabled="$store.auth.loggedIn || $store.auth.isLoadingCharacters"
                             >
                             <p class="form-helper mt-2 mb-0">Search by character, player, class, or faction.</p>
                             <div
@@ -124,7 +131,7 @@
                         <label for="characterPassword" class="form-label"> > Password:</label>
                         <input id="characterPassword" x-model="selectedCharacterPassword"
                             class="form-control dark-select" 
-                            placeholder="-- Enter password --" :disabled="!selectedCharacterId">
+                            placeholder="-- Enter password --" :disabled="!selectedCharacterId || $store.auth.isLoggingIn">
 
                     </div>
 
@@ -139,8 +146,15 @@
                                 <small>Class: <strong x-text="selectedCharacter.class || selectedCharacter.className"></strong></small>
                             </p>
                             <p class="character-blurb" x-text="selectedCharacter.publicBlurb || selectedCharacter.blurb"></p>
-                            <button x-show="!$store.auth.loggedIn" class="btn btn-court mt-3 w-100" @click="loginOnClick()">Enter as <span
-                                    x-text="selectedCharacter.name"></span></button>
+                            <button
+                                x-show="!$store.auth.loggedIn"
+                                class="btn btn-court mt-3 w-100"
+                                @click="loginOnClick()"
+                                :disabled="$store.auth.isLoggingIn"
+                            >
+                                <span x-show="!$store.auth.isLoggingIn">Enter as <span x-text="selectedCharacter.name"></span></span>
+                                <span x-show="$store.auth.isLoggingIn">Checking seal...</span>
+                            </button>
                             <button x-show="$store.auth.loggedIn" class="btn btn-court mt-3 w-100">Logged in as <span
                                     x-text="selectedCharacter.name"></span></button>
                         </div>
@@ -158,7 +172,11 @@
                 <section class="dark-card border-court rounded-4 dossier-panel p-4 p-lg-5" :class="{ 'dossier-panel-dead': character?.isDead }">
                     <div class="dossier-header mb-4">
                         <p class="dossier-kicker mb-2">Authenticated Character File</p>
-                        <h2 class="dramatic-title dossier-title mb-2" x-text="character?.name"></h2>
+                        <h2
+                            class="dramatic-title dossier-title mb-2"
+                            :class="{ 'dossier-title-long': character?.name?.length > 14, 'dossier-title-extra-long': character?.name?.length > 24 }"
+                            x-text="character?.name"
+                        ></h2>
                         <p class="subtitle dossier-subtitle mb-0">
                             Played by <span x-text="character?.player"></span>
                         </p>

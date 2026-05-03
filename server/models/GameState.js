@@ -54,7 +54,7 @@ gameStateSchema.statics.getSingleton = function getSingleton() {
   return this.findOneAndUpdate(
     { key: "main" },
     { $setOnInsert: { key: "main" } },
-    { new: true, upsert: true }
+    { returnDocument: "after", upsert: true }
   );
 };
 

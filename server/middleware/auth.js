@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const env = require("../config/env");
+const Character = require("../models/Character");
 
 function getBearerToken(req) {
   const header = req.get("authorization") || "";
@@ -36,17 +37,62 @@ function requireAuth(req, res, next) {
   }
 }
 
-function requireAdmin(req, res, next) {
-  if (!req.auth?.isAdmin) {
-    return res.status(403).json({
-      error: "Admin access required.",
-    });
-  }
+async function requireAdmin(req, res, next) {
+  try {
+    if (!req.auth?.characterId) {
+      return res.status(403).json({
+        error: "Admin access required.",
+      });
+    }
 
-  return next();
+    const character = await Character.findOne({
+      characterId: req.auth.characterId,
+    })
+      .select("characterId isAdmin canAdvanceRound")
+      .lean();
+
+    if (!character?.isAdmin) {
+      return res.status(403).json({
+        error: "Admin access required.",
+      });
+    }
+
+    req.adminCharacter = character;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+}
+
+async function requireRoundAdvancer(req, res, next) {
+  try {
+    if (!req.auth?.characterId) {
+      return res.status(403).json({
+        error: "Round advancement access required.",
+      });
+    }
+
+    const character = await Character.findOne({
+      characterId: req.auth.characterId,
+    })
+      .select("characterId canAdvanceRound")
+      .lean();
+
+    if (!character?.canAdvanceRound) {
+      return res.status(403).json({
+        error: "Round advancement access required.",
+      });
+    }
+
+    req.roundAdvancerCharacter = character;
+    return next();
+  } catch (error) {
+    return next(error);
+  }
 }
 
 module.exports = {
   requireAuth,
   requireAdmin,
+  requireRoundAdvancer,
 };

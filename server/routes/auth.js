@@ -5,23 +5,9 @@ const mongoose = require("mongoose");
 const Character = require("../models/Character");
 const env = require("../config/env");
 const { requireAuth } = require("../middleware/auth");
+const { toPublicCharacter, toSafeLoggedInCharacter } = require("../utils/characterPayload");
 
 const router = express.Router();
-
-function publicCharacter(character) {
-  return {
-    id: character.characterId,
-    name: character.name,
-    player: character.player,
-    class: character.class,
-    faction: character.faction,
-    publicBlurb: character.publicBlurb,
-    isAdmin: character.isAdmin,
-    canAdvanceRound: character.canAdvanceRound,
-    isDead: character.isDead,
-    statuses: character.statuses,
-  };
-}
 
 router.post("/login", async (req, res, next) => {
   try {
@@ -76,17 +62,38 @@ router.post("/login", async (req, res, next) => {
 
     return res.json({
       token,
-      character: publicCharacter(character),
+      character: toSafeLoggedInCharacter(character),
+      publicCharacter: toPublicCharacter(character),
     });
   } catch (error) {
     return next(error);
   }
 });
 
-router.get("/me", requireAuth, (req, res) => {
-  res.json({
-    auth: req.auth,
-  });
+router.get("/me", requireAuth, async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        error: "Database is not connected yet.",
+      });
+    }
+
+    const character = await Character.findOne({
+      characterId: req.auth.characterId,
+    }).lean();
+
+    if (!character) {
+      return res.status(404).json({
+        error: "Character not found.",
+      });
+    }
+
+    return res.json({
+      character: toSafeLoggedInCharacter(character),
+    });
+  } catch (error) {
+    return next(error);
+  }
 });
 
 module.exports = router;
