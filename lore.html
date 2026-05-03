@@ -12,7 +12,8 @@
     <nav class="navbar navbar-dark navbar-expand-lg mb-5">
         <div class="container-fluid">
             <a class="navbar-brand mx-auto" href="index.html">
-                <span class="brand-title"> Otherwordly Occurance in Outlandia  </span>
+                <span class="brand-title brand-title-full">Otherwordly Occurance in Outlandia</span>
+                <span class="brand-title brand-title-short">Otherwordly Occurance<br>in Outlandia</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -34,7 +35,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
-                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                    <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
                         <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
                 </ul>
@@ -113,6 +114,7 @@
     </footer>
 
     <div
+        x-cloak
         x-show.important="$store.auth.showLogoutConfirm"
         x-transition.opacity
         class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"

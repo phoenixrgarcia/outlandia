@@ -2,9 +2,12 @@
   "name": "murder-site",
   "version": "1.0.0",
   "description": "Outlandia fantasy royal court mystery party website",
-  "main": "index.html",
+  "main": "server/index.js",
   "scripts": {
-    "dev": "open index.html",
+    "dev": "nodemon server/index.js",
+    "dev:static": "open index.html",
+    "seed": "node server/seed/seed.js",
+    "start": "node server/index.js",
     "build": "echo \"Build complete\"",
     "deploy": "git push origin main"
   },
@@ -12,6 +15,14 @@
   "license": "ISC",
   "dependencies": {
     "alpinejs": "^3.15.8",
-    "bootstrap": "^5.3.8"
+    "bcryptjs": "^3.0.3",
+    "bootstrap": "^5.3.8",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

@@ -14,7 +14,8 @@
     <nav class="navbar navbar-dark navbar-expand-lg mb-5">
         <div class="container-fluid">
             <a class="navbar-brand mx-auto" href="index.html">
-                <span class="brand-title"> Otherwordly Occurance in Outlandia  </span>
+                <span class="brand-title brand-title-full">Otherwordly Occurance in Outlandia</span>
+                <span class="brand-title brand-title-short">Otherwordly Occurance<br>in Outlandia</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -36,7 +37,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="database.html">Court Archive</a>
                     </li>
-                    <li class="nav-item" x-show="$store.auth.loggedIn">
+                    <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
                         <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
                     </li>
                 </ul>
@@ -48,9 +49,9 @@
         <div class="row justify-content-center">
             <div class="col-lg-6">
                 <!-- Title Section -->
-                <div class="text-center mb-5">
+                <div class="text-center mb-5 court-hero">
                     <h1 class="dramatic-title">Welcome to <br>Outlandia</h1>
-                    <p class="subtitle">The finest brews in the<br>High Kingdom</p>
+                    <p class="subtitle">A royal court mystery of<br>secrets, oaths, and steel</p>
                     <div class="divider"></div>
                 </div>
 
@@ -71,14 +72,15 @@
                                 @keydown.enter.prevent="selectActive()"
                                 @keydown.escape="closeResults()"
                                 class="form-control dark-select"
-                                placeholder="-- Search name, player, class, or faction --"
                                 role="combobox"
                                 aria-autocomplete="list"
                                 aria-controls="characterSearchResults"
                                 :aria-expanded="resultsOpen.toString()"
                                 :aria-activedescendant="activeCharacterId ? `character-option-${activeCharacterId}` : null"
+                                :placeholder="window.innerWidth <= 576 ? '-- Search character --' : '-- Search name, player, class, or faction --'"
                                 :disabled="$store.auth.loggedIn"
                             >
+                            <p class="form-helper mt-2 mb-0">Search by character, player, class, or faction.</p>
                             <div
                                 id="characterSearchResults"
                                 x-show="resultsOpen"
@@ -146,7 +148,7 @@
 
                     <template x-if="!selectedCharacter">
                         <div class="text-center text-muted mt-4 pt-4"
-                            style="border-top: 1px solid rgba(255,255,255,0.1);">
+                            style="border-top: 1px solid var(--court-border);">
                             <p>Select a character to begin your investigation...</p>
                         </div>
                     </template>
@@ -306,6 +308,7 @@
     </footer>
 
     <div
+        x-cloak
         x-show.important="$store.auth.showLogoutConfirm"
         x-transition.opacity
         class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"

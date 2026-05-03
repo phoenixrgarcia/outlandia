@@ -76,13 +76,37 @@ Install dependencies:
 npm install
 ```
 
-Run the current static prototype locally:
+Create a local environment file:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` with your local values:
+
+```text
+MONGODB_URI=mongodb://127.0.0.1:27017/outlandia
+JWT_SECRET=replace-with-a-long-random-secret
+PORT=3000
+NODE_ENV=development
+TOKEN_TTL=12h
+```
+
+Do not commit `.env`; it is ignored because it will contain secrets. Commit `.env.example` only.
+
+Run the Express-backed local site:
 
 ```bash
 npm run dev
 ```
 
-You can also open `index.html` directly in a browser for the current static version.
+Run the static prototype directly:
+
+```bash
+npm run dev:static
+```
+
+You can also open `index.html` directly in a browser while static Phase 1 behavior is still being migrated.
 
 ## Development Notes
 
