@@ -14,6 +14,11 @@ async function logAdminAction(req, event) {
   return EventLog.create(buildEventLogEntry(req, event));
 }
 
+async function logGameEvent(req, event) {
+  return EventLog.create(buildEventLogEntry(req, event));
+}
+
 module.exports = {
   logAdminAction,
+  logGameEvent,
 };

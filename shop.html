@@ -57,7 +57,7 @@
             <p class="subtitle archive-subtitle">Private goods and purchasable clues</p>
             <div class="divider"></div>
             <p class="archive-intro mt-3 mb-0">
-                Browse placeholder wares for future purchases. Shop clues are private to the buyer and separate from the public Court Archive.
+                Browse placeholder wares and spend character gold. Shop clues are private to the buyer and separate from the public Court Archive.
             </p>
         </section>
 
@@ -80,8 +80,12 @@
         </section>
 
         <section class="dark-card border-court rounded-3 p-4 text-center" x-show="error && !isLoading" x-cloak>
-            <h2 class="section-title mb-2">Shop Unavailable</h2>
+            <h2 class="section-title mb-2">Shop Notice</h2>
             <p class="text-muted mb-0" x-text="error"></p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 mb-4 text-center shop-notice" x-show="notice && !error" x-cloak>
+            <p class="mb-0" x-text="notice"></p>
         </section>
 
         <section class="dark-card border-court rounded-3 p-4 text-center" x-show="!isLoading && !error && !entries.length" x-cloak>
@@ -92,12 +96,12 @@
         <section x-show="!isLoading && !error && itemEntries.length" x-cloak>
             <div class="shop-section-heading">
                 <h2 class="section-title mb-1">Items</h2>
-                <p class="text-muted mb-0">Consumable placeholders for later purchase behavior.</p>
+                <p class="text-muted mb-0">Consumable placeholders that add to your private inventory.</p>
             </div>
             <div class="row g-4 mb-5">
                 <template x-for="entry in itemEntries" :key="entry.id">
                     <div class="col-12 col-md-6 col-xl-4">
-                        <article class="dark-card rounded-3 shop-entry-card h-100 p-4">
+                        <article class="dark-card rounded-3 shop-entry-card h-100 p-4" :id="`shop-entry-${entry.id}`">
                             <div class="shop-entry-header">
                                 <p class="database-access-kicker mb-2">Item</p>
                                 <span class="shop-price" x-text="formatPrice(entry.price)"></span>
@@ -105,7 +109,13 @@
                             <h3 class="card-title mb-3" x-text="entry.name"></h3>
                             <p class="character-blurb mb-4" x-text="entry.description"></p>
                             <p class="shop-entry-note mb-4" x-show="entry.itemTemplate?.note" x-text="entry.itemTemplate?.note"></p>
-                            <button type="button" class="btn btn-court w-100" disabled x-text="purchaseLabel(entry)"></button>
+                            <button
+                                type="button"
+                                class="btn btn-court w-100"
+                                @click="purchase(entry)"
+                                :disabled="isPurchasing"
+                                x-text="isPurchasing ? 'Processing...' : purchaseLabel(entry)"
+                            ></button>
                         </article>
                     </div>
                 </template>
@@ -115,20 +125,28 @@
         <section x-show="!isLoading && !error && clueEntries.length" x-cloak>
             <div class="shop-section-heading">
                 <h2 class="section-title mb-1">Private Clues</h2>
-                <p class="text-muted mb-0">Purchasable clue placeholders. Text stays private to the buyer once purchase support is added.</p>
+                <p class="text-muted mb-0">Purchasable clue placeholders. Purchased clue text remains private to the buyer.</p>
             </div>
             <div class="row g-4">
                 <template x-for="entry in clueEntries" :key="entry.id">
                     <div class="col-12 col-md-6 col-xl-4">
-                        <article class="dark-card rounded-3 shop-entry-card shop-entry-card-clue h-100 p-4">
+                        <article class="dark-card rounded-3 shop-entry-card shop-entry-card-clue h-100 p-4" :id="`shop-entry-${entry.id}`">
                             <div class="shop-entry-header">
                                 <p class="database-access-kicker mb-2">Private Clue</p>
                                 <span class="shop-price" x-text="formatPrice(entry.price)"></span>
                             </div>
                             <h3 class="card-title mb-3" x-text="entry.name"></h3>
                             <p class="character-blurb mb-4" x-text="entry.description"></p>
-                            <p class="shop-entry-note mb-4">Clue text is withheld until purchase behavior is implemented.</p>
-                            <button type="button" class="btn btn-court w-100" disabled x-text="purchaseLabel(entry)"></button>
+                            <p class="shop-entry-note mb-4" x-show="!hasPurchasedClue(entry)">Clue text is withheld until purchase.</p>
+                            <div class="archive-record-body mb-4" x-show="hasPurchasedClue(entry)" x-html="formatClueBody(getPurchasedClue(entry)?.body)"></div>
+                            <button
+                                x-show="!hasPurchasedClue(entry)"
+                                type="button"
+                                class="btn btn-court w-100"
+                                @click="purchase(entry)"
+                                :disabled="isPurchasing"
+                                x-text="isPurchasing ? 'Processing...' : purchaseLabel(entry)"
+                            ></button>
                         </article>
                     </div>
                 </template>

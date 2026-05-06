@@ -787,10 +787,17 @@ function shopPage() {
   return {
     entries: [],
     isLoading: true,
+    isPurchasing: false,
     error: "",
+    notice: "",
+    purchasedClues: {},
 
     async init() {
+      this.$watch("$store.auth.character?.id", () => {
+        this.loadPurchasedClues();
+      });
       await this.loadShopEntries();
+      await this.loadPurchasedClues();
     },
 
     async loadShopEntries() {
@@ -810,6 +817,32 @@ function shopPage() {
         this.error = error.message || "Unable to load the shop.";
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async loadPurchasedClues() {
+      if (!this.loggedIn) {
+        this.purchasedClues = {};
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/shop/purchased-clues", {
+          headers: {
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load purchased clues.");
+        }
+
+        this.purchasedClues = Object.fromEntries(
+          (data.clues || []).map((clue) => [clue.id, clue])
+        );
+      } catch (error) {
+        this.error = error.message || "Unable to load purchased clues.";
       }
     },
 
@@ -837,6 +870,50 @@ function shopPage() {
       return `${Number(value || 0)} gold`;
     },
 
+    async purchase(entry) {
+      this.error = "";
+      this.notice = "";
+
+      if (!this.loggedIn) {
+        alert("Log in as a character before purchasing from the shop.");
+        return;
+      }
+
+      this.isPurchasing = true;
+
+      try {
+        const response = await fetch("/api/shop/purchase", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+          body: JSON.stringify({ shopId: entry.id }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Purchase failed.");
+        }
+
+        this.$store.auth.character = data.character;
+        this.notice = data.message || "Purchase complete.";
+
+        if (data.clue) {
+          this.purchasedClues = {
+            ...this.purchasedClues,
+            [data.clue.id]: data.clue,
+          };
+          this.scrollToShopEntry(entry);
+        }
+      } catch (error) {
+        const message = error.message || "Purchase failed.";
+        alert(message);
+      } finally {
+        this.isPurchasing = false;
+      }
+    },
+
     canAfford(entry) {
       return this.currentMoney >= Number(entry.price || 0);
     },
@@ -846,7 +923,11 @@ function shopPage() {
         return false;
       }
 
-      return (this.loggedInCharacter?.purchasedClueIds || []).includes(entry.clueId);
+      return !!this.getPurchasedClue(entry);
+    },
+
+    getPurchasedClue(entry) {
+      return this.purchasedClues[entry.clueId] || null;
     },
 
     purchaseLabel(entry) {
@@ -855,14 +936,31 @@ function shopPage() {
       }
 
       if (this.hasPurchasedClue(entry)) {
-        return "Purchased clue";
+        return "Purchased";
       }
 
-      if (!this.canAfford(entry)) {
-        return "Not enough gold";
-      }
+      return `Purchase for ${this.formatPrice(entry.price)}`;
+    },
 
-      return "Purchase coming later";
+    formatClueBody(body) {
+      return this.escapeHtml(body || "No clue text available.").replace(/\n/g, "<br>");
+    },
+
+    scrollToShopEntry(entry) {
+      this.$nextTick(() => {
+        document
+          .getElementById(`shop-entry-${entry.id}`)
+          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    },
+
+    escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     },
   };
 }
