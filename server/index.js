@@ -7,6 +7,7 @@ const characterRoutes = require("./routes/characters");
 const meRoutes = require("./routes/me");
 const adminRoutes = require("./routes/admin");
 const clueRoutes = require("./routes/clues");
+const shopRoutes = require("./routes/shop");
 
 const app = express();
 const rootDir = path.join(__dirname, "..");
@@ -23,6 +24,7 @@ app.use("/api/characters", characterRoutes);
 app.use("/api/me", meRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/clues", clueRoutes);
+app.use("/api/shop", shopRoutes);
 
 app.use(express.static(rootDir, staticOptions));
 

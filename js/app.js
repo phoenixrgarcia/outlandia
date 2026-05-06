@@ -108,6 +108,7 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("charactersDisplay", charactersDisplay);
   Alpine.data("loggedInCharacterDetails", loggedInCharacterDetails);
   Alpine.data("adminDashboard", adminDashboard);
+  Alpine.data("shopPage", shopPage);
 });
 
 function createAuthStore(){
@@ -778,6 +779,90 @@ function adminDashboard() {
 
     normalizeSearch(value) {
       return String(value || "").trim().toLowerCase();
+    },
+  };
+}
+
+function shopPage() {
+  return {
+    entries: [],
+    isLoading: true,
+    error: "",
+
+    async init() {
+      await this.loadShopEntries();
+    },
+
+    async loadShopEntries() {
+      this.isLoading = true;
+      this.error = "";
+
+      try {
+        const response = await fetch("/api/shop");
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load the shop.");
+        }
+
+        this.entries = data.entries || [];
+      } catch (error) {
+        this.error = error.message || "Unable to load the shop.";
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    get itemEntries() {
+      return this.entries.filter((entry) => entry.type === "item");
+    },
+
+    get clueEntries() {
+      return this.entries.filter((entry) => entry.type === "clue");
+    },
+
+    get loggedInCharacter() {
+      return this.$store.auth.character;
+    },
+
+    get loggedIn() {
+      return this.$store.auth.loggedIn;
+    },
+
+    get currentMoney() {
+      return Number(this.loggedInCharacter?.money || 0);
+    },
+
+    formatPrice(value) {
+      return `${Number(value || 0)} gold`;
+    },
+
+    canAfford(entry) {
+      return this.currentMoney >= Number(entry.price || 0);
+    },
+
+    hasPurchasedClue(entry) {
+      if (entry.type !== "clue") {
+        return false;
+      }
+
+      return (this.loggedInCharacter?.purchasedClueIds || []).includes(entry.clueId);
+    },
+
+    purchaseLabel(entry) {
+      if (!this.loggedIn) {
+        return "Log in to purchase";
+      }
+
+      if (this.hasPurchasedClue(entry)) {
+        return "Purchased clue";
+      }
+
+      if (!this.canAfford(entry)) {
+        return "Not enough gold";
+      }
+
+      return "Purchase coming later";
     },
   };
 }

@@ -5,6 +5,7 @@ const env = require("../config/env");
 const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const GameState = require("../models/GameState");
+const ShopEntry = require("../models/ShopEntry");
 
 const PLACEHOLDER_CHARACTER_SEEDS = [
   ["gm_01", "Placeholder GM 01", "GM", "GMs"],
@@ -68,6 +69,84 @@ const PLACEHOLDER_GLOBAL_CLUES = [
     summary: "TODO placeholder for a sealed court archive record.",
     body: "TODO Sealed Record Placeholder: This static record emulates a future admin-revealed global clue.",
   },
+];
+
+const PLACEHOLDER_SHOP_CLUES = [
+  {
+    clueId: "shop-private-clue-01",
+    title: "TODO Private Shop Clue 01",
+    summary: "TODO placeholder preview for a private clue available from the shop.",
+    body: "TODO Private Shop Clue Placeholder: Replace this with final purchased clue text after writers provide approved content.",
+    price: 20,
+  },
+  {
+    clueId: "shop-private-clue-02",
+    title: "TODO Private Shop Clue 02",
+    summary: "TODO placeholder preview for a second private clue available from the shop.",
+    body: "TODO Private Shop Clue Placeholder: This clue should remain private to the buyer when purchase behavior is implemented.",
+    price: 35,
+  },
+  {
+    clueId: "shop-private-clue-03",
+    title: "TODO Private Shop Clue 03",
+    summary: "TODO placeholder preview for a higher-cost private clue.",
+    body: "TODO Private Shop Clue Placeholder: This is seeded only to prove shop list behavior.",
+    price: 50,
+  },
+];
+
+const PLACEHOLDER_SHOP_ENTRIES = [
+  {
+    shopId: "shop-item-01",
+    type: "item",
+    name: "TODO Consumable Item 01",
+    description: "TODO placeholder shop item description.",
+    price: 10,
+    itemTemplate: {
+      itemId: "todo-consumable-item-01",
+      name: "TODO Consumable Item 01",
+      note: "TODO replace with final item effect notes.",
+      quantity: 1,
+    },
+    sortOrder: 10,
+  },
+  {
+    shopId: "shop-item-02",
+    type: "item",
+    name: "TODO Consumable Item 02",
+    description: "TODO placeholder shop item description.",
+    price: 25,
+    itemTemplate: {
+      itemId: "todo-consumable-item-02",
+      name: "TODO Consumable Item 02",
+      note: "TODO replace with final item effect notes.",
+      quantity: 1,
+    },
+    sortOrder: 20,
+  },
+  {
+    shopId: "shop-item-03",
+    type: "item",
+    name: "TODO Consumable Item 03",
+    description: "TODO placeholder shop item description.",
+    price: 40,
+    itemTemplate: {
+      itemId: "todo-consumable-item-03",
+      name: "TODO Consumable Item 03",
+      note: "TODO replace with final item effect notes.",
+      quantity: 1,
+    },
+    sortOrder: 30,
+  },
+  ...PLACEHOLDER_SHOP_CLUES.map((clue, index) => ({
+    shopId: `shop-clue-0${index + 1}`,
+    type: "clue",
+    name: clue.title,
+    description: clue.summary,
+    price: clue.price,
+    clueId: clue.clueId,
+    sortOrder: 100 + index,
+  })),
 ];
 
 function createPlaceholderCharacter(seed, index, passwordHash) {
@@ -182,6 +261,38 @@ async function seed() {
     }))
   );
 
+  const shopClueDocs = PLACEHOLDER_SHOP_CLUES.map((clue) => ({
+    ...clue,
+    clueType: "shop",
+    isRevealedGlobally: false,
+    revealedAt: null,
+    revealedByCharacterId: "",
+    ownerCharacterId: "",
+    purchaserCharacterIds: [],
+    tags: ["TODO", "shop-placeholder"],
+    source: "phase-4-placeholder-seed",
+  }));
+
+  await Clue.bulkWrite(
+    shopClueDocs.map((clue) => ({
+      updateOne: {
+        filter: { clueId: clue.clueId },
+        update: { $set: clue },
+        upsert: true,
+      },
+    }))
+  );
+
+  await ShopEntry.bulkWrite(
+    PLACEHOLDER_SHOP_ENTRIES.map((entry) => ({
+      updateOne: {
+        filter: { shopId: entry.shopId },
+        update: { $set: { ...entry, active: true } },
+        upsert: true,
+      },
+    }))
+  );
+
   await Character.deleteOne({
     characterId: "gm-placeholder",
     name: "GM Placeholder",
@@ -205,7 +316,7 @@ async function seed() {
     { upsert: true }
   );
 
-  console.log(`Seed complete: ${characterDocs.length} characters, ${clueDocs.length} global clues, and game state.`);
+  console.log(`Seed complete: ${characterDocs.length} characters, ${clueDocs.length} global clues, ${PLACEHOLDER_SHOP_ENTRIES.length} shop entries, and game state.`);
 }
 
 seed().catch((error) => {

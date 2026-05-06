@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outlandia Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">    <link href="css/style.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.15.8/dist/cdn.min.js"></script>
+</head>
+
+<body x-data x-init="$store.auth.init()" class="dark-bg theme-shop">
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+        <div class="container-fluid">
+            <a class="navbar-brand mx-auto" href="index.html">
+                <span class="brand-title brand-title-full">Otherwordly Occurance in Outlandia</span>
+                <span class="brand-title brand-title-short">Otherwordly Occurance<br>in Outlandia</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="lore.html">Lore</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="characters.html">Characters</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="database.html">Court Archive</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" style="color: var(--court-accent) !important;" href="shop.html">Shop</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.character?.isAdmin" x-cloak>
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
+                    <li class="nav-item" x-show="$store.auth.loggedIn" x-cloak>
+                        <a class="nav-link" href="#" @click.prevent="$store.auth.requestLogout()">Leave Character</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container py-5" x-data="shopPage()">
+        <section class="text-center mb-5">
+            <h1 class="dramatic-title">Shop</h1>
+            <p class="subtitle archive-subtitle">Private goods and purchasable clues</p>
+            <div class="divider"></div>
+            <p class="archive-intro mt-3 mb-0">
+                Browse placeholder wares for future purchases. Shop clues are private to the buyer and separate from the public Court Archive.
+            </p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 mb-4 shop-wallet-panel">
+            <div>
+                <p class="database-access-kicker mb-2">Character Purse</p>
+                <h2 class="section-title mb-0" x-show="loggedIn" x-cloak>
+                    <span x-text="loggedInCharacter?.name"></span>
+                </h2>
+                <h2 class="section-title mb-0" x-show="!loggedIn" x-cloak>Guest Browse</h2>
+            </div>
+            <div class="shop-wallet-value">
+                <span x-show="loggedIn" x-text="formatPrice(currentMoney)" x-cloak></span>
+                <span x-show="!loggedIn" x-cloak>Log in to buy</span>
+            </div>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="isLoading" x-cloak>
+            <p class="text-muted mb-0">Loading shop wares...</p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="error && !isLoading" x-cloak>
+            <h2 class="section-title mb-2">Shop Unavailable</h2>
+            <p class="text-muted mb-0" x-text="error"></p>
+        </section>
+
+        <section class="dark-card border-court rounded-3 p-4 text-center" x-show="!isLoading && !error && !entries.length" x-cloak>
+            <h2 class="section-title mb-2">No Wares Listed</h2>
+            <p class="text-muted mb-0">No active shop entries have been seeded yet.</p>
+        </section>
+
+        <section x-show="!isLoading && !error && itemEntries.length" x-cloak>
+            <div class="shop-section-heading">
+                <h2 class="section-title mb-1">Items</h2>
+                <p class="text-muted mb-0">Consumable placeholders for later purchase behavior.</p>
+            </div>
+            <div class="row g-4 mb-5">
+                <template x-for="entry in itemEntries" :key="entry.id">
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <article class="dark-card rounded-3 shop-entry-card h-100 p-4">
+                            <div class="shop-entry-header">
+                                <p class="database-access-kicker mb-2">Item</p>
+                                <span class="shop-price" x-text="formatPrice(entry.price)"></span>
+                            </div>
+                            <h3 class="card-title mb-3" x-text="entry.name"></h3>
+                            <p class="character-blurb mb-4" x-text="entry.description"></p>
+                            <p class="shop-entry-note mb-4" x-show="entry.itemTemplate?.note" x-text="entry.itemTemplate?.note"></p>
+                            <button type="button" class="btn btn-court w-100" disabled x-text="purchaseLabel(entry)"></button>
+                        </article>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+        <section x-show="!isLoading && !error && clueEntries.length" x-cloak>
+            <div class="shop-section-heading">
+                <h2 class="section-title mb-1">Private Clues</h2>
+                <p class="text-muted mb-0">Purchasable clue placeholders. Text stays private to the buyer once purchase support is added.</p>
+            </div>
+            <div class="row g-4">
+                <template x-for="entry in clueEntries" :key="entry.id">
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <article class="dark-card rounded-3 shop-entry-card shop-entry-card-clue h-100 p-4">
+                            <div class="shop-entry-header">
+                                <p class="database-access-kicker mb-2">Private Clue</p>
+                                <span class="shop-price" x-text="formatPrice(entry.price)"></span>
+                            </div>
+                            <h3 class="card-title mb-3" x-text="entry.name"></h3>
+                            <p class="character-blurb mb-4" x-text="entry.description"></p>
+                            <p class="shop-entry-note mb-4">Clue text is withheld until purchase behavior is implemented.</p>
+                            <button type="button" class="btn btn-court w-100" disabled x-text="purchaseLabel(entry)"></button>
+                        </article>
+                    </div>
+                </template>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5 py-4 text-center text-muted">
+        <div class="container">
+            <p>&copy; 2026 Otherwordly Occurance in Outlandia. All mysteries reserved.</p>
+        </div>
+    </footer>
+
+    <div
+        x-cloak
+        x-show.important="$store.auth.showLogoutConfirm"
+        x-transition.opacity
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center p-3"
+        style="background: rgba(5, 8, 18, 0.78); z-index: 1055;"
+        @click.self="$store.auth.cancelLogout()"
+        @keydown.escape.window="$store.auth.cancelLogout()"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="logout-modal-title"
+    >
+        <div class="dark-card border-court rounded-3 w-100" style="max-width: 32rem;">
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom border-secondary">
+                <h5 id="logout-modal-title" class="mb-0">Leave Character</h5>
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    aria-label="Close"
+                    @click="$store.auth.cancelLogout()"
+                ></button>
+            </div>
+            <div class="p-4">
+                <p class="mb-0">Leave this character session?</p>
+            </div>
+            <div class="d-flex justify-content-end gap-2 p-4 pt-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-light"
+                    @click="$store.auth.cancelLogout()"
+                >
+                    Stay
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-court"
+                    @click="$store.auth.logout()"
+                >
+                    Leave
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

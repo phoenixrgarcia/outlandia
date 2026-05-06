@@ -9,7 +9,7 @@
     --ink: #21180f;
     --ink-soft: #5f5140;
     --royal-burgundy: #6f1d2d;
-    --deep-green: #244a36;
+    --deep-green: #385e4a;
     --antique-gold: #b88935;
     --candlelit-shadow: #160f0a;
     --muted-stone: #6f6a5f;
@@ -56,6 +56,12 @@
     --court-secondary: var(--deep-green);
     --court-border: rgba(111, 29, 45, 0.4);
     --third-color: var(--antique-gold);
+}
+
+.theme-shop{
+    --court-accent: var(--antique-gold);
+    --court-secondary: var(--deep-green);
+    --court-border: rgba(184, 137, 53, 0.42);
 }
 
 .theme-database .subtitle,
@@ -613,6 +619,81 @@ h1, h2, h3, h4, h5, h6 {
 .database-access-feedback {
     color: var(--royal-burgundy);
     min-height: 1.5rem;
+}
+
+.shop-wallet-panel {
+    align-items: center;
+    display: flex;
+    gap: 1.5rem;
+    justify-content: space-between;
+}
+
+.shop-wallet-value {
+    background: rgba(36, 74, 54, 0.12);
+    border: 1px solid rgba(36, 74, 54, 0.35);
+    border-radius: 0.5rem;
+    color: var(--deep-green);
+    flex-shrink: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.08rem;
+    padding: 0.7rem 1rem;
+    text-transform: uppercase;
+}
+
+.shop-section-heading {
+    margin-bottom: 1.25rem;
+}
+
+.shop-entry-card {
+    min-height: 100%;
+}
+
+.shop-entry-card::before {
+    background: linear-gradient(90deg, var(--deep-green), var(--antique-gold));
+}
+
+.shop-entry-card-clue::before {
+    background: linear-gradient(90deg, var(--royal-burgundy), var(--antique-gold));
+}
+
+.shop-entry-header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+}
+
+.shop-price {
+    background: rgba(184, 137, 53, 0.18);
+    border: 1px solid rgba(184, 137, 53, 0.42);
+    border-radius: 0.5rem;
+    color: var(--ink);
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.06rem;
+    padding: 0.4rem 0.65rem;
+    text-transform: uppercase;
+}
+
+.shop-entry-note {
+    background: rgba(255, 248, 232, 0.48);
+    border-left: 0.25rem solid var(--court-accent);
+    border-radius: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    padding: 0.9rem 1rem;
+}
+
+.shop-entry-card .btn-court:disabled {
+    background: var(--muted-stone);
+    border-color: rgba(22, 15, 10, 0.2);
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.82;
+    transform: none;
 }
 
 .admin-tabs {
@@ -1188,6 +1269,16 @@ a:hover {
 
     .subtitle {
         font-size: 1rem;
+    }
+
+    .shop-wallet-panel {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .shop-wallet-value {
+        text-align: center;
+        width: 100%;
     }
 
     .navbar-nav {
