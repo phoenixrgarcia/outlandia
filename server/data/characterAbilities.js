@@ -237,103 +237,214 @@ const CHARACTER_ABILITIES = {
   },
   magician_volkran_channeler: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    active: {
+      name: "Chaos Surge",
+      description:
+        "Roll a d6 and increase or double your next bribe/interrogation reward. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
+    handlers: {
+      passive: {},
+      active: {
+        todo: "roll a d6 and apply the result to the next bribe/interrogation reward",
+      },
+    },
   },
   magician_marion_bluthers: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Whispered Pact",
+      description:
+        "Force a player to reveal if they've lied this round, they have to truthfully answer yes/no OR take 2 suspicion tokens. Cost: 5 Gold and gain 1 suspicion",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   magician_penelope_pura: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Dreamwalk",
+      description:
+        "Secretly view one player's last action (via GM). Cost: 8 Gold",
+      cost: currency(8, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   magician_calypso_caspian: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Siren's Call",
+      description:
+        "Force a player to either: Give 10 Gold or gain 2 Suspicion tokens. Cost: 10 Gold",
+      cost: currency(10, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   clergy_raven_ratelm: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Flashbang",
+      description:
+        "Force a player to reroll an interrogation result. Cost: 8 Gold",
+      cost: currency(8, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   clergy_sidonia_solomona: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Dusk's Veil",
+      description:
+        "Negate suspicion gain for one action (yours or another's). Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   clergy_maura_mary_anna: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    active: {
+      name: "Divine Challenge",
+      description:
+        "Force a contested d20 between two players. The loser pays you gold based on a d6 roll . Cost: 10 Gold",
+      cost: currency(10, 0),
+    },
+    handlers: { passive: {}, active: { todo: "add d6 roll" } },
   },
   worker_solina_suspecta: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Liquid Courage",
+      description:
+        "Target gains advantage on next roll but gains 1 Suspicion token. Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   worker_wendela_lunites: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Feed Trust",
+      description:
+        "Remove 1 Suspicion token from a player and gain 1 Favor if target had greater than 1 suspicion. Cost: 7 Gold",
+      cost: currency(7, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   worker_tyrus_tithe: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Reinforced Nerve",
+      description: "Give +4 to next roll (yours or another's). Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   worker_elisanna_einarr: {
-    passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    passive: {
+      name: "Footprint Analysis",
+      description:
+        "Immediately identify any footprint (clue) you're given or find.",
+    },
+    active: {
+      name: "Quiet Step",
+      description: "Target avoids being targeted for one round. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   worker_una_urgellesa: {
-    passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    passive: {
+      name: "Broadcast",
+      description: "1 announcement every round.",
+    },
+    active: {
+      name: "Timely Announcement",
+      description:
+        "Force all players to publicly declare their current gold. Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   worker_viktor_bastian: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    active: {
+      name: "Rumor Mill",
+      description:
+        "Spread a rumor; the subject(s) of the rumor gain disadvantage unless they pay 5 Gold. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
+    handlers: { passive: {}, active: { todo: "message 2 players" } },
   },
   street_darwin_durand: {
-    passive: { name: "", description: "" },
+    passive: {
+      name: "Pity Trade",
+      description:
+        "Roll d6; each nearby player gives you that much silver. Transactions done through GM",
+    },
     active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_valerius_shadow: {
-    passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "Slip Through",
+      description:
+        "Move unseen unless someone rolls a successful d6 against you. 1-2, they detec you, 3-4 avoid detection for 3 minutes, 5-6 no detection.",
+    },
+    active: {
+      name: "Pickpocket",
+      description:
+        "Attempt to steal gold and items. 16-20: success. 10-15: victim is notified of pickpocketing. 1-9: failure and gain 1 suspicion.",
+    },
+    handlers: { passive: {}, active: { todo: "roll d20 and do result" } },
   },
   street_justa_justice: {
-    passive: { name: "", description: "" },
+    passive: {
+      name: "Blackmail",
+      description:
+        "If you've successfully interrogated someone before, auto-succeed a bribe against them. Resets each use, but get double use for nat 20 result on interrogation. Cost: 7 Gold",
+    },
     active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_quintina_quintius: {
-    passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "Second Take",
+      description: "Immediately repeat a failed theft or bribery attempt once.",
+    },
+    active: {
+      name: "Pickpocket",
+      description:
+        "Attempt to steal gold and items. 16-20: success. 10-15: victim is notified of pickpocketing. 1-9: failure and gain 1 suspicion.",
+    },
+    handlers: { passive: {}, active: { todo: "roll d20 and do result" } },
   },
   street_liudmila_lefhild: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Ritual Mark",
+      description:
+        "Sacrifice 1 Favor token to give 2 Suspicion tokens to others (split as desired). Execute through a GM. Cost: 1 Favor",
+    },
     handlers: { passive: {}, active: {} },
   },
   street_isabel_einarr: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
+    active: {
+      name: "Silent Insight",
+      description:
+        "Ask a GM a yes/no question about a player's role or action. Cost: 1 Favor",
+    },
     handlers: { passive: {}, active: {} },
   },
   street_dread_pirate_jewels: {
     passive: { name: "", description: "" },
-    active: { name: "", description: "" },
-    handlers: { passive: {}, active: {} },
+    active: {
+      name: "Plunder",
+      description:
+        "Roll a d6 and steal gold from a player based on the result. Cost: 10 Gold and gain 1 Suspicion token",
+      cost: currency(10, 0),
+    },
+    handlers: { passive: {}, active: { todo: "roll d6 and apply result" } },
   },
 };
 
