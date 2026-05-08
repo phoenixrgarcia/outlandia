@@ -1,4 +1,5 @@
 const { normalizeCurrency } = require("./currency");
+const { getSerializableCharacterAbilities } = require("../data/characterAbilities");
 
 function toPublicCharacter(character) {
   return {
@@ -16,7 +17,7 @@ function toSafeLoggedInCharacter(character) {
   return {
     ...toPublicCharacter(character),
     inventory: character.inventory,
-    abilities: character.abilities,
+    abilities: getSerializableCharacterAbilities(character.characterId),
     secret: character.secret,
     twist: character.twist,
     goals: character.goals,

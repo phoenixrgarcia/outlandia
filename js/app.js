@@ -842,6 +842,7 @@ function loggedInCharacterDetails() {
   return {
     sections: {
       inventory: false,
+      abilities: false,
       goals: false,
       secret: false,
       twist: false,
@@ -871,6 +872,19 @@ function loggedInCharacterDetails() {
       }
 
       return this.escapeHtml(String(text)).replace(/\n/g, "<br>");
+    },
+
+    formatAbility(ability) {
+      if (!ability) {
+        return "None";
+      }
+
+      const name = ability.name ? `<strong>${this.escapeHtml(ability.name)}</strong>` : "";
+      const description = ability.description
+        ? this.escapeHtml(ability.description).replace(/\n/g, "<br>")
+        : "";
+
+      return [name, description].filter(Boolean).join(name && description ? "<br>" : "") || "None";
     },
 
     createListItems(value) {

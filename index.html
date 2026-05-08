@@ -239,6 +239,25 @@
                         </article>
 
                         <article class="detail-section">
+                            <button type="button" class="detail-toggle" @click="toggleSection('abilities')" :aria-expanded="sections.abilities">
+                                <span>Abilities</span>
+                                <span class="detail-toggle-icon" :class="{ 'is-open': sections.abilities }">+</span>
+                            </button>
+                            <div class="detail-content" x-show="sections.abilities" x-transition>
+                                <div class="detail-card-grid">
+                                    <div class="detail-chip detail-chip-ability">
+                                        <h3 class="detail-chip-title">Passive</h3>
+                                        <p class="mb-0" x-html="formatAbility(character?.abilities?.passive)"></p>
+                                    </div>
+                                    <div class="detail-chip detail-chip-ability">
+                                        <h3 class="detail-chip-title">Active</h3>
+                                        <p class="mb-0" x-html="formatAbility(character?.abilities?.active)"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+
+                        <article class="detail-section">
                             <button type="button" class="detail-toggle" @click="toggleSection('goals')" :aria-expanded="sections.goals">
                                 <span>Goals</span>
                                 <span class="detail-toggle-icon" :class="{ 'is-open': sections.goals }">+</span>

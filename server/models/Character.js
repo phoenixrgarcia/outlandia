@@ -39,41 +39,6 @@ const inventoryItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const abilitySchema = new mongoose.Schema(
-  {
-    abilityId: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-    },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-      default: "",
-    },
-    usesPerRound: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    usesRemaining: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    requiresAdminResolution: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  { _id: false }
-);
-
 const statusSchema = new mongoose.Schema(
   {
     statusId: {
@@ -163,10 +128,6 @@ const characterSchema = new mongoose.Schema(
     },
     inventory: {
       type: [inventoryItemSchema],
-      default: [],
-    },
-    abilities: {
-      type: [abilitySchema],
       default: [],
     },
     secret: {

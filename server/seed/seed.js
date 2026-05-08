@@ -172,16 +172,6 @@ function createPlaceholderCharacter(seed, index, passwordHash) {
         quantity: 1,
       },
     ],
-    abilities: [
-      {
-        abilityId: `${characterId}-placeholder-ability`,
-        name: "TODO ability placeholder",
-        description: "TODO replace with final ability text.",
-        usesPerRound: 0,
-        usesRemaining: 0,
-        requiresAdminResolution: false,
-      },
-    ],
     secret: "TODO secret placeholder.",
     twist: "TODO twist placeholder.",
     goals: ["TODO goal placeholder."],

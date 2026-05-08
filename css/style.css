@@ -1244,6 +1244,14 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: inset 0 1px 0 rgba(255, 248, 232, 0.8);
 }
 
+.detail-chip-title {
+    color: var(--court-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.14rem;
+    margin-bottom: 0.55rem;
+    text-transform: uppercase;
+}
+
 .detail-chip-status {
     background: rgba(184, 137, 53, 0.12);
     border-color: rgba(184, 137, 53, 0.38);
