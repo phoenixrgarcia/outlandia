@@ -11,7 +11,7 @@
 
 <body  x-data x-init="$store.auth.init()" class="dark-bg theme-home">
     <!-- Navigation -->
-    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5 sticky-top">
         <div class="container-fluid">
             <a class="navbar-brand mx-auto" href="index.html">
                 <span class="brand-title brand-title-full">Otherwordly Occurance in Outlandia</span>
@@ -57,7 +57,7 @@
                 <!-- Title Section -->
                 <div class="text-center mb-5 court-hero">
                     <h1 class="dramatic-title">Welcome to <br>Outlandia</h1>
-                    <p class="subtitle">A royal court mystery of<br>secrets, oaths, and steel</p>
+                    <p class="subtitle">A death has occurred during the Royal Festival. The Jester is dead … but something is wrong. You will decide what happened … and who will be blamed.</p>
                     <div class="divider"></div>
                 </div>
 
@@ -139,7 +139,7 @@
                     </div>
 
                     <!-- Character Info Display -->
-                    <template x-if="selectedCharacter">
+                    <template x-if="selectedCharacter&&!$store.auth.loggedIn">
                         <div class="character-info mt-4 pt-4">
                             <h3 class="character-name mb-2" x-text="selectedCharacter.name"></h3>
                             <p class="text-muted mb-3">
@@ -163,7 +163,7 @@
                         </div>
                     </template>
 
-                    <template x-if="!selectedCharacter">
+                    <template x-if="!selectedCharacter&&!$store.auth.loggedIn">
                         <div class="text-center text-muted mt-4 pt-4"
                             style="border-top: 1px solid var(--court-border);">
                             <p>Select a character to begin your investigation...</p>
@@ -174,7 +174,7 @@
             <div class="col-12 mt-5" x-data="loggedInCharacterDetails()" x-show="$store.auth.loggedIn && character" x-transition.opacity>
                 <section class="dark-card border-court rounded-4 dossier-panel p-4 p-lg-5" :class="{ 'dossier-panel-dead': character?.isDead }">
                     <div class="dossier-header mb-4">
-                        <p class="dossier-kicker mb-2">Authenticated Character File</p>
+                        <p class="dossier-kicker mb-2">Citizenship File</p>
                         <h2
                             class="dramatic-title dossier-title mb-2"
                             :class="{ 'dossier-title-long': character?.name?.length > 14, 'dossier-title-extra-long': character?.name?.length > 24 }"

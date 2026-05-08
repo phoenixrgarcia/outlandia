@@ -7,7 +7,7 @@ const PLACEHOLDER_FACTIONS = [
   "Magicians",
   "The Clergy",
   "The Workers",
-  "The Streets"
+  "The Streets",
 ];
 
 const AUTH_TOKEN_STORAGE_KEY = "outlandiaAuthToken";
@@ -31,10 +31,30 @@ const PLACEHOLDER_CHARACTER_SEEDS = [
   ["guard_03", "Placeholder Guard 03", "Sentinel", "The Guards"],
   ["guard_04", "Placeholder Guard 04", "Scout", "The Guards"],
   ["guard_05", "Placeholder Guard 05", "Jailer", "The Guards"],
-  ["alchemist_01", "Placeholder Alchemist 01", "Alchemist", "Alchemical Expressionist"],
-  ["alchemist_02", "Placeholder Alchemist 02", "Apothecary", "Alchemical Expressionist"],
-  ["alchemist_03", "Placeholder Alchemist 03", "Transmuter", "Alchemical Expressionist"],
-  ["alchemist_04", "Placeholder Alchemist 04", "Researcher", "Alchemical Expressionist"],
+  [
+    "alchemist_01",
+    "Placeholder Alchemist 01",
+    "Alchemist",
+    "Alchemical Expressionist",
+  ],
+  [
+    "alchemist_02",
+    "Placeholder Alchemist 02",
+    "Apothecary",
+    "Alchemical Expressionist",
+  ],
+  [
+    "alchemist_03",
+    "Placeholder Alchemist 03",
+    "Transmuter",
+    "Alchemical Expressionist",
+  ],
+  [
+    "alchemist_04",
+    "Placeholder Alchemist 04",
+    "Researcher",
+    "Alchemical Expressionist",
+  ],
   ["magician_01", "Placeholder Magician 01", "Wizard", "Magicians"],
   ["magician_02", "Placeholder Magician 02", "Illusionist", "Magicians"],
   ["magician_03", "Placeholder Magician 03", "Diviner", "Magicians"],
@@ -55,7 +75,7 @@ const PLACEHOLDER_CHARACTER_SEEDS = [
   ["street_04", "Placeholder Street 04", "Beggar", "The Streets"],
   ["street_05", "Placeholder Street 05", "Traveler", "The Streets"],
   ["street_06", "Placeholder Street 06", "Guild Agent", "The Streets"],
-  ["street_07", "Placeholder Street 07", "Fence", "The Streets"]
+  ["street_07", "Placeholder Street 07", "Fence", "The Streets"],
 ];
 
 function createPlaceholderCharacter(seed, index) {
@@ -72,7 +92,7 @@ function createPlaceholderCharacter(seed, index) {
     publicBlurb: "TODO public character blurb placeholder for " + name + ".",
     blurb: "TODO public character blurb placeholder for " + name + ".",
     isDead: id === "street_07",
-    image: "default.png"
+    image: "default.png",
   };
 }
 
@@ -80,9 +100,8 @@ const CHARACTERS = Object.fromEntries(
   PLACEHOLDER_CHARACTER_SEEDS.map((seed, index) => {
     const character = createPlaceholderCharacter(seed, index);
     return [character.id, character];
-  })
+  }),
 );
-
 
 function createCharacterDetails(
   player,
@@ -90,7 +109,7 @@ function createCharacterDetails(
   occupationAndClothingTypeSuggestions,
   characterDetails,
   goals,
-  abilities
+  abilities,
 ) {
   return {
     player,
@@ -98,7 +117,7 @@ function createCharacterDetails(
     occupationAndClothingTypeSuggestions,
     characterDetails,
     goals,
-    abilities
+    abilities,
   };
 }
 
@@ -185,9 +204,9 @@ function installInboxShell() {
       </a>
     `;
 
-    const leaveItem = Array.from(nav.children).find((item) => (
-      item.textContent || ""
-    ).toLowerCase().includes("leave character"));
+    const leaveItem = Array.from(nav.children).find((item) =>
+      (item.textContent || "").toLowerCase().includes("leave character"),
+    );
 
     nav.insertBefore(inboxItem, leaveItem || null);
   });
@@ -201,7 +220,6 @@ function installInboxShell() {
   inboxShell.setAttribute("x-show", "$store.auth.showInbox");
   inboxShell.setAttribute("x-transition.opacity", "");
   inboxShell.setAttribute("x-cloak", "");
-  inboxShell.setAttribute("@keydown.escape.window", "$store.auth.closeInbox()");
   inboxShell.className = "inbox-overlay";
   inboxShell.innerHTML = `
     <section
@@ -263,8 +281,8 @@ function loadSocketClient() {
   return socketClientLoadPromise;
 }
 
-function createAuthStore(){
-  return{
+function createAuthStore() {
+  return {
     character: null,
     characters: {},
     characterDetails: CHARACTERS_DETAILED,
@@ -313,7 +331,7 @@ function createAuthStore(){
         }
 
         this.characters = Object.fromEntries(
-          data.characters.map((character) => [character.id, character])
+          data.characters.map((character) => [character.id, character]),
         );
       } catch (error) {
         this.characters = {};
@@ -369,7 +387,9 @@ function createAuthStore(){
         const data = await response.json();
 
         if (!response.ok) {
-          this.showLoginError(data.error || "Access denied. Incorrect password.");
+          this.showLoginError(
+            data.error || "Access denied. Incorrect password.",
+          );
           return;
         }
 
@@ -379,7 +399,9 @@ function createAuthStore(){
         await this.afterAuthenticated();
         alert(`Login successful! Welcome, ${data.character.name}.`);
       } catch (error) {
-        this.showLoginError("Unable to reach the login service. Please try again.");
+        this.showLoginError(
+          "Unable to reach the login service. Please try again.",
+        );
       } finally {
         this.isLoggingIn = false;
       }
@@ -480,7 +502,8 @@ function createAuthStore(){
         }));
         this.unreadInboxCount = Number(data.unreadCount || 0);
       } catch (error) {
-        this.inboxError = error.message || "Unable to mark inbox messages read.";
+        this.inboxError =
+          error.message || "Unable to mark inbox messages read.";
       }
     },
 
@@ -546,7 +569,9 @@ function createAuthStore(){
         return;
       }
 
-      const existingIndex = this.inboxMessages.findIndex((item) => item.id === message.id);
+      const existingIndex = this.inboxMessages.findIndex(
+        (item) => item.id === message.id,
+      );
 
       if (existingIndex >= 0) {
         this.inboxMessages.splice(existingIndex, 1, message);
@@ -562,7 +587,9 @@ function createAuthStore(){
     },
 
     handleRealtimeInboxRead(payload) {
-      const readIds = new Set((payload?.messageIds || []).map((messageId) => String(messageId)));
+      const readIds = new Set(
+        (payload?.messageIds || []).map((messageId) => String(messageId)),
+      );
 
       this.inboxMessages = this.inboxMessages.map((message) => {
         if (!readIds.size || readIds.has(message.id)) {
@@ -607,10 +634,14 @@ function createAuthStore(){
     },
 
     formatInboxState(message) {
-      return JSON.stringify({
-        old: message.oldState || null,
-        new: message.newState || null,
-      }, null, 2);
+      return JSON.stringify(
+        {
+          old: message.oldState || null,
+          new: message.newState || null,
+        },
+        null,
+        2,
+      );
     },
 
     requestLogout() {
@@ -637,8 +668,8 @@ function createAuthStore(){
       this.inboxMessages = [];
       this.unreadInboxCount = 0;
       this.showInbox = false;
-    }
-  }
+    },
+  };
 }
 
 function characterSelector() {
@@ -669,7 +700,7 @@ function characterSelector() {
           character.name,
           character.player,
           this.getCharacterClass(character),
-          character.faction
+          character.faction,
         ]
           .filter(Boolean)
           .some((value) => this.normalizeSearch(value).includes(search));
@@ -691,7 +722,7 @@ function characterSelector() {
 
       return Object.entries(groups).map(([faction, characters]) => ({
         faction,
-        characters
+        characters,
       }));
     },
 
@@ -704,11 +735,20 @@ function characterSelector() {
     },
 
     normalizeSearch(value) {
-      return String(value || "").trim().toLowerCase();
+      return String(value || "")
+        .trim()
+        .toLowerCase();
     },
 
     getCharacterClass(character) {
-      return character.class || character.className || character.role || character.publicBlurb || character.blurb || "Unassigned class";
+      return (
+        character.class ||
+        character.className ||
+        character.role ||
+        character.publicBlurb ||
+        character.blurb ||
+        "Unassigned class"
+      );
     },
 
     openResults() {
@@ -754,10 +794,13 @@ function characterSelector() {
         return;
       }
 
-      const currentIndex = results.findIndex((character) => character.id === this.activeCharacterId);
-      const nextIndex = currentIndex === -1
-        ? 0
-        : (currentIndex + direction + results.length) % results.length;
+      const currentIndex = results.findIndex(
+        (character) => character.id === this.activeCharacterId,
+      );
+      const nextIndex =
+        currentIndex === -1
+          ? 0
+          : (currentIndex + direction + results.length) % results.length;
 
       this.activeCharacterId = results[nextIndex].id;
       this.scrollActiveIntoView();
@@ -769,7 +812,9 @@ function characterSelector() {
         return;
       }
 
-      const character = this.filteredCharacters.find((item) => item.id === this.activeCharacterId);
+      const character = this.filteredCharacters.find(
+        (item) => item.id === this.activeCharacterId,
+      );
 
       if (character) {
         this.selectCharacter(character);
@@ -787,7 +832,7 @@ function characterSelector() {
     loginOnClick() {
       this.$store.auth.attemptLogin(
         this.selectedCharacterId,
-        this.selectedCharacterPassword
+        this.selectedCharacterPassword,
       );
     },
   };
@@ -801,7 +846,7 @@ function loggedInCharacterDetails() {
       secret: false,
       twist: false,
       relationships: false,
-      clues: false
+      clues: false,
     },
 
     get character() {
@@ -865,7 +910,7 @@ function loggedInCharacterDetails() {
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
-    }
+    },
   };
 }
 
@@ -900,7 +945,10 @@ function databaseAccess() {
     },
 
     formatArchiveBody(body) {
-      return this.escapeHtml(body || "No archive text available.").replace(/\n/g, "<br>");
+      return this.escapeHtml(body || "No archive text available.").replace(
+        /\n/g,
+        "<br>",
+      );
     },
 
     escapeHtml(text) {
@@ -966,7 +1014,8 @@ function adminDashboard() {
 
       try {
         if (!this.token) {
-          this.error = "Log in as an admin character to view the admin dashboard.";
+          this.error =
+            "Log in as an admin character to view the admin dashboard.";
           return;
         }
 
@@ -1071,7 +1120,9 @@ function adminDashboard() {
       }
 
       const currentRound = this.summary?.gameState?.currentRound || 1;
-      const confirmed = window.confirm(`Advance from round ${currentRound} to round ${currentRound + 1}?`);
+      const confirmed = window.confirm(
+        `Advance from round ${currentRound} to round ${currentRound + 1}?`,
+      );
 
       if (!confirmed) {
         return;
@@ -1099,10 +1150,12 @@ function adminDashboard() {
     },
 
     updateMoney(characterId, gold, silver) {
-      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/money`, {
-        method: "PATCH",
-        body: JSON.stringify({ money: currency(gold, silver) }),
-      }));
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/characters/${characterId}/money`, {
+          method: "PATCH",
+          body: JSON.stringify({ money: currency(gold, silver) }),
+        }),
+      );
     },
 
     updateInventory(characterId, inventoryText) {
@@ -1111,35 +1164,45 @@ function adminDashboard() {
         .map((line) => line.trim())
         .filter(Boolean)
         .map((line) => {
-          const [namePart, quantityPart] = line.split("|").map((part) => part.trim());
+          const [namePart, quantityPart] = line
+            .split("|")
+            .map((part) => part.trim());
           return {
             name: namePart,
             quantity: quantityPart ? Number(quantityPart) : 1,
           };
         });
 
-      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/inventory`, {
-        method: "PATCH",
-        body: JSON.stringify({ inventory }),
-      }));
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/characters/${characterId}/inventory`, {
+          method: "PATCH",
+          body: JSON.stringify({ inventory }),
+        }),
+      );
     },
 
     toggleDeath(character) {
-      return this.mutate(() => this.adminRequest(`/api/admin/characters/${character.id}/death`, {
-        method: "PATCH",
-        body: JSON.stringify({ isDead: !character.isDead }),
-      }));
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/characters/${character.id}/death`, {
+          method: "PATCH",
+          body: JSON.stringify({ isDead: !character.isDead }),
+        }),
+      );
     },
 
     addStatus(characterId, statusName, statusNote, expiresAt) {
-      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/statuses`, {
-        method: "POST",
-        body: JSON.stringify({
-          name: statusName,
-          note: statusNote,
-          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/characters/${characterId}/statuses`, {
+          method: "POST",
+          body: JSON.stringify({
+            name: statusName,
+            note: statusNote,
+            expiresAt: expiresAt
+              ? new Date(expiresAt).toISOString()
+              : undefined,
+          }),
         }),
-      }));
+      );
     },
 
     formatDateTime(value) {
@@ -1156,23 +1219,34 @@ function adminDashboard() {
     },
 
     removeStatus(characterId, statusId) {
-      return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/statuses/${statusId}`, {
-        method: "DELETE",
-      }));
+      return this.mutate(() =>
+        this.adminRequest(
+          `/api/admin/characters/${characterId}/statuses/${statusId}`,
+          {
+            method: "DELETE",
+          },
+        ),
+      );
     },
 
     consumeModifier(characterId, modifierId) {
-      return this.mutate(() => this.adminRequest(`/api/admin/modifiers/${modifierId}/consume`, {
-        method: "POST",
-        body: JSON.stringify({ characterId }),
-      }));
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/modifiers/${modifierId}/consume`, {
+          method: "POST",
+          body: JSON.stringify({ characterId }),
+        }),
+      );
     },
 
     revealClue(clue) {
-      return this.mutate(() => this.adminRequest(`/api/admin/clues/${clue.id}/reveal`, {
-        method: "PATCH",
-        body: JSON.stringify({ isRevealedGlobally: !clue.isRevealedGlobally }),
-      }));
+      return this.mutate(() =>
+        this.adminRequest(`/api/admin/clues/${clue.id}/reveal`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            isRevealedGlobally: !clue.isRevealedGlobally,
+          }),
+        }),
+      );
     },
 
     get totalCharacters() {
@@ -1192,7 +1266,10 @@ function adminDashboard() {
     },
 
     get canAdvanceRound() {
-      return Boolean(this.summary?.adminCharacter?.canAdvanceRound || this.$store.auth.character?.canAdvanceRound);
+      return Boolean(
+        this.summary?.adminCharacter?.canAdvanceRound ||
+        this.$store.auth.character?.canAdvanceRound,
+      );
     },
 
     get filteredCharacters() {
@@ -1210,7 +1287,9 @@ function adminDashboard() {
     },
 
     get globalClueCount() {
-      const globalClues = this.summary?.clueCounts?.find((item) => item.type === "global");
+      const globalClues = this.summary?.clueCounts?.find(
+        (item) => item.type === "global",
+      );
       return globalClues?.count || 0;
     },
 
@@ -1220,12 +1299,17 @@ function adminDashboard() {
 
     inventoryText(character) {
       return (character.inventory || [])
-        .map((item) => `${item.name}${item.quantity && item.quantity !== 1 ? ` | ${item.quantity}` : ""}`)
+        .map(
+          (item) =>
+            `${item.name}${item.quantity && item.quantity !== 1 ? ` | ${item.quantity}` : ""}`,
+        )
         .join("\n");
     },
 
     normalizeSearch(value) {
-      return String(value || "").trim().toLowerCase();
+      return String(value || "")
+        .trim()
+        .toLowerCase();
     },
   };
 }
@@ -1290,7 +1374,7 @@ function shopPage() {
         }
 
         this.purchasedClues = Object.fromEntries(
-          (data.clues || []).map((clue) => [clue.id, clue])
+          (data.clues || []).map((clue) => [clue.id, clue]),
         );
       } catch (error) {
         this.error = error.message || "Unable to load purchased clues.";
@@ -1411,7 +1495,10 @@ function shopPage() {
     },
 
     canAfford(entry) {
-      return currencyValueInSilver(this.currentMoney) >= currencyValueInSilver(entry.price);
+      return (
+        currencyValueInSilver(this.currentMoney) >=
+        currencyValueInSilver(entry.price)
+      );
     },
 
     hasPurchasedClue(entry) {
@@ -1439,7 +1526,10 @@ function shopPage() {
     },
 
     formatClueBody(body) {
-      return this.escapeHtml(body || "No clue text available.").replace(/\n/g, "<br>");
+      return this.escapeHtml(body || "No clue text available.").replace(
+        /\n/g,
+        "<br>",
+      );
     },
 
     scrollToShopEntry(entry) {
@@ -1470,13 +1560,15 @@ function charactersDisplay() {
     get factions() {
       const characters = Object.values(this.$store.auth.characters);
       const factionNames = PLACEHOLDER_FACTIONS.filter((factionName) =>
-        characters.some((character) => character.faction === factionName)
+        characters.some((character) => character.faction === factionName),
       );
 
       return factionNames.map((factionName) => ({
         id: factionName.toLowerCase().replaceAll(" ", "-"),
         name: factionName,
-        characters: characters.filter((character) => character.faction === factionName)
+        characters: characters.filter(
+          (character) => character.faction === factionName,
+        ),
       }));
     },
 
@@ -1496,17 +1588,19 @@ function charactersDisplay() {
               character.player,
               character.class,
               character.faction,
-              character.publicBlurb
+              character.publicBlurb,
             ]
               .filter(Boolean)
               .some((value) => this.normalizeSearch(value).includes(search));
-          })
+          }),
         }))
         .filter((faction) => faction.characters.length);
     },
 
     normalizeSearch(value) {
-      return String(value || "").trim().toLowerCase();
+      return String(value || "")
+        .trim()
+        .toLowerCase();
     },
 
     syncOpenFactions() {
@@ -1523,6 +1617,6 @@ function charactersDisplay() {
 
     toggleFaction(factionId) {
       this.openFactions[factionId] = !this.openFactions[factionId];
-    }
+    },
   };
 }

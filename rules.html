@@ -18,7 +18,7 @@
   </head>
   <body x-data x-init="$store.auth.init()" class="dark-bg theme-rules">
     <!-- Navigation -->
-    <nav class="navbar navbar-dark navbar-expand-lg mb-5">
+    <nav class="navbar navbar-dark navbar-expand-lg mb-5 sticky-top">
       <div class="container-fluid">
         <a class="navbar-brand mx-auto" href="index.html">
           <span class="brand-title brand-title-full"
@@ -87,7 +87,10 @@
           <!-- Title Section -->
           <div class="text-center mb-5">
             <h1 class="dramatic-title">Court Rules</h1>
-            <p class="subtitle">Gameplay guidance for the Outlandia table</p>
+            <p class="subtitle">
+              There are no turns. You will speak, move, accuse, and investigate
+              at your discretion.
+            </p>
             <div class="divider"></div>
           </div>
 
@@ -97,182 +100,256 @@
             closed
           >
             <summary class="card-body rule-summary">
-              <h3 class="section-title mb-0">How to Play:</h3>
+              <h3 class="section-title mb-0">Your knowledge:</h3>
               <span class="rule-summary-icon" aria-hidden="true"></span>
             </summary>
             <div class="card-body pt-0">
               <section class="text-light mb-4">
                 <p>
-                  You decide whom to talk to and when. You also decide what you
-                  will tell them, and whether you want to tell them the truth or
-                  not. Though, that goes for everyone else in the game as well.
-                  <br /><br />In-game you will pretend to be someone else, your
-                  character, in a fictional setting. You will meet and interact
-                  with other characters and everyone will be trying to achieve
-                  their own goals. No script is provided - it’s up to you!
+                  Some information on your sheet is true, some is partially
+                  correct, and some may be misleading or based on limited
+                  perspective. <br><br>Not everything your character believes is
+                  objectively correct. <br><br>You will need to investigate and confirm
+                  information through play. <br><br>One of if not the most IMPORTANT
+                  RULE: Not everything you hear is true. Some information is:
+                  <ul>
+                    <li>incomplete</li>
+                    <li>misleading</li>
+                    <li>deliberately false</li>
+                  </ul>
                 </p>
               </section>
             </div>
           </details>
+
+<details
+            class="card dark-card border-court mb-4 rule-accordion"
+            closed
+          >
+            <summary class="card-body rule-summary">
+              <h4 class="section-title mb-0">Win Conditions:</h4>
+              <span class="rule-summary-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="card-body pt-0">
+              <section class="text-light mb-4">
+                
+                <p>To win, your objectives must be completed and you must vote for a plausible suspect</p>
+                <p>There is no single path to victory.</p>
+                <p>You may:</p>
+                <ul class="rule-list">
+                  <li>solve the truth</li>
+                  <li>complete your objectives</li>
+                  <li>survive suspicion</li>
+                  <li>frame another player</li>
+                  <li>or control the narrative</li>
+                </ul>
+
+              </section>
+            </div>
+          </details>
+
           <details
             class="card dark-card border-court mb-4 rule-accordion"
             closed
           >
             <summary class="card-body rule-summary">
-              <h4 class="section-title mb-0">Game Mechanics & Rules:</h4>
+              <h4 class="section-title mb-0">Actions:</h4>
               <span class="rule-summary-icon" aria-hidden="true"></span>
             </summary>
             <div class="card-body pt-0">
-              <!-- Mechanics -->
               <section class="text-light mb-4">
-                <h5 class="section-title">Mechanics</h5>
-                <p class="text-muted mb-3">
-                  TODO: Future writer pass should rename old host, duel, and
-                  scene-specific mechanic terms for the final fantasy court
-                  setting.
+                <h5 class="section-title">Interrogate</h5>
+                <p>
+                  Ask a player questions. They may answer freely unless forced
+                  otherwise.
                 </p>
-                <ul class="rule-list">
-                  <li>
-                    <b>Fighting:</b> To attack another player, you must have a
-                    weapon or appropriate ability, be within touching distance,
-                    and win a rock-paper-scissors match.
-                  </li>
-                  <li><b>Success:</b> The victim becomes unconscious.</li>
-                  <li>
-                    <b>Failure or tie:</b> No effect. The defender may attack
-                    back or flee (cannot be attacked again for 10 minutes).
-                  </li>
-                  <li>
-                    <b>Recovery:</b> A First Aid Kit heals instantly. Otherwise:
-                    <ul>
-                      <li>Before Last Call: recover after 10 minutes.</li>
-                      <li>After Last Call: death occurs after 10 minutes.</li>
-                    </ul>
-                  </li>
-                  <li>
-                    <b>Who goes first:</b> The player who declares first attacks
-                    first. Simultaneous actions are decided by the event host.
-                  </li>
-                  <li>
-                    <b>Multiple combat:</b> The event host determines order;
-                    resolve attacks one at a time.
-                  </li>
-                  <li>
-                    <b>Formal Duel:</b> Players may duel using best-of-3
-                    rock-paper-scissors. Required props are provided if needed.
-                    Winner renders opponent unconscious. Special abilities may
-                    allow winning on draws.
-                  </li>
-                </ul>
-              </section>
+                <details class="rule-detail mb-4">
+                  <summary>Detailed information</summary>
+                  <p>Any player can:</p>
+                  <ul class="rule-list">
+                    <li>Demand answers</li>
+                    <li>Offer payment for truth</li>
+                    <li>Threaten consequences</li>
+                  </ul>
+                  <p>
+                    Interrogatee can lie unless an ability or roll overrides it. But,
+                    information gained via interrogation can be immediately
+                    challenged via Deception/Insight.
+                  </p>
+                  <p>Roll a d20 for success:</p>
+                  <ul class="rule-list">
+                    <li>20: Full truth, target cannot lie.</li>
+                    <li>
+                      15-19: Target must answer truthfully, minor omissions
+                      allowed.
+                    </li>
+                    <li>
+                      10-14: Target must answer but may give partial truth or
+                      be vague or misleading.
+                    </li>
+                  </ul>
+                  <p>On fail:</p>
+                  <ul class="rule-list mb-0">
+                    <li>The target can walk away.</li>
+                    <li>
+                      Cannot be questioned by the same person for 5 minutes.
+                    </li>
+                    <li>
+                      Target may pay 3 Gold or take 1 suspicion to refuse even
+                      on success (except nat 20).
+                    </li>
+                  </ul>
+                </details>
 
-              <!-- States -->
-              <section class="text-light mb-4">
-                <h5 class="section-title">States</h5>
-                <ul class="rule-list">
-                  <li>
-                    <b>Alive:</b> No deaths occur before Last Call unless
-                    specified by the event host.
-                  </li>
-                  <li>
-                    <b>Well:</b> Not affected by poison or unconsciousness.
-                  </li>
-                  <li><b>Impervious:</b> All attacks against you fail.</li>
-                  <li><b>Mithridatism:</b> Immune to poison for 10 minutes.</li>
-                  <li>
-                    <b>Unconscious:</b> Sit still. Recovery follows the same
-                    10-minute rules based on Last Call.
-                  </li>
-                  <li>
-                    <b>Poison:</b>
-                    <ul>
-                      <li>You lose all abilities.</li>
-                      <li>Requires an Antidote to cure.</li>
-                      <li>After Last Call: death in 10 minutes.</li>
-                      <li>
-                        Before Last Call: death occurs 10 minutes after Last
-                        Call.
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-              </section>
+                <h5 class="section-title">Lie / Deceive</h5>
+                <p>
+                  If challenged, you may roll to maintain your story.
+                </p>
+                <details class="rule-detail mb-4">
+                  <summary>Detailed information</summary>
+                  <p>
+                    When a player makes a claim, any listener can challenge it.
+                  </p>
+                  <p>
+                    Speaker rolls Deception (d20) vs. Challenger rolls Insight
+                    (d20).
+                  </p>
+                  <ul class="rule-list">
+                    <li>Speaker wins: Lie stands.</li>
+                    <li>GM confirms it as believable.</li>
+                    <li>Challenger wins: Lie is exposed.</li>
+                  </ul>
+                  <p>Speaker must:</p>
+                  <ul class="rule-list mb-0">
+                    <li>Reveal truth</li>
+                    <li>OR take 1 suspicion to deflect</li>
+                    <li>Failed challenge: -2 on next roll.</li>
+                  </ul>
+                </details>
 
-              <!-- Healing -->
-              <section class="text-light mb-4">
-                <h5 class="section-title">Healing</h5>
+                <h5 class="section-title">Bribe</h5>
+                <p>Offer gold for:</p>
                 <ul class="rule-list">
-                  <li>
-                    <b>First Aid Kit:</b> Instantly restores unconscious
-                    players. Cannot treat poison.
-                  </li>
-                  <li>
-                    <b>Antidote:</b> Required to cure poison. Can be used by
-                    anyone but must be crafted by a qualified player.
-                  </li>
-                  <li>
-                    <b>Restrictions:</b> Players cannot attack unconscious
-                    characters.
-                  </li>
-                  <li>
-                    <b>Searching:</b> Players may search unconscious characters
-                    via the event host (items and money only).
-                  </li>
-                  <li>
-                    <b>Poison Use:</b> Can be given directly or secretly
-                    administered via the event host.
-                  </li>
+                  <li>silence</li>
+                  <li>favors</li>
+                  <li>protection</li>
+                  <li>information</li>
                 </ul>
-              </section>
+                <p>Deals are not guaranteed unless accepted.</p>
+                <details class="rule-detail mb-4">
+                  <summary>Detailed information</summary>
+                  <p>Pay players with Gold/Silver/Favors for:</p>
+                  <ul class="rule-list">
+                    <li>Silence</li>
+                    <li>Services</li>
+                    <li>Information</li>
+                    <li>Protection</li>
+                  </ul>
+                  <p>
+                    If a deal involves secrets or accusations, it must have at
+                    least 5 Gold or 1 Favor on the table.
+                  </p>
+                  <p>If a player breaks a deal:</p>
+                  <ul class="rule-list mb-0">
+                    <li>Gain 2 suspicion.</li>
+                    <li>Cannot receive Favor Tokens for 1 round.</li>
+                  </ul>
+                </details>
 
-              <!-- Death -->
-              <section class="text-light mb-4">
-                <h5 class="section-title">Death</h5>
-                <ul class="rule-list">
-                  <li>
-                    No deaths occur before Last Call (unless ruled otherwise).
-                  </li>
-                  <li>Dead players receive a “Last Dying Breath” action.</li>
-                  <li>
-                    Dead players cannot reveal secrets, clues, or abilities.
-                  </li>
-                  <li>Only items and money may be taken from the deceased.</li>
-                </ul>
+                <h5 class="section-title">Blackmail</h5>
+                <p>
+                  Apply leverage to gain resources from another player.
+                </p>
+                <p>
+                  Costs 5 gold - Coordinate with a Game Master
+                </p>
+                <details class="rule-detail">
+                  <summary>Detailed information</summary>
+                  <p>Target chooses:</p>
+                  <ul class="rule-list">
+                    <li>Pay X Gold or X Favor, where X is determined by a Game Master.</li>
+                    <li>Resist, roll opposing d20.</li>
+                  </ul>
+                  <p>Fail resistor:</p>
+                  <ul class="rule-list">
+                    <li>Pay</li>
+                    <li>OR 2 suspicion</li>
+                  </ul>
+                  <p>Fail blackmailer:</p>
+                  <ul class="rule-list mb-0">
+                    <li>Gain 1 suspicion.</li>
+                  </ul>
+                </details>
               </section>
+            </div>
+          </details>
 
-              <!-- Arrest -->
+          <details
+            class="card dark-card border-court mb-4 rule-accordion"
+            closed
+          >
+            <summary class="card-body rule-summary">
+              <h4 class="section-title mb-0">Dice Rolls:</h4>
+              <span class="rule-summary-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="card-body pt-0">
               <section class="text-light mb-4">
-                <h5 class="section-title">Arrest</h5>
+
+                <h5 class="section-title">Affective Abilities</h5>
+                <p>Both players roll a d20.</p>
+
+                <h5 class="section-title">d20</h5>
+                <p>Success check</p>
                 <ul class="rule-list">
-                  <li>
-                    TODO law-role placeholders may make a limited number of
-                    arrests.
-                  </li>
-                  <li>Arrested players are placed in a holding cell.</li>
-                  <li>
-                    Evidence must be presented or release occurs after 10
-                    minutes (5 during Last Call).
-                  </li>
-                  <li>Lawmen may confiscate items as evidence.</li>
-                  <li>Arrested players cannot use abilities.</li>
-                  <li>
-                    <b>Escape:</b> Possible via outside help, clever plans, or
-                    host-approved challenges.
-                  </li>
+                  <li>1-9: Fail</li>
+                  <li>10-14: Partial Success</li>
+                  <li>15-19: Success</li>
+                  <li>20: Critical</li>
                 </ul>
+
+                <h5 class="section-title">d6</h5>
+                <p>Quality/Effect</p>
+                <ul class="rule-list mb-0">
+                  <li>1-2: Weak/Vague</li>
+                  <li>3-4: Normal</li>
+                  <li>5-6: Strong/Bonus</li>
+                </ul>
+
+                <h5 class="section-title">Advantage/Disadvantage</h5>
+                <p>Roll 2d20 and take the higher/lower.</p>
+
+                <h5 class="section-title">Multipliers</h5>
+                <p class="mb-0">
+                  Add to rolls to modify outcome, either increasing difficulty
+                  of vs. rolls or increasing total bonuses. Can stack +8*
+                </p>
               </section>
+            </div>
+          </details>
 
-              <!-- Last Call -->
+          <details
+            class="card dark-card border-court mb-4 rule-accordion"
+            closed
+          >
+            <summary class="card-body rule-summary">
+              <h4 class="section-title mb-0">Social Status:</h4>
+              <span class="rule-summary-icon" aria-hidden="true"></span>
+            </summary>
+            <div class="card-body pt-0">
               <section class="text-light mb-4">
-                <h5 class="section-title">Last Call</h5>
-                <ul class="rule-list">
-                  <li>Announced during the final hour of the game.</li>
-                  <li>Players now can die from all causes.</li>
-                  <li>Poison and injuries take effect after 10 minutes.</li>
-                  <li>
-                    Players must complete objectives before time runs out.
-                  </li>
-                </ul>
+                <h5 class="section-title">Suspicion</h5>
+                <p>
+                  Represents how suspicious others are of you. High suspicion
+                  makes you easier to target.
+                </p>
+
+                <p>Suspicion is tracked by GMs through your color. Low suspicion gets a green card and no penalties. Red is the highest suspicion, allowing people to refuse interactions, and giving you penalties on rolls.</p>
+
+                <h5 class="section-title">Favor</h5>
+                <p>
+                  Represents influence and leverage. Can improve outcomes or be
+                  traded socially.
+                </p>
               </section>
             </div>
           </details>
@@ -287,10 +364,6 @@
             </summary>
             <div class="card-body pt-0">
               <section class="text-light mb-4">
-                <p class="text-muted mb-3">
-                  TODO: Future writer pass should rename old host, law, money,
-                  and scene-specific terms for the final fantasy court setting.
-                </p>
                 <ul class="rule-list">
                   <li>
                     <b>Three basic qualities:</b> Playing a murder mystery
@@ -384,235 +457,6 @@
                     <b>In conclusion:</b> Good luck, have fun, do not die!
                   </li>
                 </ul>
-              </section>
-            </div>
-          </details>
-
-          <details
-            class="card dark-card border-court mb-4 rule-accordion"
-            closed
-          >
-            <summary class="card-body rule-summary">
-              <h4 class="section-title mb-0">Abilities:</h4>
-              <span class="rule-summary-icon" aria-hidden="true"></span>
-            </summary>
-            <div class="card-body pt-0">
-              <section class="text-light mb-4">
-                <p class="text-muted mb-3">
-                  TODO: Ability names and costs are placeholder carryovers until
-                  final fantasy abilities are written.
-                </p>
-                <ul class="rule-list">
-                  <li>
-                    <b>Open Wide:</b> A character must show you all their item
-                    cards and money. (You can’t take their items or money-just
-                    look at them.) <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Share What You Know:</b> After talking to another player,
-                    share your clue. They must then show you their clue.
-                    <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Medicine Maker:</b> You can craft Antidotes for poisoned
-                    players, or craft Poisons. <br /><br /><b
-                      >&nbsp;&nbsp;Crafting:</b
-                    >
-                    Antidote: 1x Green Herb, 1x Catalyst <br /><b
-                      >&nbsp;&nbsp;Crafting:</b
-                    >
-                    Poison: 1x Purple Herb, 1x Catalyst
-                  </li>
-                  <li>
-                    <b>Sharpshooting:</b> You can make a failed or tied
-                    rock-paper-scissors challenge succeed. Does not have to be a
-                    challenge you’re involved in. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3
-                  </li>
-                  <li>
-                    <b>Keep the Change:</b> Another character has to reveal a
-                    secret to you. <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$75
-                  </li>
-                  <li>
-                    <b>Payment for my services:</b> Play a lil diddy and receive
-                    payment of $$$100, if they ain’t got the cash knock them
-                    unconscious. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 4
-                  </li>
-                  <li>
-                    <b>I’ve Had Worse:</b> Use this after another player has
-                    defeated you in combat. The wound has no effect: you are not
-                    injured and can now take an action. Does not work against
-                    poison. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 3
-                  </li>
-                  <li>
-                    <b>Have Some Copper:</b> Another has to reveal their clue to
-                    you. <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Intimidate:</b> A character must reveal a secret to you.
-                    <br /><br /><b>&nbsp;&nbsp;Uses:</b> 2
-                  </li>
-                  <li>
-                    <b>Is it Luck? / Is it Cheats?</b> Make any failed card
-                    games related challenge a success. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3 <br /><b>&nbsp;&nbsp;Note:</b> Unlimited uses if you find
-                    your confiscated marked cards.
-                  </li>
-                  <li>
-                    <b>Tis’ Just a Flesh Wound!:</b> Use this after another
-                    player has defeated you in combat. The wound has no effect:
-                    you are not injured and can now take an action. Does not
-                    work against poison. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 2
-                  </li>
-                  <li>
-                    <b>Arrest:</b> You may arrest someone under suspicion and
-                    send them to a holding area. The event host sends them there
-                    and prevents them from using their abilities. However, if
-                    you cannot present suitable evidence to the host within 10
-                    minutes (or 5 minutes if before Last Call), they will be
-                    released.
-                  </li>
-                  <li>
-                    <b>Pickpocket:</b> Tell the event host which item you want
-                    to take from another player. If that player does not have
-                    what you seek, the host will take something else at random.
-                    <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Thorough Appraisal:</b> After speaking to another player,
-                    they must show you all their item cards and money. (You
-                    can’t take their items or money-just look at them.)
-                    <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Lockpick:</b> Attempt to unlock any locked object. 3 coin
-                    flip attempts per object. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3 attempts per object
-                  </li>
-                  <li>
-                    <b>This is a Hold Up!:</b> While speaking to another player,
-                    they may show you all of their item cards and money. (You
-                    can’t take their items or money-just look at them.) If they
-                    refuse, knock them unconscious. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    4
-                  </li>
-                  <li>
-                    <b>Investigate:</b> While speaking to another player, they
-                    must show you all of their item cards and money. (You can’t
-                    take their items or money-just look at them.) <br /><br /><b
-                      >&nbsp;&nbsp;Cost:</b
-                    >
-                    $$$50
-                  </li>
-                  <li>
-                    <b>Tight-Lipped:</b> If another player plays an ability on
-                    you that forces you to reveal your secret or clue, it has no
-                    effect-give nothing up and their attempt fails. They still
-                    have to check off a use. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    2
-                  </li>
-                  <li>
-                    <b>TODO Listening Placeholder:</b> You can create a way to
-                    listen in on other players’ conversations. Let the host know
-                    who you want to listen in on, and they will relay the
-                    information. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 2
-                  </li>
-                  <li>
-                    <b>Not So Fast!:</b> An ability played by another player has
-                    no effect! However, it still costs a use and they cannot use
-                    that ability on you again. Cannot be used to cancel out
-                    another Not so fast!. <br /><br /><b>&nbsp;&nbsp;Cost:</b>
-                    $$$100
-                  </li>
-                  <li>
-                    <b>Let’s share what we know:</b> After talking to another
-                    player, show them your clue. They must then show you their
-                    clue. <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$50
-                  </li>
-                  <li>
-                    <b>Intuition:</b> Use your intuition and might (your wallet)
-                    to change a failed or tied rock-paper-scissors challenge
-                    into a success. It needn’t be a challenge you are involved
-                    in. <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$150
-                  </li>
-                  <li>
-                    <b>I’ve Bared Mine, Bare Yours:</b> Reveal a secret to
-                    another player - they must reveal a secret to you.
-                    <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$150
-                  </li>
-                  <li>
-                    <b>The Fever:</b> Make any failed card games related
-                    challenge a success. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 3
-                    <br /><b>&nbsp;&nbsp;Note:</b> Unlimited uses if you can
-                    find the marked cards.
-                  </li>
-                  <li>
-                    <b>Judge of Character:</b> Another player must reveal their
-                    secret to you. <br /><br /><b>&nbsp;&nbsp;Cost:</b> $$$150
-                  </li>
-                  <li>
-                    <b>TODO Defensive Placeholder:</b> An attempt to send you
-                    unconscious fails. <br /><br /><b>&nbsp;&nbsp;Uses:</b> 3
-                  </li>
-                  <li>
-                    <b>Flannelmouthing:</b> If another player plays an ability
-                    on you that forces you to reveal your secret or clue, you
-                    instead talk about your day. Their effort has no effect-give
-                    nothing up and their attempt fails. They still have to check
-                    off their use of ability. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3
-                  </li>
-                  <li>
-                    <b>TODO Persuasion Placeholder:</b> You’ve got a way with
-                    words, a character must reveal their clue and consider
-                    joining your community. <br /><br /><b>&nbsp;&nbsp;Cost:</b>
-                    $$$50 <br /><b>&nbsp;&nbsp;Note:</b> Ability can be
-                    recharged with a successful knockout of another character.
-                    Using this ability on a character 3 times converts them to a
-                    TODO faction member.
-                  </li>
-                  <li>
-                    <b>Tithe:</b> Tell the event host which item you want to
-                    pickpocket from a prospective or promised follower. If that
-                    follower does not have what you seek, the host will take
-                    something else at random. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3
-                  </li>
-                  <li>
-                    <b>For a Price:</b> If anyone pulls a skill on you to force
-                    you to reveal your Secret or Clue to them, you instead can
-                    charge a toll for the information. Toll starts at $$$100 but
-                    drops by $$$20 with every use. <br /><br /><b
-                      >&nbsp;&nbsp;Uses:</b
-                    >
-                    3
-                  </li>
-                  <li>
-                    <b>According to my report…</b> Another player has revealed
-                    more than they intended and must reveal their Secret to you.
-                    <br /><br /><b>&nbsp;&nbsp;Uses:</b> 3
-                  </li>
-                </ul>
-                <p class="mt-4 mb-0">
-                  <b>Secret Traits:</b> Some character types will have specific
-                  special traits. These will be given to you along with your
-                  abilities. Keep them close to your chest, but feel free to
-                  share with those you can trust.
-                </p>
               </section>
             </div>
           </details>

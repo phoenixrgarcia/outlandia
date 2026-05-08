@@ -8,7 +8,7 @@
     --parchment-deep: #e4d1a6;
     --ink: #21180f;
     --ink-soft: #5f5140;
-    --royal-burgundy: #6f1d2d;
+    --royal-burgundy: rgb(131, 49, 65);
     --deep-green: #385e4a;
     --antique-gold: #b88935;
     --candlelit-shadow: #160f0a;
@@ -237,7 +237,8 @@ h1, h2, h3, h4, h5, h6 {
     background: rgba(22, 15, 10, 0.96);
     border-bottom: 1px solid var(--court-border);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
-    position: relative;
+    position: sticky;
+
 }
 
 .navbar::after {
@@ -563,6 +564,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .rule-accordion[open] .rule-summary-icon {
     transform: rotate(225deg);
+}
+
+.rule-detail {
+    border-left: 2px solid var(--court-accent);
+    margin-top: 0.75rem;
+    padding-left: 1rem;
+}
+
+.rule-detail summary {
+    color: var(--court-accent);
+    cursor: pointer;
+    font-family: var(--font-heading);
+    letter-spacing: 0.08em;
+    list-style-position: inside;
+    text-transform: uppercase;
 }
 
 @media (max-width: 576px) {
