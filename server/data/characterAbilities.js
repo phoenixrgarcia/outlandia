@@ -1,3 +1,5 @@
+const { currency } = require("../utils/currency");
+
 const DEFAULT_CHARACTER_ABILITIES = {
   passive: null,
   active: null,
@@ -24,203 +26,313 @@ const CHARACTER_ABILITIES = {
   // },
 
   gm_abbo_arnulf: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   gm_alaric_arntrude: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   gm_percival_rondtabel: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   gm_wolfram_lodge: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   gm_noelle_nicaise: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   royalty_sabine_valois: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "Queen's Grace",
+      description:
+        "+2 to interrogation/deception rolls. Apply these bonuses yourself when rolling.",
+    },
+    active: {
+      name: "Royal Authority",
+      description:
+        "Once per round, force two players into a public interaction (must either bribe or interrogate each other). Cost: 10 Gold and gain 1 suspicion.",
+      cost: currency(10, 0),
+    },
+    handlers: { passive: {}, active: { todo: "send message to two players" } },
   },
   royalty_yohan_valois: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: {
+      name: "King's Presence",
+      description:
+        "Immune to theft unless on critical success. Dispute discrepencies with GMs. ",
+    },
+    active: {
+      name: "Crown's Pardon",
+      description:
+        "Once per round, cancel the result of any failed roll (yours or another's) and reroll it. Cost: 10 Gold or 1 Favor",
+      cost: currency(10, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   court_fitz_herald: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "Watchful Instinct",
+      description:
+        "When shown a document or order you can ask a GM: “Does this follow procedure”. The GM will answer: Yes - Legitimate, No - Something is off",
+    },
+    active: {
+      name: "Marked Shot",
+      description:
+        "Choose a player, the next action made against them gains +5. Notify a GM or the target when using this ability. Cost: 4 Gold  ",
+      cost: currency(4, 0),
+    },
+    handlers: { passive: {}, active: { todo: "send message to player" } },
   },
   court_livio_nivio: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: {
+      name: "Material Expertise",
+      description:
+        "You can tell how heat, force, or chemicals affect an object. (clue)",
+    },
+    active: {
+      name: "Hidden Plate",
+      description:
+        "Ignore one negative effect (suspicion penalty, bribe, hex, etc.) Cost: 8 Gold",
+      cost: currency(8, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   court_hugh_basterd: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: {
+      name: "Penny for your thoughts",
+      description: "Gain 1 silver when rumors catch on (your or another's)",
+    },
+    active: {
+      name: "Silver Tongue",
+      description:
+        "Add +5 to any bribe or interrogation roll (yours or another's). Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   court_hildegund_hundolf: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Suspicious Writing",
+      description:
+        "Mark a player's statement, if it is later proven false, they will gain a suspicion token. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   guard_sigrid_tomb: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "",
+      description: "",
+    },
+    active: {
+      name: "Detain/Release",
+      description:
+        "Roll d6 and choose between: Detain - Prevent a player from acting for that amount of time. OR Release - Free someone's movement when they are frozen. Cost: 10 Gold, gain 1 suspicion.",
+      cost: currency(10, 0),
+    },
+    handlers: { passive: {}, active: { todo: "roll d6. Display result" } },
   },
   guard_raphael_regalis: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Intimidating Interrogation",
+      description:
+        "Gain advantage +2 in an interrogation AND target cannot give a false answer on success, but gain 1 suspicion. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   guard_van_ailsing: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Duel of Honor",
+      description:
+        "Challenge to a duel; roll a d20. Loser gives the winner 10 Gold OR 1 Favor. Cost: 5 Gold",
+      cost: currency(5, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   guard_rabot_the_brave: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Shield Ally",
+      description:
+        "Take the effect of an ability meant for another. Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   guard_durr_vinelight: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Oathbound Honesty",
+      description:
+        "Target must answer one question truthfully (GM enforced) OR may take 1 suspicion token to resist. Cost: 12 Gold, and cannot lie for the remainder of the round",
+      cost: currency(12, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   guard_vudo_surebrick: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: {
+      name: "Patrol Eye",
+      description:
+        "Gain a list of who targeted a player last round. Ask GMs to reveal this information. Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   alchemist_attila_bastian: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
-    handlers: { passive: {}, active: {} },
+    passive: {
+      name: "Inspect Element",
+      description:
+        "Analyze any residual evidence and instantly pinpoint if its makeup is familiar to you",
+    },
+    active: {
+      name: "Experimental Draft Potion",
+      description: "Apply a modifier to a target's d20 roll. Cost: 8 Gold",
+      cost: currency(8, 0),
+    },
+    handlers: {
+      passive: {},
+      active: { todo: "roll a d6, then send message to player" },
+    },
   },
   alchemist_pax_patience: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: {
+      name: "Wild Accusation",
+      description:
+        "Make a wild claim about another player. Roll d20, on success GM confirms it true.",
+    },
+    active: {
+      name: "Volatile Concoction",
+      description:
+        "Force all players in a group (3 max) to roll d20; lowest gains 1 suspicion token. Cost: 6 Gold",
+      cost: currency(6, 0),
+    },
     handlers: { passive: {}, active: {} },
   },
   magician_olga_woodland_hearth: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: {
+      name: "Curse Residue",
+      description:
+        "When inspecting objects you can tell if it has been used in harm, poison, or betrayal.",
+    },
+    active: {
+      name: "Salt Hex of Unluck",
+      description:
+        "Target may choose: Accept a curse giving disadvantage on their next d20 roll. Or resist publicly and roll d6. Apply curse through GM. Cost: 5 Gold, or 1 Favor",
+    },
     handlers: { passive: {}, active: {} },
   },
   magician_volkran_channeler: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   magician_marion_bluthers: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   magician_penelope_pura: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   magician_calypso_caspian: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   clergy_raven_ratelm: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   clergy_sidonia_solomona: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   clergy_maura_mary_anna: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_solina_suspecta: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_wendela_lunites: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_tyrus_tithe: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_elisanna_einarr: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_una_urgellesa: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   worker_viktor_bastian: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_darwin_durand: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_valerius_shadow: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_justa_justice: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_quintina_quintius: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_liudmila_lefhild: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_isabel_einarr: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
   street_dread_pirate_jewels: {
-    passive: { name: {}, description: {} },
-    active: { name: {}, description: {} },
+    passive: { name: "", description: "" },
+    active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
   },
 };
