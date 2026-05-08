@@ -7,6 +7,7 @@ const env = require("../config/env");
 const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const GameState = require("../models/GameState");
+const InboxMessage = require("../models/InboxMessage");
 const ShopEntry = require("../models/ShopEntry");
 const { currency } = require("../utils/currency");
 
@@ -230,86 +231,40 @@ const CHARACTER_SEEDS = [
   { characterId: "street_liudmila_lefhild", name: "Liudmila Lefhild", player: "EXTRA", class: "Dark Cultist", faction: "The Streets", password: "6794", money: currency(20, 15), publicBlurb: "Fanatical, manipulative. Quiet but intense. Speaks in unsettling certainty. Twists facts to fit beliefs.", goals: ["Convince 2 players the Sorcerer caused this.", "Spread 5 suspicion."], secret: ["This was a ritual tied to dark powers.", "You manipulate Raphael’s guilt."], twist: ["Withdrawn and Impressionable: You once spent years as a shut-in until a book arrived on your doorstep. You followed its teachings and one day found its voice guiding you to the Royal Festival. Now here, you feel a strong pull towards the power of the Sorcerer, the same from your book of Bhaal’s teachings.", "Claim the death was a ritualistic sacrifice. The sorcerer must have felt the ritualistic surge. You want to help them channel this power."], clues: ["Ritual rumor, “This could be ritual energy…”"], relationships: ["Fixated on the Sorcerer", "Previously worked with the Alchemist", "Unsettles Clerics and Monk"] },
   { characterId: "street_isabel_einarr", name: "Isabel Einarr", player: "EXTRA", class: "Monk/Spymaster", faction: "The Streets", password: "8423", money: currency(20, 20), publicBlurb: "Reserved, analytical, and always watching. Detached, methodical.", goals: ["Learn 3 true secrets. Reveal 1 crucial truth publicly."], secret: ["You were assigned to investigate the Horologist. You’ve already noticed inconsistencies in timekeeping records."], twist: ["Reserved and secretive but never reclusive: You’ve been hired by the king to go undercover here and there. You were too busy watching the scribe scribble away at his notes about a meeting that you failed to notice the disastrous events taking place on the royal floor!", "You believe the Jester chose death in some form."], clues: ["Burnt costume fragment - Physical"], relationships: ["Work for the King, but not fully trusted", "The Horologist has been your primary investigation report", "You trust in the Clerics divine power", "The Cultist unsettles you"] },
   { characterId: "street_dread_pirate_jewels", name: "Dread Pirate Jewels", player: "EXTRA", class: "Raider", faction: "The Streets", password: "3257", money: currency(15, 30), publicBlurb: "Aggressive, opportunistic, and anti-royal. Dangerous.", goals: ["Steal 20 gold.", "Reach highest wealth."], secret: ["You were hired by a wealthy figure to carry out an assassination likely a royal, but were arrested before acting."], twist: ["Angrily scheming: You were invited here to carry out an assasination job by someone you suspect to be a royal. But, as soon as you arrived you were arrested for conspiracy. During all the commotion you were able to escape, but the circumstances of your hiring still boggle you.", "You could benefit from the chaos to complete your original mission and escape with your life."], clues: [""], relationships: ["You have a strung hatred and distrust of the Royals", "Neutral to all others"] },
+  { characterId: "extra_character_test", name: "Testing", player: "EXTRA", class: "Test", faction: "The Streets", password: "1234", money: currency(100, 30), publicBlurb: "Aggressive, opportunistic, and anti-royal. Dangerous.", goals: ["Steal 20 gold.", "Reach highest wealth."], secret: ["You were hired by a wealthy figure to carry out an assassination likely a royal, but were arrested before acting."], twist: ["Angrily scheming: You were invited here to carry out an assasination job by someone you suspect to be a royal. But, as soon as you arrived you were arrested for conspiracy. During all the commotion you were able to escape, but the circumstances of your hiring still boggle you.", "You could benefit from the chaos to complete your original mission and escape with your life."], clues: [""], relationships: ["You have a strung hatred and distrust of the Royals", "Neutral to all others"] },
 ];
 
 const GLOBAL_CLUES = PHASE_CLUE_FILES.flatMap(parseClueFile);
 
-const PLACEHOLDER_SHOP_CLUES = [
-  {
-    clueId: "shop-private-clue-01",
-    title: "TODO Private Shop Clue 01",
-    summary: "TODO placeholder preview for a private clue available from the shop.",
-    body: "TODO Private Shop Clue Placeholder: Replace this with final purchased clue text after writers provide approved content.",
-    price: currency(4, 0),
-  },
-  {
-    clueId: "shop-private-clue-02",
-    title: "TODO Private Shop Clue 02",
-    summary: "TODO placeholder preview for a second private clue available from the shop.",
-    body: "TODO Private Shop Clue Placeholder: This clue should remain private to the buyer when purchase behavior is implemented.",
-    price: currency(7, 0),
-  },
-  {
-    clueId: "shop-private-clue-03",
-    title: "TODO Private Shop Clue 03",
-    summary: "TODO placeholder preview for a higher-cost private clue.",
-    body: "TODO Private Shop Clue Placeholder: This is seeded only to prove shop list behavior.",
-    price: currency(10, 0),
-  },
-];
-
 const PLACEHOLDER_SHOP_ENTRIES = [
-  {
-    shopId: "shop-item-01",
-    type: "item",
-    name: "TODO Consumable Item 01",
-    description: "TODO placeholder shop item description.",
-    price: currency(2, 0),
-    itemTemplate: {
-      itemId: "todo-consumable-item-01",
-      name: "TODO Consumable Item 01",
-      note: "TODO replace with final item effect notes.",
-      quantity: 1,
-    },
-    sortOrder: 10,
-  },
-  {
-    shopId: "shop-item-02",
-    type: "item",
-    name: "TODO Consumable Item 02",
-    description: "TODO placeholder shop item description.",
-    price: currency(5, 0),
-    itemTemplate: {
-      itemId: "todo-consumable-item-02",
-      name: "TODO Consumable Item 02",
-      note: "TODO replace with final item effect notes.",
-      quantity: 1,
-    },
-    sortOrder: 20,
-  },
-  {
-    shopId: "shop-poison-01",
-    type: "item",
-    name: "Sample Poison",
-    description: "Test item for Phase 4 notifications. Choose a target to receive the Poisoned status.",
-    price: currency(1, 0),
-    itemTemplate: {
-      itemId: "sample-poison",
-      name: "Sample Poison",
-      note: "Testing only: applies Poisoned to a selected target.",
-      quantity: 1,
-    },
-    sortOrder: 30,
-  },
-  ...PLACEHOLDER_SHOP_CLUES.map((clue, index) => ({
-    shopId: `shop-clue-0${index + 1}`,
-    type: "clue",
-    name: clue.title,
-    description: clue.summary,
-    price: clue.price,
-    clueId: clue.clueId,
-    sortOrder: 100 + index,
-  })),
+  { shopId: "lockpick-set", type: "item", category: "Tools & Consumables", availableToRound: 2, name: "Lockpick Set", description: "Enter a locked or restricted room. Roll d20. Success on 10+. On failure, gain 1 suspicion.", price: currency(0, 10), itemTemplate: { itemId: "lockpick-set", name: "Lockpick Set", note: "Use to attempt entry into a locked or restricted room.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 10, successMessage: "Success. You may enter the locked or restricted room.", failureMessage: "Failure. A GM has been notified that you gain 1 suspicion.", suspicionDeltaOnFailure: 1, notifyGmOnFailure: true, consumeOnUse: true }, sortOrder: 10 },
+  { shopId: "healing-elixir", type: "item", category: "Tools & Consumables", availableToRound: 2, name: "Healing Elixir", description: "Use to remove 1 suspicion or fix a minor injury.", price: currency(0, 15), itemTemplate: { itemId: "healing-elixir", name: "Healing Elixir", note: "Use to remove 1 suspicion or fix a minor injury.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to remove 1 suspicion or resolve a minor injury.", suspicionDelta: -1, consumeOnUse: true }, sortOrder: 20 },
+  { shopId: "bribe-booster", type: "item", category: "Tools & Consumables", availableToRound: 2, name: "Bribe Booster", description: "+3 to next bribe/interrogation.", price: currency(6, 0), itemTemplate: { itemId: "bribe-booster", name: "Bribe Booster", note: "+3 to next bribe/interrogation.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified that you are using +3 on your next bribe/interrogation.", consumeOnUse: true }, sortOrder: 30 },
+  { shopId: "field-test-kit", type: "item", category: "Tools & Consumables", availableToRound: 2, name: "Field Test Kit", description: "Handle poisons safely, test residue, or identify if something is poisoned. 1 use per round.", price: currency(10, 0), stockPerRound: 1, itemTemplate: { itemId: "field-test-kit", name: "Field Test Kit", note: "Use to handle poisons safely, test residue, or identify if something is poisoned.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve your Field Test Kit use.", consumeOnUse: true }, sortOrder: 40 },
+  { shopId: "alchemists-vial", type: "item", category: "Tools & Consumables", availableToRound: 2, name: "Alchemist's Vial", description: "Contains a mystery effect. Roll d12. GM will discreetly give the result after you talk to them.", price: currency(20, 0), stockPerRound: 1, itemTemplate: { itemId: "alchemists-vial", name: "Alchemist's Vial", note: "Roll d12. Talk to a GM for the mystery result.", quantity: 1 }, useDefinition: { action: "roll", die: 12, successMessage: "Your d12 result has been sent to the GMs. Talk to a GM for the effect.", notifyGmAlways: true, consumeOnUse: true }, sortOrder: 50 },
+  { shopId: "royal-seal-stamp", type: "item", category: "Tools & Consumables", name: "Royal Seal Stamp", description: "Forge a message or note with authority.", price: currency(25, 0), availableToRound: 3, itemTemplate: { itemId: "royal-seal-stamp", name: "Royal Seal Stamp", note: "Use to forge a message or note with authority.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve your forged royal message or note.", consumeOnUse: true }, sortOrder: 60 },
+  { shopId: "eavesdrop", type: "item", category: "Information", availableToRound: 2, name: "Eavesdrop", description: "Hear one private conversation. GM provides a summary.", price: currency(13, 0), itemTemplate: { itemId: "eavesdrop", name: "Eavesdrop", note: "Use to request a GM summary of one private conversation.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide an Eavesdrop summary.", consumeOnUse: true }, sortOrder: 110 },
+  { shopId: "speak-to-sphinx", type: "item", category: "Information", availableToRound: 2, name: "Speak to the Sphinx", description: "Summon the Sphinx to the Alcove. Requires 1 Favor. Each player gets 2 max visits. Talk to a GM for more details.", price: currency(0, 0), favorRequired: 1, itemTemplate: { itemId: "speak-to-sphinx", name: "Speak to the Sphinx", note: "Requires 1 Favor. Each player gets 2 max visits.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified that you are summoning the Sphinx to the Alcove.", consumeOnUse: true }, sortOrder: 120 },
+  { shopId: "cross-examination", type: "item", category: "Information", availableToRound: 2, name: "Cross-Examination", description: "Ask a GM about a player's direct involvement in the crime.", price: currency(23, 0), itemTemplate: { itemId: "cross-examination", name: "Cross-Examination", note: "Use to ask a GM about a player's direct involvement in the crime.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Cross-Examination.", consumeOnUse: true }, sortOrder: 130 },
+  { shopId: "false-alibi", type: "item", category: "Information", availableToRound: 2, name: "False Alibi", description: "Ignore one accusation or interrogation result.", price: currency(19, 0), itemTemplate: { itemId: "false-alibi", name: "False Alibi", note: "Use to ignore one accusation or interrogation result.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified that you are using False Alibi.", consumeOnUse: true }, sortOrder: 140 },
+  { shopId: "erase-record", type: "item", category: "Information", availableToRound: 2, name: "Erase Record", description: "Remove 1 suspicion OR negate the Scribe's effect.", price: currency(19, 0), itemTemplate: { itemId: "erase-record", name: "Erase Record", note: "Use to remove 1 suspicion OR negate the Scribe's effect.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to remove 1 suspicion or negate the Scribe's effect.", suspicionDelta: -1, consumeOnUse: true }, sortOrder: 150 },
+  { shopId: "rumor-card", type: "item", category: "Information", availableToRound: 2, name: "Rumor Card", description: "Reach into the rumor box to receive a random clue about a player.", price: currency(35, 0), itemTemplate: { itemId: "rumor-card", name: "Rumor Card", note: "Use to receive a random clue about a player from the rumor box.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide a Rumor Card clue.", consumeOnUse: true }, sortOrder: 160 },
+  { shopId: "secret-note", type: "item", category: "Information", availableToRound: 2, name: "Secret Note", description: "Reveal a small leak of information.", price: currency(45, 0), itemTemplate: { itemId: "secret-note", name: "Secret Note", note: "Use to reveal a small leak of information.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide a Secret Note.", consumeOnUse: true }, sortOrder: 170 },
+  { shopId: "forgery", type: "item", category: "Information", name: "Forgery", description: "Plant a misleading clue in another area. Roll d20. 12+ success. On failure, gain 1 suspicion and the target area is flagged as tampered.", price: currency(50, 0), availableToRound: 3, stockTotal: 2, itemTemplate: { itemId: "forgery", name: "Forgery", note: "Roll d20 to plant a misleading clue in another area.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. GM has been notified to place the forgery with no alert.", failureMessage: "Failure. GM has been notified that you gain 1 suspicion and the target area is tampered.", suspicionDeltaOnFailure: 1, notifyGmAlways: true, consumeOnUse: true }, sortOrder: 180 },
+  { shopId: "cursed-trinket", type: "item", category: "Temporary Abilities & Debuffs", availableToRound: 2, name: "Cursed Trinket", description: "May grant insight or backfire dramatically. Roll d20: 12+ positive effect. On failure, gain suspicion or carry cumbersome object for the rest of the game.", price: currency(0, 15), itemTemplate: { itemId: "cursed-trinket", name: "Cursed Trinket", note: "Roll d20. 12+ success for positive effect.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. GM has been notified to provide a player secret.", failureMessage: "Failure. GM has been notified to assign suspicion or a cumbersome object.", suspicionDeltaOnFailure: 1, notifyGmAlways: true, consumeOnUse: true }, sortOrder: 210 },
+  { shopId: "sneak-cloak", type: "item", category: "Temporary Abilities & Debuffs", availableToRound: 2, name: "Sneak Cloak", description: "Move between rooms unnoticed. Roll d20: 12+ success. On failure, all players are given notice of your action. Talk to GM.", price: currency(0, 20), itemTemplate: { itemId: "sneak-cloak", name: "Sneak Cloak", note: "Roll d20 to move between rooms unnoticed.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. You may move between rooms unnoticed.", failureMessage: "Failure. GM has been notified to announce your action.", notifyGmOnFailure: true, consumeOnUse: true }, sortOrder: 220 },
+  { shopId: "shielding-ale", type: "item", category: "Temporary Abilities & Debuffs", availableToRound: 2, name: "Shielding Ale", description: "Take a shot to protect yourself from rumor or magical effect. Roll d6: 4+ success.", price: currency(0, 25), itemTemplate: { itemId: "shielding-ale", name: "Shielding Ale", note: "Roll d6. 4+ protects from rumor or magical effect.", quantity: 1 }, useDefinition: { action: "roll", die: 6, successAt: 4, successMessage: "Success. You are protected from the rumor or magical effect.", failureMessage: "Failure. The ale does not protect you.", consumeOnUse: true }, sortOrder: 230 },
+  { shopId: "weapon-guard-aid", type: "item", category: "Temporary Abilities & Debuffs", name: "Weapon / Guard Aid", description: "While holding, choose to intervene, shut down an accusation for 5 minutes, steal an item quietly, or force a reroll. Roll d20: 15+ success.", price: currency(25, 0), availableToRound: 3, stockTotal: 3, stockPerRound: 1, itemTemplate: { itemId: "weapon-guard-aid", name: "Weapon / Guard Aid", note: "Roll d20. 15+ success.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 15, successMessage: "Success. GM has been notified to resolve your chosen Guard Aid effect.", failureMessage: "Failure. GM has been notified that the Guard Aid failed.", notifyGmAlways: true, consumeOnUse: true }, sortOrder: 240 },
+  { shopId: "antidote-kit", type: "item", category: "Tools & Consumables", name: "Antidote Kit", description: "Remove poison effect. Every character can buy it, but only once per round.", price: currency(20, 0), availableFromRound: 2, oncePerCharacterPerRound: true, itemTemplate: { itemId: "antidote-kit", name: "Antidote Kit", note: "Use to remove poison from yourself.", quantity: 1 }, useDefinition: { action: "antidote", consumeOnUse: true }, sortOrder: 310 },
+  { shopId: "poison-vial", type: "item", category: "Tools & Consumables", name: "Poison Vial", description: "Apply secretly to drink, item, or player via ability.", price: currency(25, 0), availableFromRound: 2, oncePerCharacterPerRound: true, itemTemplate: { itemId: "poison-vial", name: "Poison Vial", note: "Use to poison a selected character.", quantity: 1 }, useDefinition: { action: "poison", requiresTarget: true, consumeOnUse: true }, sortOrder: 320 },
+  { shopId: "blood-contract", type: "item", category: "Black Market", name: "Blood Contract", description: "Bind another player. If they lie to you, they gain 2 suspicion.", price: currency(10, 0), favorRequired: 1, availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "blood-contract", name: "Blood Contract", note: "Requires 1 Favor. Bind another player.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Blood Contract.", consumeOnUse: true }, sortOrder: 410 },
+  { shopId: "memory-scraper", type: "item", category: "Black Market", name: "Memory Scraper", description: "Ask a GM: What is this player hiding? GM gives one relevant secret or misleading truth.", price: currency(20, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "memory-scraper", name: "Memory Scraper", note: "Use to ask what a player is hiding.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Memory Scraper.", consumeOnUse: true }, sortOrder: 420 },
+  { shopId: "veiled-passage", type: "item", category: "Black Market", name: "Veiled Passage", description: "Instantly move anywhere. Cannot be tracked or observed.", price: currency(15, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "veiled-passage", name: "Veiled Passage", note: "Use to move anywhere without being tracked or observed.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified that you used Veiled Passage.", consumeOnUse: true }, sortOrder: 430 },
+  { shopId: "acupuncture-kit", type: "item", category: "Black Market", name: "Acupuncture Kit", description: "Apply to a player. Next time they roll: below 10 they gain 2 suspicion, 10+ nothing happens.", price: currency(25, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "acupuncture-kit", name: "Acupuncture Kit", note: "Use on a player before their next roll.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Acupuncture Kit.", consumeOnUse: true }, sortOrder: 440 },
+  { shopId: "scapegoat-sigil", type: "item", category: "Black Market", name: "Scapegoat Sigil", description: "Transfer all suspicion you gain this round to another player.", price: currency(20, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "scapegoat-sigil", name: "Scapegoat Sigil", note: "Transfer all suspicion you gain this round to another player.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Scapegoat Sigil.", consumeOnUse: true }, sortOrder: 450 },
+  { shopId: "truth-mirror", type: "item", category: "Black Market", name: "Truth Mirror", description: "During accusation phase, ask one player a question. They must answer truthfully. GM enforced.", price: currency(25, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "truth-mirror", name: "Truth Mirror", note: "Use during accusation phase to ask one truthful question.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to enforce Truth Mirror.", consumeOnUse: true }, sortOrder: 460 },
+  { shopId: "panic-powder", type: "item", category: "Black Market", name: "Panic Powder", description: "All players in area must reveal current suspicion OR gain 1 suspicion.", price: currency(12, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "panic-powder", name: "Panic Powder", note: "Use on an area: reveal current suspicion or gain 1 suspicion.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to resolve Panic Powder.", consumeOnUse: true }, sortOrder: 470 },
+  { shopId: "unstable-duplicate", type: "item", category: "Black Market", name: "Unstable Duplicate", description: "Copy any ability used this round. Roll d6: 1-2 backfires, 3-6 works.", price: currency(18, 0), availableFromRound: 3, stockTotal: 3, itemTemplate: { itemId: "unstable-duplicate", name: "Unstable Duplicate", note: "Roll d6. 1-2 backfires, 3-6 works.", quantity: 1 }, useDefinition: { action: "roll", die: 6, successAt: 3, successMessage: "Works. GM has been notified to resolve the copied ability.", failureMessage: "Backfire. GM has been notified that you take the effect instead.", notifyGmAlways: true, consumeOnUse: true }, sortOrder: 480 },
 ];
 
 function createCharacter(seed, index, passwordHash) {
@@ -404,28 +359,8 @@ async function seed() {
     }))
   );
 
-  const shopClueDocs = PLACEHOLDER_SHOP_CLUES.map((clue) => ({
-    ...clue,
-    clueType: "shop",
-    isRevealedGlobally: false,
-    revealedAt: null,
-    revealedByCharacterId: "",
-    ownerCharacterId: "",
-    purchaserCharacterIds: [],
-    tags: ["TODO", "shop-placeholder"],
-    source: "phase-4-placeholder-seed",
-  }));
-
-  await Clue.bulkWrite(
-    shopClueDocs.map((clue) => ({
-      updateOne: {
-        filter: { clueId: clue.clueId },
-        update: { $set: clue },
-        upsert: true,
-      },
-    }))
-  );
-
+  await Clue.deleteMany({ clueType: "shop" });
+  await ShopEntry.deleteMany({});
   await ShopEntry.bulkWrite(
     PLACEHOLDER_SHOP_ENTRIES.map((entry) => ({
       updateOne: {
@@ -435,6 +370,8 @@ async function seed() {
       },
     }))
   );
+
+  await InboxMessage.deleteMany({});
 
   await GameState.updateOne(
     { key: "main" },
@@ -457,7 +394,7 @@ async function seed() {
     { upsert: true }
   );
 
-  console.log(`Seed complete: ${characterDocs.length} characters, ${clueDocs.length} global clues, ${PLACEHOLDER_SHOP_ENTRIES.length} shop entries, and game state.`);
+  console.log(`Seed complete: ${characterDocs.length} characters, ${clueDocs.length} global clues, ${PLACEHOLDER_SHOP_ENTRIES.length} shop entries, cleared inbox notifications, and game state.`);
 }
 
 seed().catch((error) => {

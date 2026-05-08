@@ -231,13 +231,41 @@
                                 <span class="detail-toggle-icon" :class="{ 'is-open': sections.inventory }">+</span>
                             </button>
                             <div class="detail-content" x-show="sections.inventory" x-transition>
+                                <div class="shop-notice mb-3" x-show="useNotice" x-cloak>
+                                    <p class="mb-0" x-text="useNotice"></p>
+                                </div>
+                                <div class="alert alert-danger mb-3" x-show="useError" x-cloak>
+                                    <p class="mb-0" x-text="useError"></p>
+                                </div>
                                 <div class="detail-card-grid">
-                                    <template x-for="(item, index) in createListItems(character?.inventory)" :key="`inventory-${index}`">
+                                    <template x-for="(item, index) in character?.inventory || []" :key="`inventory-${item.itemId || index}`">
                                         <div class="detail-chip">
-                                            <p class="mb-0" x-html="formatText(item)"></p>
+                                            <p class="mb-2" x-html="formatText(item)"></p>
+                                            <div class="mb-3" x-show="isPoisonInventoryItem(item)" x-cloak>
+                                                <label class="form-label" :for="`inventory-target-${item.itemId}`">Target</label>
+                                                <select
+                                                    class="form-control dark-select"
+                                                    :id="`inventory-target-${item.itemId}`"
+                                                    x-model="selectedInventoryTargets[item.itemId]"
+                                                    :disabled="isUsingItem"
+                                                >
+                                                    <option value="">Choose a character</option>
+                                                    <template x-for="target in poisonTargets" :key="target.id">
+                                                        <option :value="target.id" x-text="targetLabel(target)"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="btn btn-court btn-sm"
+                                                x-show="canUseInventoryItem(item)"
+                                                :disabled="isUsingItem"
+                                                @click="useInventoryItem(item)"
+                                                x-text="isUsingItem ? 'Using...' : 'Use Item'"
+                                            ></button>
                                         </div>
                                     </template>
-                                    <p class="text-muted mb-0" x-show="!createListItems(character?.inventory).length">No inventory available.</p>
+                                    <p class="text-muted mb-0" x-show="!(character?.inventory || []).length">No inventory available.</p>
                                 </div>
                             </div>
                         </article>

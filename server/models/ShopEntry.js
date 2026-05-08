@@ -52,10 +52,55 @@ const shopEntrySchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    category: {
+      type: String,
+      default: "Items",
+      trim: true,
+      index: true,
+    },
+    availableFromRound: {
+      type: Number,
+      default: 1,
+      min: 1,
+      index: true,
+    },
+    availableToRound: {
+      type: Number,
+      default: 0,
+      min: 0,
+      index: true,
+    },
     price: {
       type: mongoose.Schema.Types.Mixed,
       required: true,
       default: () => ({ gold: 0, silver: 0 }),
+    },
+    priceScaling: {
+      type: Boolean,
+      default: true,
+    },
+    favorRequired: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    stockTotal: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    stockPerRound: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    oncePerCharacterPerRound: {
+      type: Boolean,
+      default: false,
+    },
+    useDefinition: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     itemTemplate: {
       type: itemTemplateSchema,

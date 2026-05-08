@@ -165,7 +165,7 @@
         <div class="shop-section-heading">
           <h2 class="section-title mb-1">Items</h2>
           <p class="text-muted mb-0">
-            Consumable placeholders that add to your private inventory.
+            Purchased items are added to your inventory. Use them from your character sheet.
           </p>
         </div>
         <div class="row g-4 mb-5">
@@ -176,38 +176,60 @@
                 :id="`shop-entry-${entry.id}`"
               >
                 <div class="shop-entry-header">
-                  <p class="database-access-kicker mb-2">Item</p>
+                  <p class="database-access-kicker mb-2" x-text="entry.category || 'Item'"></p>
                   <span
                     class="shop-price"
                     x-text="formatPrice(entry.price)"
                   ></span>
                 </div>
                 <h3 class="card-title mb-3" x-text="entry.name"></h3>
-                <p class="character-blurb mb-4" x-text="entry.description"></p>
+                <p class="character-blurb mb-4" x-html="formatDescription(entry)"></p>
                 <p
                   class="shop-entry-note mb-4"
                   x-show="entry.itemTemplate?.note"
                   x-text="entry.itemTemplate?.note"
                 ></p>
-                <div class="mb-4" x-show="isPoisonEntry(entry)" x-cloak>
-                  <label class="form-label" :for="`poison-target-${entry.id}`"
-                    >Target</label
-                  >
-                  <select
-                    class="form-control dark-select"
-                    :id="`poison-target-${entry.id}`"
-                    x-model="selectedTargets[entry.id]"
-                    :disabled="!loggedIn || isPurchasing"
-                  >
-                    <option value="">Choose a character</option>
-                    <template x-for="target in poisonTargets" :key="target.id">
-                      <option
-                        :value="target.id"
-                        x-text="targetLabel(target)"
-                      ></option>
-                    </template>
-                  </select>
+                <button
+                  type="button"
+                  class="btn btn-court w-100"
+                  @click="purchase(entry)"
+                  :disabled="isPurchasing"
+                  x-text="isPurchasing ? 'Processing...' : purchaseLabel(entry)"
+                ></button>
+              </article>
+            </div>
+          </template>
+        </div>
+      </section>
+
+      <section x-show="!isLoading && !error && blackMarketEntries.length" x-cloak>
+        <div class="shop-section-heading">
+          <h2 class="section-title mb-1">Black Market</h2>
+          <p class="text-muted mb-0">
+            Restricted goods available in the current round.
+          </p>
+        </div>
+        <div class="row g-4 mb-5">
+          <template x-for="entry in blackMarketEntries" :key="entry.id">
+            <div class="col-12 col-md-6 col-xl-4">
+              <article
+                class="dark-card rounded-3 shop-entry-card h-100 p-4"
+                :id="`shop-entry-${entry.id}`"
+              >
+                <div class="shop-entry-header">
+                  <p class="database-access-kicker mb-2">Black Market</p>
+                  <span
+                    class="shop-price"
+                    x-text="formatPrice(entry.price)"
+                  ></span>
                 </div>
+                <h3 class="card-title mb-3" x-text="entry.name"></h3>
+                <p class="character-blurb mb-4" x-html="formatDescription(entry)"></p>
+                <p
+                  class="shop-entry-note mb-4"
+                  x-show="entry.itemTemplate?.note"
+                  x-text="entry.itemTemplate?.note"
+                ></p>
                 <button
                   type="button"
                   class="btn btn-court w-100"

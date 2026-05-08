@@ -835,6 +835,18 @@ function loggedInCharacterDetails() {
       relationships: false,
       clues: false,
     },
+    selectedInventoryTargets: {},
+    poisonTargets: [],
+    isUsingItem: false,
+    useNotice: "",
+    useError: "",
+
+    async init() {
+      this.$watch("$store.auth.character?.id", () => {
+        this.loadPoisonTargets();
+      });
+      await this.loadPoisonTargets();
+    },
 
     get character() {
       return this.$store.auth.character;
@@ -846,15 +858,99 @@ function loggedInCharacterDetails() {
 
     toggleSection(section) {
       this.sections[section] = !this.sections[section];
+
+      if (section === "inventory" && this.sections.inventory) {
+        this.loadPoisonTargets();
+      }
     },
 
     formatMoney(value) {
       return formatCurrency(value);
     },
 
+    async loadPoisonTargets() {
+      if (!this.$store.auth.loggedIn) {
+        this.poisonTargets = [];
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/shop/targets?effect=poison", {
+          headers: {
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        this.poisonTargets = response.ok ? data.targets || [] : [];
+      } catch (error) {
+        this.poisonTargets = [];
+      }
+    },
+
+    isPoisonInventoryItem(item) {
+      return item?.itemId === "poison-vial";
+    },
+
+    canUseInventoryItem(item) {
+      return Boolean(item?.itemId);
+    },
+
+    targetLabel(target) {
+      return `${target.name} - ${target.player} - ${target.faction}`;
+    },
+
+    async useInventoryItem(item) {
+      this.useNotice = "";
+      this.useError = "";
+
+      if (!item?.itemId || this.isUsingItem) {
+        return;
+      }
+
+      if (this.isPoisonInventoryItem(item) && !this.selectedInventoryTargets[item.itemId]) {
+        this.useError = "Choose a poison target.";
+        return;
+      }
+
+      this.isUsingItem = true;
+
+      try {
+        const response = await fetch(`/api/shop/items/${item.itemId}/use`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+          body: JSON.stringify({
+            targetCharacterId: this.selectedInventoryTargets[item.itemId] || "",
+          }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to use item.");
+        }
+
+        this.$store.auth.character = data.character;
+        this.selectedInventoryTargets[item.itemId] = "";
+        this.useNotice = data.result?.roll
+          ? `${data.result.itemName}: rolled ${data.result.roll.value} on a d${data.result.roll.die}. ${data.result.message}`
+          : data.result?.message || "Item used.";
+      } catch (error) {
+        this.useError = error.message || "Unable to use item.";
+      } finally {
+        this.isUsingItem = false;
+      }
+    },
+
     formatText(text) {
       if (!text) {
         return "No information available.";
+      }
+
+      if (typeof text === "object" && !Array.isArray(text)) {
+        return this.escapeHtml(this.formatListItem(text));
       }
 
       if (Array.isArray(text)) {
@@ -904,7 +1000,8 @@ function loggedInCharacterDetails() {
       }
 
       if (typeof item === "object") {
-        return [item.name, item.note, item.description]
+        const quantity = item.quantity && item.quantity !== 1 ? `x${item.quantity}` : "";
+        return [item.name, quantity, item.note, item.description]
           .filter(Boolean)
           .join(": ")
           .trim();
@@ -1352,6 +1449,7 @@ function adminDashboard() {
 function shopPage() {
   return {
     entries: [],
+    currentRound: 1,
     isLoading: true,
     isPurchasing: false,
     error: "",
@@ -1383,6 +1481,7 @@ function shopPage() {
         }
 
         this.entries = data.entries || [];
+        this.currentRound = data.currentRound || 1;
       } catch (error) {
         this.error = error.message || "Unable to load the shop.";
       } finally {
@@ -1442,7 +1541,11 @@ function shopPage() {
     },
 
     get itemEntries() {
-      return this.entries.filter((entry) => entry.type === "item");
+      return this.entries.filter((entry) => entry.type === "item" && entry.category !== "Black Market");
+    },
+
+    get blackMarketEntries() {
+      return this.entries.filter((entry) => entry.type === "item" && entry.category === "Black Market");
     },
 
     get clueEntries() {
@@ -1466,7 +1569,7 @@ function shopPage() {
     },
 
     isPoisonEntry(entry) {
-      return entry?.itemTemplate?.itemId === "sample-poison";
+      return entry?.itemTemplate?.itemId === "poison-vial";
     },
 
     targetLabel(target) {
@@ -1482,19 +1585,10 @@ function shopPage() {
         return;
       }
 
-      if (this.isPoisonEntry(entry) && !this.selectedTargets[entry.id]) {
-        alert("Choose who will receive the poison.");
-        return;
-      }
-
       this.isPurchasing = true;
 
       try {
         const payload = { shopId: entry.id };
-
-        if (this.isPoisonEntry(entry)) {
-          payload.targetCharacterId = this.selectedTargets[entry.id];
-        }
 
         const response = await fetch("/api/shop/purchase", {
           method: "POST",
@@ -1512,7 +1606,6 @@ function shopPage() {
 
         this.$store.auth.character = data.character;
         this.notice = data.message || "Purchase complete.";
-        this.selectedTargets[entry.id] = "";
 
         if (data.clue) {
           this.purchasedClues = {
@@ -1558,6 +1651,34 @@ function shopPage() {
       }
 
       return `Purchase for ${this.formatPrice(entry.price)}`;
+    },
+
+    formatDescription(entry) {
+      const description = this.escapeHtml(entry.description || "");
+      const favor = entry.favorRequired
+        ? `<br><strong>Requires ${entry.favorRequired} Favor${entry.favorRequired === 1 ? "" : "s"}.</strong>`
+        : "";
+      const stock = this.stockLabel(entry);
+
+      return [description, favor, stock ? `<br><span>${this.escapeHtml(stock)}</span>` : ""].join("");
+    },
+
+    stockLabel(entry) {
+      const labels = [];
+
+      if (entry.remainingTotal !== null && entry.remainingTotal !== undefined) {
+        labels.push(`${entry.remainingTotal} left for the game`);
+      }
+
+      if (entry.remainingThisRound !== null && entry.remainingThisRound !== undefined) {
+        labels.push(`${entry.remainingThisRound} left this round`);
+      }
+
+      if (entry.oncePerCharacterPerRound) {
+        labels.push("Limit: once per character per round");
+      }
+
+      return labels.join(" | ");
     },
 
     formatClueBody(body) {

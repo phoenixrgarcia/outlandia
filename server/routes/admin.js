@@ -8,7 +8,7 @@ const { requireAuth, requireAdmin, requireRoundAdvancer } = require("../middlewa
 const { logAdminAction } = require("../services/eventLog");
 const { createAndEmitInboxMessage } = require("../services/inbox");
 const { emitToCharacter } = require("../services/realtime");
-const { normalizeCurrency } = require("../utils/currency");
+const { normalizeCurrency, currency } = require("../utils/currency");
 
 const router = express.Router();
 
@@ -205,6 +205,46 @@ router.post("/round/advance", requireAuth, requireAdmin, requireRoundAdvancer, e
     previousGameState.roundStartedAt = new Date();
     previousGameState.updatedBy = req.auth.characterId;
     await previousGameState.save();
+
+    if (previousGameState.currentRound === 3) {
+      const upkeepCharacters = await Character.find({
+        isAdmin: false,
+        faction: { $ne: "GMs" },
+      }).select("characterId name money");
+      const paidUpkeep = [];
+
+      await Promise.all(
+        upkeepCharacters.map(async (character) => {
+          const money = normalizeCurrency(character.money);
+
+          if (money.gold < 5) {
+            return;
+          }
+
+          character.money = currency(money.gold - 5, money.silver);
+          character.markModified("money");
+          await character.save();
+          paidUpkeep.push(character.characterId);
+          await createAndEmitInboxMessage({
+            characterId: character.characterId,
+            title: "Round 3 Upkeep Paid",
+            body: "Five gold has been paid for the round 3 upkeep.",
+            type: "round",
+          });
+        }),
+      );
+
+      await logAdminAction(req, {
+        action: "round.upkeep.applied",
+        targetType: "gameState",
+        targetId: previousGameState.key,
+        details: {
+          round: previousGameState.currentRound,
+          goldCharged: 5,
+          paidCharacterIds: paidUpkeep,
+        },
+      });
+    }
 
     await logAdminAction(req, {
       action: "round.advanced",
