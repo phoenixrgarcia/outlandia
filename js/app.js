@@ -15,89 +15,69 @@ const LEGACY_CHARACTER_STORAGE_KEY = "loggedInCharacter";
 const SILVER_PER_GOLD = 5;
 let socketClientLoadPromise = null;
 
-const PLACEHOLDER_CHARACTER_SEEDS = [
-  ["gm_01", "Placeholder GM 01", "GM", "GMs"],
-  ["royalty_01", "Placeholder Royalty 01", "Monarch", "Royalty"],
-  ["royalty_02", "Placeholder Royalty 02", "Heir", "Royalty"],
-  ["royalty_03", "Placeholder Royalty 03", "Consort", "Royalty"],
-  ["royalty_04", "Placeholder Royalty 04", "Noble", "Royalty"],
-  ["court_01", "Placeholder Courtier 01", "Chancellor", "Royal Court"],
-  ["court_02", "Placeholder Courtier 02", "Diplomat", "Royal Court"],
-  ["court_03", "Placeholder Courtier 03", "Treasurer", "Royal Court"],
-  ["court_04", "Placeholder Courtier 04", "Advisor", "Royal Court"],
-  ["court_05", "Placeholder Courtier 05", "Scribe", "Royal Court"],
-  ["guard_01", "Placeholder Guard 01", "Captain", "The Guards"],
-  ["guard_02", "Placeholder Guard 02", "Knight", "The Guards"],
-  ["guard_03", "Placeholder Guard 03", "Sentinel", "The Guards"],
-  ["guard_04", "Placeholder Guard 04", "Scout", "The Guards"],
-  ["guard_05", "Placeholder Guard 05", "Jailer", "The Guards"],
-  [
-    "alchemist_01",
-    "Placeholder Alchemist 01",
-    "Alchemist",
-    "Alchemical Expressionist",
-  ],
-  [
-    "alchemist_02",
-    "Placeholder Alchemist 02",
-    "Apothecary",
-    "Alchemical Expressionist",
-  ],
-  [
-    "alchemist_03",
-    "Placeholder Alchemist 03",
-    "Transmuter",
-    "Alchemical Expressionist",
-  ],
-  [
-    "alchemist_04",
-    "Placeholder Alchemist 04",
-    "Researcher",
-    "Alchemical Expressionist",
-  ],
-  ["magician_01", "Placeholder Magician 01", "Wizard", "Magicians"],
-  ["magician_02", "Placeholder Magician 02", "Illusionist", "Magicians"],
-  ["magician_03", "Placeholder Magician 03", "Diviner", "Magicians"],
-  ["magician_04", "Placeholder Magician 04", "Enchanter", "Magicians"],
-  ["magician_05", "Placeholder Magician 05", "Archivist", "Magicians"],
-  ["clergy_01", "Placeholder Clergy 01", "High Priest", "The Clergy"],
-  ["clergy_02", "Placeholder Clergy 02", "Acolyte", "The Clergy"],
-  ["clergy_03", "Placeholder Clergy 03", "Oracle", "The Clergy"],
-  ["clergy_04", "Placeholder Clergy 04", "Chaplain", "The Clergy"],
-  ["worker_01", "Placeholder Worker 01", "Steward", "The Workers"],
-  ["worker_02", "Placeholder Worker 02", "Cook", "The Workers"],
-  ["worker_03", "Placeholder Worker 03", "Courier", "The Workers"],
-  ["worker_04", "Placeholder Worker 04", "Stablehand", "The Workers"],
-  ["worker_05", "Placeholder Worker 05", "Artisan", "The Workers"],
-  ["street_01", "Placeholder Street 01", "Merchant", "The Streets"],
-  ["street_02", "Placeholder Street 02", "Performer", "The Streets"],
-  ["street_03", "Placeholder Street 03", "Informant", "The Streets"],
-  ["street_04", "Placeholder Street 04", "Beggar", "The Streets"],
-  ["street_05", "Placeholder Street 05", "Traveler", "The Streets"],
-  ["street_06", "Placeholder Street 06", "Guild Agent", "The Streets"],
-  ["street_07", "Placeholder Street 07", "Fence", "The Streets"],
+const CHARACTER_SEEDS = [
+  ["gm_abbo_arnulf", "Abbo Arnulf", "GM", "GMs", "Noah"],
+  ["gm_alaric_arntrude", "Joeqen U’gah", "GM / Shopkeep first shift", "GMs", "Nate R"],
+  ["gm_percival_rondtabel", "Percival RondTabel", "GM", "GMs", "EXTRA"],
+  ["gm_wolfram_lodge", "Wolfram Lodge", "GM", "GMs", "CJ"],
+  ["gm_noelle_nicaise", "Noëlle Nicaise", "GM", "GMs", "Sam"],
+  ["royalty_sabine_valois", "Sabine Valois", "Queen Ruler of Outlandia", "Royalty", "Jen"],
+  ["royalty_yohan_valois", "Yohan Valois", "King Ruler of Outlandia", "Royalty", "Braydon"],
+  ["court_fitz_herald", "Fitz Herald", "Archer", "Royal Court", "EXTRA"],
+  ["court_livio_nivio", "Livio Nivio", "Armorer", "Royal Court", "EXTRA"],
+  ["court_hugh_basterd", "Hugh Basterd", "Bard/Jester's Assistant", "Royal Court", "Nate J"],
+  ["court_hildegund_hundolf", "Hyde Hundolf the Hagiographer", "Scribe", "Royal Court", "Dominic"],
+  ["guard_sigrid_tomb", "Sigrid Tomb", "Royal Guard", "The Guards", "Makhai"],
+  ["guard_raphael_regalis", "Raphael Regalis", "Barbarian, Ex-Guardsman", "The Guards", "Alex"],
+  ["guard_van_ailsing", "Van Belsing", "Knight A", "The Guards", "Kayla"],
+  ["guard_rabot_the_brave", "Rabot the Brave", "Knight B", "The Guards", "Carter"],
+  ["guard_durr_vinelight", "Durr Vinelight", "Paladin", "The Guards", "EXTRA"],
+  ["guard_vudo_surebrick", "Vudo Surebrick", "Watchman", "The Guards", "EXTRA"],
+  ["alchemist_attila_bastian", "Attila Bastian", "Botanist", "Alchemical Expressionist", "Jaq"],
+  ["alchemist_pax_patience", "Pax Patience", "Town Kook, Alchemist", "Alchemical Expressionist", "Phoenix"],
+  ["magician_olga_woodland_hearth", "Olga of the Woodland Hearth", "Court Witch", "Magicians", "EXTRA"],
+  ["magician_volkran_channeler", "Volkran the Channeler", "Sorcerer", "Magicians", "EXTRA"],
+  ["magician_marion_bluthers", "Marion Bluthers", "Warlock", "Magicians", "EXTRA"],
+  ["magician_penelope_pura", "Penelope Pura", "Dream Druid (Fey)", "Magicians", "EXTRA"],
+  ["magician_calypso_caspian", "Calypso Caspian", "Sea Druid", "Magicians", "Jax"],
+  ["clergy_raven_ratelm", "Raven Ratelm", "High Priestess (Light Cleric)", "The Clergy", "Makhai's GF"],
+  ["clergy_sidonia_solomona", "Sidonia Lunite", "Twilight Cleric", "The Clergy", "EXTRA"],
+  ["clergy_maura_mary_anna", "Maura Mary-Anna", "Cleric of War", "The Clergy", "EXTRA"],
+  ["worker_solina_suspecta", "Solina Suspecta", "Alewife", "The Workers", "Jenna"],
+  ["worker_wendela_lunites", "Wendela Baker", "Baker", "The Workers", "CC"],
+  ["worker_tyrus_tithe", "Tyrus Tithe", "Blacksmith", "The Workers", "EXTRA"],
+  ["worker_elisanna_einarr", "Elisanna Einarr", "Cobbler", "The Workers", "EXTRA"],
+  ["worker_una_urgellesa", "Úna Urgellesa", "Crier, Horologist", "The Workers", "Melina"],
+  ["worker_viktor_bastian", "Viktor Bastian", "Minstrel (Performer)", "The Workers", "EXTRA"],
+  ["street_darwin_durand", "Darwin Durand", "Beggar", "The Streets", "EXTRA"],
+  ["street_valerius_shadow", "Valerius the Shadow", "Street Urchin", "The Streets", "Katie"],
+  ["street_justa_justice", "Justa Justice", "Rogue", "The Streets", "EXTRA"],
+  ["street_quintina_quintius", "Quintina Quintius", "Thief", "The Streets", "Fae"],
+  ["street_liudmila_lefhild", "Liudmila Lefhild", "Dark Cultist", "The Streets", "EXTRA"],
+  ["street_isabel_einarr", "Isabel Einarr", "Monk/Spymaster", "The Streets", "EXTRA"],
+  ["street_dread_pirate_jewels", "Dread Pirate Jewels", "Raider", "The Streets", "EXTRA"]
 ];
 
 function createPlaceholderCharacter(seed, index) {
-  const [id, name, characterClass, faction] = seed;
+  const [id, name, characterClass, faction, player] = seed;
   const number = String(index + 1).padStart(2, "0");
 
   return {
     id,
     name,
-    player: "Player " + number,
+    player: player || "Player " + number,
     class: characterClass,
     className: characterClass,
     faction,
-    publicBlurb: "TODO public character blurb placeholder for " + name + ".",
-    blurb: "TODO public character blurb placeholder for " + name + ".",
-    isDead: id === "street_07",
-    image: "default.png",
+    publicBlurb: "",
+    blurb: "",
+    isDead: false,
+    image: "default.png"
   };
 }
 
 const CHARACTERS = Object.fromEntries(
-  PLACEHOLDER_CHARACTER_SEEDS.map((seed, index) => {
+  CHARACTER_SEEDS.map((seed, index) => {
     const character = createPlaceholderCharacter(seed, index);
     return [character.id, character];
   }),
@@ -299,14 +279,20 @@ function createAuthStore() {
     inboxError: "",
     socket: null,
     realtimeConnected: false,
+    isInitialized: false,
 
     async init() {
       this.showLogoutConfirm = false;
       localStorage.removeItem(LEGACY_CHARACTER_STORAGE_KEY);
-      await this.fetchPublicCharacters();
 
-      if (this.authToken) {
-        await this.restoreSessionFromToken();
+      try {
+        await this.fetchPublicCharacters();
+
+        if (this.authToken) {
+          await this.restoreSessionFromToken();
+        }
+      } finally {
+        this.isInitialized = true;
       }
     },
 
@@ -871,6 +857,16 @@ function loggedInCharacterDetails() {
         return "No information available.";
       }
 
+      if (Array.isArray(text)) {
+        const items = text
+          .map((item) => this.escapeHtml(String(item || "").trim()))
+          .filter(Boolean);
+
+        return items.length
+          ? items.join("<br>")
+          : "No information available.";
+      }
+
       return this.escapeHtml(String(text)).replace(/\n/g, "<br>");
     },
 
@@ -935,7 +931,25 @@ function databaseAccess() {
     error: "",
 
     async init() {
+      await this.waitForAuthInitialization();
       await this.loadGlobalClues();
+    },
+
+    waitForAuthInitialization() {
+      return new Promise((resolve) => {
+        const check = () => {
+          const auth = Alpine.store("auth");
+
+          if (!auth?.authToken || auth.isInitialized) {
+            resolve();
+            return;
+          }
+
+          window.setTimeout(check, 50);
+        };
+
+        check();
+      });
     },
 
     async loadGlobalClues() {
@@ -943,7 +957,14 @@ function databaseAccess() {
       this.error = "";
 
       try {
-        const response = await fetch("/api/clues/global");
+        const token = Alpine.store("auth")?.authToken;
+        const response = await fetch("/api/clues/global", {
+          headers: token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {},
+        });
         const data = await response.json();
 
         if (!response.ok) {
@@ -1601,8 +1622,7 @@ function charactersDisplay() {
               character.name,
               character.player,
               character.class,
-              character.faction,
-              character.publicBlurb,
+              character.faction
             ]
               .filter(Boolean)
               .some((value) => this.normalizeSearch(value).includes(search));

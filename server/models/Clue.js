@@ -1,5 +1,28 @@
 const mongoose = require("mongoose");
 
+const audienceSectionSchema = new mongoose.Schema(
+  {
+    label: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    body: {
+      type: String,
+      default: "",
+    },
+    factions: {
+      type: [String],
+      default: [],
+    },
+    classes: {
+      type: [String],
+      default: [],
+    },
+  },
+  { _id: false }
+);
+
 const clueSchema = new mongoose.Schema(
   {
     clueId: {
@@ -22,6 +45,16 @@ const clueSchema = new mongoose.Schema(
     body: {
       type: String,
       default: "",
+    },
+    availableRound: {
+      type: Number,
+      default: 1,
+      min: 1,
+      index: true,
+    },
+    audienceSections: {
+      type: [audienceSectionSchema],
+      default: [],
     },
     clueType: {
       type: String,

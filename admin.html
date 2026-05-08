@@ -500,6 +500,11 @@
           x-cloak
         >
           <h2 class="section-title mb-3">Global Clue Reveals</h2>
+          <p class="text-muted mb-3">
+            Showing global clues available through round
+            <strong x-text="summary?.gameState?.currentRound || 1"></strong>.
+            Earlier unrevealed clues remain available in later rounds.
+          </p>
           <div class="row g-3">
             <template x-for="clue in globalClues" :key="clue.id">
               <div class="col-12 col-lg-4">
@@ -509,7 +514,13 @@
                     x-text="clue.isRevealedGlobally ? 'Revealed' : 'Hidden'"
                   ></p>
                   <h3 class="section-title mb-2" x-text="clue.title"></h3>
+                  <p class="dossier-kicker mb-2" x-text="`Round ${clue.availableRound || 1}`"></p>
                   <p class="text-muted" x-text="clue.summary"></p>
+                  <p
+                    class="text-muted"
+                    x-show="clue.audienceSections?.length"
+                    x-text="`${clue.audienceSections.length} faction-specific note${clue.audienceSections.length === 1 ? '' : 's'}`"
+                  ></p>
                   <button
                     type="button"
                     class="btn btn-court w-100"

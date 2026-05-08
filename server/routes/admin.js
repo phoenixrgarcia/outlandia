@@ -68,6 +68,7 @@ function toAdminClue(clue) {
     id: clue.clueId,
     title: clue.title,
     summary: clue.summary,
+    availableRound: clue.availableRound || 1,
     clueType: clue.clueType,
     isRevealedGlobally: clue.isRevealedGlobally,
     revealedAt: clue.revealedAt,
@@ -76,6 +77,7 @@ function toAdminClue(clue) {
     purchaserCharacterIds: clue.purchaserCharacterIds,
     price: normalizeCurrency(clue.price),
     tags: clue.tags,
+    audienceSections: clue.audienceSections || [],
   };
 }
 
@@ -174,12 +176,19 @@ router.get("/characters", requireAuth, requireAdmin, ensureDatabase, async (req,
 
 router.get("/clues", requireAuth, requireAdmin, ensureDatabase, async (req, res, next) => {
   try {
+    const gameState = await GameState.getSingleton().lean();
+    const currentRound = gameState?.currentRound || 1;
     const clues = await Clue.find()
-      .sort({ clueType: 1, title: 1 })
-      .select("clueId title summary clueType isRevealedGlobally revealedAt revealedByCharacterId ownerCharacterId purchaserCharacterIds price tags")
+      .or([
+        { clueType: { $ne: "global" } },
+        { availableRound: { $lte: currentRound } },
+      ])
+      .sort({ clueType: 1, availableRound: 1, title: 1 })
+      .select("clueId title summary availableRound audienceSections clueType isRevealedGlobally revealedAt revealedByCharacterId ownerCharacterId purchaserCharacterIds price tags")
       .lean();
 
     return res.json({
+      currentRound,
       clues: clues.map(toAdminClue),
     });
   } catch (error) {
@@ -544,19 +553,29 @@ router.patch("/clues/:id/reveal", requireAuth, requireAdmin, ensureDatabase, asy
       });
     }
 
+    const gameState = await GameState.getSingleton();
+    const currentRound = gameState?.currentRound || 1;
+
+    if (clue.clueType === "global" && (clue.availableRound || 1) > currentRound) {
+      return res.status(400).json({
+        error: `This clue is not available until round ${clue.availableRound}.`,
+      });
+    }
+
     const previousRevealState = clue.isRevealedGlobally;
     clue.isRevealedGlobally = reveal;
     clue.revealedAt = reveal ? new Date() : undefined;
     clue.revealedByCharacterId = reveal ? req.auth.characterId : "";
     await clue.save();
 
-    await GameState.updateOne(
-      { key: "main" },
-      reveal
-        ? { $addToSet: { globalClueIds: clue.clueId } }
-        : { $pull: { globalClueIds: clue.clueId } },
-      { upsert: true }
-    );
+    if (gameState) {
+      if (reveal) {
+        gameState.globalClueIds = Array.from(new Set([...(gameState.globalClueIds || []), clue.clueId]));
+      } else {
+        gameState.globalClueIds = (gameState.globalClueIds || []).filter((clueId) => clueId !== clue.clueId);
+      }
+      await gameState.save();
+    }
     await logAdminAction(req, {
       action: "clue.reveal.changed",
       targetType: "clue",

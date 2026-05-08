@@ -19,7 +19,7 @@ Planned high-level changes:
 
 - Medieval fantasy royal court visual theme
 - Searchable character login for around 40 playable characters
-- Placeholder character factions: Royal Court, Laborers, Knights, Fae
+- Seeded character factions: GMs, Royalty, Royal Court, The Guards, Alchemical Expressionist, Magicians, The Clergy, The Workers, The Streets
 - Private character sections for inventory, goals, secret, twist, and relationships
 - Node.js and Express backend
 - MongoDB-backed game data

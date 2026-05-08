@@ -80,6 +80,69 @@
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
 }
 
+.lore-faction-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.lore-faction-card {
+    background: rgba(255, 250, 236, 0.62);
+    border: 1px solid var(--court-border);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.lore-faction-card h3,
+.lore-isles dt {
+    color: var(--court-secondary);
+    font-family: 'Georgia', serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.08rem;
+    margin-bottom: 0.45rem;
+    text-transform: uppercase;
+}
+
+.lore-faction-card p,
+.lore-copy p,
+.lore-isles dd {
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.lore-faction-card p,
+.lore-isles dd {
+    margin-bottom: 0;
+}
+
+.lore-copy {
+    max-width: 68rem;
+}
+
+.lore-copy p {
+    margin-bottom: 1.1rem;
+}
+
+.lore-isles {
+    border-top: 1px solid var(--court-border);
+    padding-top: 1.5rem;
+}
+
+.lore-isles dl {
+    display: grid;
+    gap: 0.85rem;
+    margin-bottom: 0;
+}
+
+.lore-isles dl > div {
+    background: rgba(255, 250, 236, 0.5);
+    border: 1px solid rgba(108, 82, 44, 0.26);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
 .clue-hint{
     color: var(--royal-burgundy);
 }
@@ -1119,6 +1182,12 @@ h1, h2, h3, h4, h5, h6 {
 .dossier-subtitle {
     font-size: 1rem;
     letter-spacing: 0.16rem;
+}
+
+.dossier-public-blurb {
+    max-width: 48rem;
+    color: var(--text-muted);
+    font-size: 1.05rem;
 }
 
 .dead-state-banner {

@@ -107,7 +107,7 @@
                 :placeholder="window.innerWidth <= 576 ? '-- Search roster --' : '-- Search name, player, class, or faction --'"
               />
               <p class="form-helper mt-2 mb-0">
-                Search by character, player, class, faction, or public blurb.
+                Search by character, player, class, or faction.
               </p>
             </div>
 
@@ -179,6 +179,7 @@
                           ></small>
                         </p>
                         <p
+                          x-show="character.publicBlurb || character.blurb"
                           class="character-blurb"
                           x-text="character.publicBlurb || character.blurb"
                         ></p>

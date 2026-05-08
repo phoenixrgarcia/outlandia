@@ -1,0 +1,141 @@
+Heat Fracture Pattern: - Requires medical knowledge to comprehend - PINK - IN WORLD
+Upon investigating the body you notice…
+“The floor beneath the Jester is cracked outward…not burned inward. The heat came from inside the body…”
+Info for MEDICS: This resembles documented reactions from certain unstable alchemical medicinal compounds in a rare treatment known to trigger extreme internal heat when improperly closed.
+
+
+
+
+ARCANE AMPLIFICATION BACKFIRE - PINK - Only comprehensible by those with magical training - IN WORLD
+This appears to be a page from an arcane user’s spell book…
+“Amplification runes are unstable when NATURAL BALANCE is disturbed. If improperly inscribed, they can cause the substance to ‘turn inward’. 
+Info for MAGICS:These effects are often seen when precision work is rushed or interrupted.” 
+
+
+
+SECOND VIAL’S RUMOR: - PINK -  From Bard 
+“There was another vial…I saw it earlier today!”
+
+
+
+PARTIAL FORMULA: - ORANGE - IN WORLD
+Upon investigating the torn pieces of paper a few lines stick out to you:
+“Strain α: the material behaves unpredictably under pressure…
+Originally stabilized for controlled medical application…
+Improper ingestion—especially sudden or forced—may result in catastrophic internal reaction.” 
+ “Strain β: reacts violently to cold…
+Originally stabilized for at-home pain relief…
+Ingestion method recommended.”
+“Strain Ω  is inert under pressure…
+Originally stabilized for cooking applications.
+Food-safe but washing recommended.”
+
+
+
+CLOCKWORK RESIDUE - Recognizable by Undercity Dwellers  - ORANGE - IN WORLD
+“There are traces of oil, dust, and grime embedded in the gloves…
+For UNDERCITY: similar to the accumulates that someone who works on mechanical devices would collect.”
+
+
+
+TAMPERED CHALICE THEORY - PINK - Recognizable by royal staff - IN WORLD
+One of the investigative guards dropped this earlier. Upon reading the report your eyes fall upon a specific section…
+“Residue on the Queen’s chalice suggests prior contamination. 
+For ROYAL STAFF: The substance appears to have degraded or been removed hesitantly.
+Possibly transferred.”
+
+MISSING ORDER AUTHORIZATION: - Recognizable by royal staff - PINK - IN WORLD
+“This order is missing something…
+For ROYAL STAFF:  intermediate authorization stamp.”
+
+
+
+SCRIBE LOGS - ORANGE - IN WORLD
+Entry — 11th Day of Maie
+Request submitted on behalf of a court entertainer for emergency access to restricted treatment compounds.
+Request denied pending financial review.
+Authorization incomplete.
+
+—
+
+Entry — 14th Day of Maie
+Directive 7B reviewed under Crown advisement.
+Additional surveillance approved for designated personnel connected to court functions.
+Names omitted from copied record.
+
+—
+Entry — 16th Day of Maie
+Kitchen access request approved for performance preparations.
+Authorization seal appears altered after filing.
+Margin note:
+“Approved verbally. Do not delay the performance.”
+
+—
+
+Entry — 17th Day of Maie
+Inquiry submitted regarding missing inventory from medicinal storage.
+Investigation suspended by higher authority before completion.
+
+—
+
+Entry — Undated
+Several records referencing royal medical expenditures have been removed.
+Remaining files indicate increased restrictions on treatment access for non-royal citizens following recent treasury shortages.
+Final Attached Note
+“Too many corrections.
+Too many missing signatures.
+Someone wants this to disappear.”
+
+
+COURT INCIDENT LOG - ORANGE - IN WORLD
+Filed Following the Banquet Disturbance
+Compiled from witness statements, guard observations, and servant testimony.
+Approximate Sequence of Events
+Prior to the Performance
+The Jester was observed entering and exiting the kitchen area multiple times under approved authorization. Kitchen staff report unusual agitation and secrecy regarding performance preparations.
+During the Banquet
+Witnesses report the Jester carrying a small vial believed to be part of a stage performance involving colored liquid or “volatile dye.”
+Several attendees observed a verbal confrontation shortly before the incident. Exact details remain disputed.
+Attached is a MAP OF ASSIGNMENTS
+Physical map showing who was assigned where
+
+
+Escalation - ORANGE - IN WORLD
+A loud disturbance was heard near the kitchen entrance. One witness reports the sound of splintering wood shortly before shouting began.
+At least one guard claims an unidentified individual demanded proof that the substance posed no threat to the Crown.
+For UNDERCITY: Consumption of Substance
+Accounts conflict regarding whether the Jester consumed the vial voluntarily.
+Several witnesses insist he appeared reluctant moments beforehand.
+Damage to nearby flooring suggests heat originated from within the body rather than from external ignition.
+
+
+
+GUARD INTERFERENCE ESCALATION - ORANGE - IN WORLD
+One of the investigative guards dropped this earlier. While reading the report your eyes fall upon a specific section…
+“Witness accounts suggest the vial was forcibly consumed under duress. Sudden ingestion of unstable compounds can drastically alter their effects.” 
+
+
+
+FORCED ENTRY EVIDENCE - PINK - IN WORLD
+Upon investigating the kitchen door you notice…
+“The kitchen door hinge is bent way past the wrong way. Someone forced entry inside…
+Evidence Recovered
+Recovered from scene:
+shattered vial fragments
+Traces of alchemical residue
+Signs of physical struggle near kitchen entrance
+Witness statements regarding the number of vials present remain inconsistent.
+Additional Notes - 
+The Queen’s chalice has been removed for further examination.
+Several authorization records appear incomplete or improperly filed.
+Investigation remains ongoing.”
+MOTIVE
+
+
+
+
+GUARD INCIDENT REPORT - ORANGE - IN WORLD
+Investigating the partial report, a few sentences stand out to you…
+“Forced entry found at kitchen door.
+Eye witness claims victim declared the vial was harmless stage dye. 
+The intruder demanded a demonstration to verify non-threat…”

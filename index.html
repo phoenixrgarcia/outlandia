@@ -148,7 +148,6 @@
                             <p class="text-muted mb-3">
                                 <small>Class: <strong x-text="selectedCharacter.class || selectedCharacter.className"></strong></small>
                             </p>
-                            <p class="character-blurb" x-text="selectedCharacter.publicBlurb || selectedCharacter.blurb"></p>
                             <button
                                 x-show="!$store.auth.loggedIn"
                                 class="btn btn-court mt-3 w-100"
@@ -183,6 +182,11 @@
                         <p class="subtitle dossier-subtitle mb-0">
                             Played by <span x-text="character?.player"></span>
                         </p>
+                        <p
+                            x-show="character?.publicBlurb"
+                            class="character-blurb dossier-public-blurb mt-3 mb-0"
+                            x-html="formatText(character?.publicBlurb)"
+                        ></p>
 
                         <div class="dead-state-banner mt-4" x-show="character?.isDead" role="status">
                             This character is marked dead for the current game state.
@@ -280,7 +284,14 @@
                                 <span class="detail-toggle-icon" :class="{ 'is-open': sections.secret }">+</span>
                             </button>
                             <div class="detail-content" x-show="sections.secret" x-transition>
-                                <div class="detail-copy" x-html="formatText(character?.secret)"></div>
+                                <div class="detail-card-grid">
+                                    <template x-for="(secret, index) in createListItems(character?.secret)" :key="`secret-${index}`">
+                                        <div class="detail-chip">
+                                            <p class="mb-0" x-html="formatText(secret)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.secret).length">No secret available.</p>
+                                </div>
                             </div>
                         </article>
 
@@ -290,7 +301,14 @@
                                 <span class="detail-toggle-icon" :class="{ 'is-open': sections.twist }">+</span>
                             </button>
                             <div class="detail-content" x-show="sections.twist" x-transition>
-                                <div class="detail-copy" x-html="formatText(character?.twist)"></div>
+                                <div class="detail-card-grid">
+                                    <template x-for="(twist, index) in createListItems(character?.twist)" :key="`twist-${index}`">
+                                        <div class="detail-chip">
+                                            <p class="mb-0" x-html="formatText(twist)"></p>
+                                        </div>
+                                    </template>
+                                    <p class="text-muted mb-0" x-show="!createListItems(character?.twist).length">No twist available.</p>
+                                </div>
                             </div>
                         </article>
 

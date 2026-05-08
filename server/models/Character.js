@@ -5,15 +5,6 @@ const stringArray = {
   default: [],
 };
 
-const relationshipSchema = new mongoose.Schema(
-  {
-    characterId: String,
-    name: String,
-    note: String,
-  },
-  { _id: false }
-);
-
 const inventoryItemSchema = new mongoose.Schema(
   {
     itemId: {
@@ -130,14 +121,8 @@ const characterSchema = new mongoose.Schema(
       type: [inventoryItemSchema],
       default: [],
     },
-    secret: {
-      type: String,
-      default: "",
-    },
-    twist: {
-      type: String,
-      default: "",
-    },
+    secret: stringArray,
+    twist: stringArray,
     goals: stringArray,
     clues: stringArray,
     purchasedClueIds: {
@@ -146,10 +131,7 @@ const characterSchema = new mongoose.Schema(
       index: true,
     },
     privateInformation: stringArray,
-    relationships: {
-      type: [relationshipSchema],
-      default: [],
-    },
+    relationships: stringArray,
     // Stored as separate gold and silver. Shop spending treats 5 silver as 1 gold.
     money: {
       type: mongoose.Schema.Types.Mixed,

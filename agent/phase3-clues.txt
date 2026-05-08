@@ -1,0 +1,26 @@
+WIFE’S BODY: - Requires medical knowledge to read - PINK - IN WORLD
+Upon investigating the body you find it shares the same internal heat damage as her husband’s….
+For MEDICS: “The heat seems to have scorched her from the inside out. Suggests exposure to the same compound. Likely voluntarily, not forced.”
+
+
+Guard’s Insight - ORANGE -  IN WORLD
+“Dosage markings on one vial are carefully measured…
+The other shows no markings at all…”
+
+
+HEALER’S COMPOUND THEORY - Requires medical knowledge to comprehend - ORANGE -  IN WORLD
+This appears to be a page from a medical ward patient book…
+“Certain experimental treatments, when improperly administered, can cause extreme internal heat reactions.
+For MEDICS:  These compounds are rare – prohibitively expensive. Access is typically limited to royal or elite patients under strict supervision.”
+
+
+TIDAL MARKINGS: - PINK - Comprehensible by anyone familiar with magic and/or alchemy - IN WORLD
+Upon investigating the cloth you realize…
+“The symbol on the cloth matches a flow-marking used in binding sigils and stability markings….However, the inscription is incomplete.”
+For MAGICS: PARTIAL WAVE GLYPHS 
+Markings of incomplete stability binding sigils
+
+TRUE MECHANISM: - For anyone stuck - PINK - IN WORLD
+You have the sudden realization that…
+“The compound required precise timing and careful administration. Under controlled conditions, it produces mild effects but when taken suddenly, under stress, or without preparation…”
+
