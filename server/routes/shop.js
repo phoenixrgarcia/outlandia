@@ -5,7 +5,10 @@ const Clue = require("../models/Clue");
 const ShopEntry = require("../models/ShopEntry");
 const { requireAuth } = require("../middleware/auth");
 const { logGameEvent } = require("../services/eventLog");
+const { createAndEmitInboxMessage } = require("../services/inbox");
+const { emitToCharacter } = require("../services/realtime");
 const { toSafeLoggedInCharacter } = require("../utils/characterPayload");
+const { canAffordCurrency, normalizeCurrency, spendCurrency } = require("../utils/currency");
 
 const router = express.Router();
 
@@ -15,9 +18,20 @@ function toPublicShopEntry(entry) {
     type: entry.type,
     name: entry.name,
     description: entry.description,
-    price: entry.price,
+    price: normalizeCurrency(entry.price),
     itemTemplate: entry.type === "item" ? entry.itemTemplate : undefined,
     clueId: entry.type === "clue" ? entry.clueId : undefined,
+  };
+}
+
+function toPoisonTarget(character) {
+  return {
+    id: character.characterId,
+    name: character.name,
+    player: character.player,
+    class: character.class,
+    faction: character.faction,
+    isDead: character.isDead,
   };
 }
 
@@ -81,6 +95,22 @@ function incrementInventory(character, itemTemplate) {
   return newItem;
 }
 
+function isPoisonEntry(entry) {
+  return entry.type === "item" && entry.itemTemplate?.itemId === "sample-poison";
+}
+
+function normalizeCharacterId(characterId) {
+  return String(characterId || "").trim().toLowerCase();
+}
+
+function createPoisonStatus() {
+  return {
+    statusId: `poisoned-${Date.now()}`,
+    name: "Poisoned",
+    note: "Sample poison effect for realtime notification testing.",
+  };
+}
+
 router.get("/", async (req, res, next) => {
   try {
     if (mongoose.connection.readyState !== 1) {
@@ -126,6 +156,33 @@ router.get("/purchased-clues", requireAuth, ensureDatabase, async (req, res, nex
 
     return res.json({
       clues: clues.map(toPurchasedClue),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/targets", requireAuth, ensureDatabase, async (req, res, next) => {
+  try {
+    const effect = String(req.query.effect || "").trim().toLowerCase();
+
+    if (effect !== "poison") {
+      return res.status(400).json({
+        error: "Unsupported target list.",
+      });
+    }
+
+    const targets = await Character.find({
+      characterId: { $ne: req.auth.characterId },
+      isAdmin: false,
+      faction: { $ne: "GMs" },
+    })
+      .sort({ faction: 1, name: 1 })
+      .select("characterId name player class faction isDead")
+      .lean();
+
+    return res.json({
+      targets: targets.map(toPoisonTarget),
     });
   } catch (error) {
     return next(error);
@@ -183,14 +240,15 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
         });
       }
 
-      if (character.money < entry.price) {
+      if (!canAffordCurrency(character.money, entry.price)) {
         return res.status(400).json({
-          error: "Not enough money.",
+          error: "Not enough currency.",
         });
       }
 
-      const previousMoney = character.money;
-      character.money -= entry.price;
+      const previousMoney = normalizeCurrency(character.money);
+      character.money = spendCurrency(character.money, entry.price);
+      character.markModified("money");
       character.purchasedClueIds.push(clue.clueId);
 
       if (!clue.purchaserCharacterIds.includes(character.characterId)) {
@@ -206,7 +264,22 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
           clueId: clue.clueId,
           price: entry.price,
           previousMoney,
-          nextMoney: character.money,
+          nextMoney: normalizeCurrency(character.money),
+        },
+      });
+      await createAndEmitInboxMessage({
+        characterId: character.characterId,
+        title: "Clue Purchased",
+        body: `${clue.title} has been added to your private purchased clues.`,
+        type: "shop",
+        oldState: {
+          money: previousMoney,
+          purchasedClueIds: character.purchasedClueIds.filter((clueId) => clueId !== clue.clueId),
+        },
+        newState: {
+          money: normalizeCurrency(character.money),
+          purchasedClueIds: character.purchasedClueIds,
+          clueId: clue.clueId,
         },
       });
 
@@ -220,9 +293,109 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
     }
 
     if (entry.type === "item") {
-      if (character.money < entry.price) {
+      if (!canAffordCurrency(character.money, entry.price)) {
         return res.status(400).json({
-          error: "Not enough money.",
+          error: "Not enough currency.",
+        });
+      }
+
+      if (isPoisonEntry(entry)) {
+        const targetCharacterId = normalizeCharacterId(req.body.targetCharacterId);
+
+        if (!targetCharacterId) {
+          return res.status(400).json({
+            error: "Choose a target for the poison.",
+          });
+        }
+
+        if (targetCharacterId === character.characterId) {
+          return res.status(400).json({
+            error: "Choose another character as the poison target.",
+          });
+        }
+
+        const target = await Character.findOne({ characterId: targetCharacterId });
+
+        if (!target) {
+          return res.status(404).json({
+            error: "Poison target not found.",
+          });
+        }
+
+        if (target.isAdmin || target.faction === "GMs") {
+          return res.status(400).json({
+            error: "GM and admin characters cannot be poisoned.",
+          });
+        }
+
+        const previousBuyerMoney = normalizeCurrency(character.money);
+        const previousTargetStatuses = target.statuses.map((status) => (
+          status.toObject ? status.toObject() : status
+        ));
+        const poisonStatus = createPoisonStatus();
+
+        character.money = spendCurrency(character.money, entry.price);
+        character.markModified("money");
+        target.statuses.push(poisonStatus);
+
+        await Promise.all([character.save(), target.save()]);
+        await logGameEvent(req, {
+          action: "shop.poison.used",
+          targetType: "character",
+          targetId: target.characterId,
+          details: {
+            shopId: entry.shopId,
+            price: entry.price,
+            buyerCharacterId: character.characterId,
+            targetCharacterId: target.characterId,
+            previousBuyerMoney,
+            nextBuyerMoney: normalizeCurrency(character.money),
+            status: poisonStatus,
+          },
+        });
+        await createAndEmitInboxMessage({
+          characterId: character.characterId,
+          title: "Poison Delivered",
+          body: `${target.name} has been marked Poisoned for this test.`,
+          type: "shop",
+          oldState: {
+            money: previousBuyerMoney,
+          },
+          newState: {
+            money: normalizeCurrency(character.money),
+            targetCharacterId: target.characterId,
+            status: poisonStatus,
+          },
+        });
+        await createAndEmitInboxMessage({
+          characterId: target.characterId,
+          title: "You Have Been Poisoned",
+          body: "A poison effect has been applied to your character.",
+          type: "status",
+          oldState: {
+            statuses: previousTargetStatuses,
+          },
+          newState: {
+            status: poisonStatus,
+            statuses: target.statuses.map((status) => (
+              status.toObject ? status.toObject() : status
+            )),
+          },
+        });
+
+        emitToCharacter(target.characterId, "status:update", {
+          characterId: target.characterId,
+          statuses: target.statuses.map((status) => (
+            status.toObject ? status.toObject() : status
+          )),
+        });
+
+        return res.status(201).json({
+          entry: toPublicShopEntry(entry),
+          character: toSafeLoggedInCharacter(character),
+          target: toPoisonTarget(target),
+          status: poisonStatus,
+          message: `${target.name} has been poisoned.`,
         });
       }
 
@@ -234,8 +407,9 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
         });
       }
 
-      const previousMoney = character.money;
-      character.money -= entry.price;
+      const previousMoney = normalizeCurrency(character.money);
+      character.money = spendCurrency(character.money, entry.price);
+      character.markModified("money");
       await character.save();
       await logGameEvent(req, {
         action: "shop.item.purchased",
@@ -247,7 +421,20 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
           quantity: purchasedItem.quantity,
           price: entry.price,
           previousMoney,
-          nextMoney: character.money,
+          nextMoney: normalizeCurrency(character.money),
+        },
+      });
+      await createAndEmitInboxMessage({
+        characterId: character.characterId,
+        title: "Item Purchased",
+        body: `${purchasedItem.name} has been added to your inventory.`,
+        type: "shop",
+        oldState: {
+          money: previousMoney,
+        },
+        newState: {
+          money: normalizeCurrency(character.money),
+          item: purchasedItem,
         },
       });
 

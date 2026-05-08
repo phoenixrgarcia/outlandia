@@ -1,3 +1,5 @@
+const { normalizeCurrency } = require("./currency");
+
 function toPublicCharacter(character) {
   return {
     id: character.characterId,
@@ -22,7 +24,7 @@ function toSafeLoggedInCharacter(character) {
     purchasedClueIds: character.purchasedClueIds,
     privateInformation: character.privateInformation,
     relationships: character.relationships,
-    money: character.money,
+    money: normalizeCurrency(character.money),
     isAdmin: character.isAdmin,
     canAdvanceRound: character.canAdvanceRound,
     statuses: character.statuses,

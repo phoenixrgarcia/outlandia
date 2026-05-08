@@ -228,6 +228,20 @@
             <div class="col-12 col-lg-4">
               <article class="dark-card border-court rounded-3 p-4 h-100">
                 <h2 class="section-title mb-3">Round Control</h2>
+                <p class="text-muted mb-2">Current round</p>
+                <p class="admin-round-current mb-3" x-text="summary?.gameState?.currentRound || 1"></p>
+                <button
+                  type="button"
+                  class="btn btn-court w-100 mb-3"
+                  x-show="canAdvanceRound"
+                  :disabled="isAdvancingRound"
+                  @click="advanceRound()"
+                  x-text="isAdvancingRound ? 'Advancing...' : 'Advance Round'"
+                  x-cloak
+                ></button>
+                <p class="text-muted mb-3" x-show="!canAdvanceRound" x-cloak>
+                  This admin character can view rounds but cannot advance them.
+                </p>
                 <template
                   x-for="character in roundAdvancers"
                   :key="character.id"
@@ -277,10 +291,12 @@
                 <article
                   class="dark-card border-court rounded-3 p-3"
                   x-data="{
-                                    moneyValue: character.money,
+                                    moneyGold: normalizeCurrency(character.money).gold,
+                                    moneySilver: normalizeCurrency(character.money).silver,
                                     inventoryValue: inventoryText(character),
                                     statusName: '',
-                                    statusNote: ''
+                                    statusNote: '',
+                                    statusExpiresAt: ''
                                 }"
                 >
                   <div
@@ -310,24 +326,38 @@
                   <div class="row g-3">
                     <div class="col-12 col-lg-3">
                       <label class="form-label" :for="`money-${character.id}`"
-                        >Money</label
+                        >Currency</label
                       >
-                      <div class="input-group">
-                        <input
-                          :id="`money-${character.id}`"
-                          type="number"
-                          min="0"
-                          class="form-control dark-select"
-                          x-model="moneyValue"
-                        />
-                        <button
-                          class="btn btn-court"
-                          type="button"
-                          @click="updateMoney(character.id, moneyValue)"
-                        >
-                          Save
-                        </button>
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <input
+                            :id="`money-${character.id}`"
+                            type="number"
+                            min="0"
+                            class="form-control dark-select"
+                            x-model="moneyGold"
+                            aria-label="Gold"
+                          />
+                          <p class="form-helper mt-1 mb-0">Gold</p>
+                        </div>
+                        <div class="col-6">
+                          <input
+                            type="number"
+                            min="0"
+                            class="form-control dark-select"
+                            x-model="moneySilver"
+                            aria-label="Silver"
+                          />
+                          <p class="form-helper mt-1 mb-0">Silver</p>
+                        </div>
                       </div>
+                      <button
+                        class="btn btn-court btn-sm mt-2"
+                        type="button"
+                        @click="updateMoney(character.id, moneyGold, moneySilver)"
+                      >
+                        Save Currency
+                      </button>
                     </div>
 
                     <div class="col-12 col-lg-5">
@@ -369,10 +399,19 @@
                         x-model="statusNote"
                         placeholder="Optional note"
                       />
+                      <input
+                        class="form-control dark-select mb-2"
+                        type="datetime-local"
+                        x-model="statusExpiresAt"
+                        aria-label="Optional status expiration"
+                      />
+                      <p class="form-helper mt-1 mb-2">
+                        Optional expiration for timed statuses.
+                      </p>
                       <button
                         class="btn btn-court btn-sm"
                         type="button"
-                        @click="addStatus(character.id, statusName, statusNote); statusName = ''; statusNote = ''"
+                        @click="addStatus(character.id, statusName, statusNote, statusExpiresAt); statusName = ''; statusNote = ''; statusExpiresAt = ''"
                       >
                         Add Status
                       </button>
@@ -390,6 +429,11 @@
                           class="detail-chip detail-chip-status d-inline-flex align-items-center gap-2 me-2 mb-2"
                         >
                           <span x-text="status.name"></span>
+                          <small
+                            class="text-muted"
+                            x-show="status.expiresAt"
+                            x-text="`until ${formatDateTime(status.expiresAt)}`"
+                          ></small>
                           <button
                             class="btn btn-sm btn-outline-light"
                             type="button"

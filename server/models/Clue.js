@@ -53,9 +53,8 @@ const clueSchema = new mongoose.Schema(
       index: true,
     },
     price: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({ gold: 0, silver: 0 }),
     },
     tags: {
       type: [String],

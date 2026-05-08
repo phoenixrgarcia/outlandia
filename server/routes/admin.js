@@ -4,8 +4,11 @@ const mongoose = require("mongoose");
 const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const GameState = require("../models/GameState");
-const { requireAuth, requireAdmin } = require("../middleware/auth");
+const { requireAuth, requireAdmin, requireRoundAdvancer } = require("../middleware/auth");
 const { logAdminAction } = require("../services/eventLog");
+const { createAndEmitInboxMessage } = require("../services/inbox");
+const { emitToCharacter } = require("../services/realtime");
+const { normalizeCurrency } = require("../utils/currency");
 
 const router = express.Router();
 
@@ -46,7 +49,7 @@ function toAdminCharacter(character) {
     player: character.player,
     class: character.class,
     faction: character.faction,
-    money: character.money,
+    money: normalizeCurrency(character.money),
     isAdmin: character.isAdmin,
     canAdvanceRound: character.canAdvanceRound,
     isDead: character.isDead,
@@ -71,7 +74,7 @@ function toAdminClue(clue) {
     revealedByCharacterId: clue.revealedByCharacterId,
     ownerCharacterId: clue.ownerCharacterId,
     purchaserCharacterIds: clue.purchaserCharacterIds,
-    price: clue.price,
+    price: normalizeCurrency(clue.price),
     tags: clue.tags,
   };
 }
@@ -184,13 +187,42 @@ router.get("/clues", requireAuth, requireAdmin, ensureDatabase, async (req, res,
   }
 });
 
+router.post("/round/advance", requireAuth, requireAdmin, requireRoundAdvancer, ensureDatabase, async (req, res, next) => {
+  try {
+    const previousGameState = await GameState.getSingleton();
+    const previousRound = previousGameState.currentRound;
+
+    previousGameState.currentRound = previousRound + 1;
+    previousGameState.roundStartedAt = new Date();
+    previousGameState.updatedBy = req.auth.characterId;
+    await previousGameState.save();
+
+    await logAdminAction(req, {
+      action: "round.advanced",
+      targetType: "gameState",
+      targetId: previousGameState.key,
+      details: {
+        previousRound,
+        nextRound: previousGameState.currentRound,
+        roundStartedAt: previousGameState.roundStartedAt,
+      },
+    });
+
+    return res.json({
+      gameState: previousGameState.toObject(),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.patch("/characters/:id/money", requireAuth, requireAdmin, ensureDatabase, async (req, res, next) => {
   try {
-    const money = Number(req.body.money);
+    const money = normalizeCurrency(req.body.money);
 
-    if (!Number.isFinite(money) || money < 0) {
+    if (!Number.isFinite(money.gold) || !Number.isFinite(money.silver)) {
       return res.status(400).json({
-        error: "Money must be a non-negative number.",
+        error: "Currency must include non-negative gold and silver amounts.",
       });
     }
 
@@ -200,8 +232,9 @@ router.patch("/characters/:id/money", requireAuth, requireAdmin, ensureDatabase,
       return null;
     }
 
-    const previousMoney = character.money;
+    const previousMoney = normalizeCurrency(character.money);
     character.money = money;
+    character.markModified("money");
     await character.save();
     await logAdminAction(req, {
       action: "money.changed",
@@ -209,7 +242,7 @@ router.patch("/characters/:id/money", requireAuth, requireAdmin, ensureDatabase,
       targetId: character.characterId,
       details: {
         previousMoney,
-        nextMoney: character.money,
+        nextMoney: normalizeCurrency(character.money),
       },
     });
 
@@ -324,6 +357,15 @@ router.post("/characters/:id/statuses", requireAuth, requireAdmin, ensureDatabas
       expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : undefined,
     };
 
+    if (status.expiresAt && Number.isNaN(status.expiresAt.getTime())) {
+      return res.status(400).json({
+        error: "Status expiration must be a valid date.",
+      });
+    }
+
+    const previousStatuses = character.statuses.map((item) => (
+      item.toObject ? item.toObject() : item
+    ));
     character.statuses.push(status);
     await character.save();
     await logAdminAction(req, {
@@ -333,6 +375,29 @@ router.post("/characters/:id/statuses", requireAuth, requireAdmin, ensureDatabas
       details: {
         status,
       },
+    });
+    await createAndEmitInboxMessage({
+      characterId: character.characterId,
+      title: "Status Added",
+      body: status.note
+        ? `${status.name}: ${status.note}`
+        : `${status.name} has been added to your character.`,
+      type: "status",
+      oldState: {
+        statuses: previousStatuses,
+      },
+      newState: {
+        status,
+        statuses: character.statuses.map((item) => (
+          item.toObject ? item.toObject() : item
+        )),
+      },
+    });
+    emitToCharacter(character.characterId, "status:update", {
+      characterId: character.characterId,
+      statuses: character.statuses.map((item) => (
+        item.toObject ? item.toObject() : item
+      )),
     });
 
     return res.status(201).json({
@@ -353,6 +418,9 @@ router.delete("/characters/:id/statuses/:statusId", requireAuth, requireAdmin, e
     }
 
     const originalCount = character.statuses.length;
+    const previousStatuses = character.statuses.map((item) => (
+      item.toObject ? item.toObject() : item
+    ));
     const removedStatus = character.statuses.find(
       (status) => status.statusId === String(req.params.statusId).toLowerCase()
     );
@@ -374,6 +442,29 @@ router.delete("/characters/:id/statuses/:statusId", requireAuth, requireAdmin, e
       details: {
         status: removedStatus?.toObject ? removedStatus.toObject() : removedStatus,
       },
+    });
+    await createAndEmitInboxMessage({
+      characterId: character.characterId,
+      title: "Status Removed",
+      body: removedStatus?.name
+        ? `${removedStatus.name} is no longer active.`
+        : "A status is no longer active.",
+      type: "status",
+      oldState: {
+        status: removedStatus?.toObject ? removedStatus.toObject() : removedStatus,
+        statuses: previousStatuses,
+      },
+      newState: {
+        statuses: character.statuses.map((item) => (
+          item.toObject ? item.toObject() : item
+        )),
+      },
+    });
+    emitToCharacter(character.characterId, "status:update", {
+      characterId: character.characterId,
+      statuses: character.statuses.map((item) => (
+        item.toObject ? item.toObject() : item
+      )),
     });
 
     return res.json({

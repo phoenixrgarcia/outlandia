@@ -53,9 +53,9 @@ const shopEntrySchema = new mongoose.Schema(
       trim: true,
     },
     price: {
-      type: Number,
+      type: mongoose.Schema.Types.Mixed,
       required: true,
-      min: 0,
+      default: () => ({ gold: 0, silver: 0 }),
     },
     itemTemplate: {
       type: itemTemplateSchema,

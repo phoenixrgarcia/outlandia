@@ -1,4 +1,5 @@
 const path = require("path");
+const http = require("http");
 const express = require("express");
 const env = require("./config/env");
 const connectDB = require("./config/db");
@@ -8,8 +9,13 @@ const meRoutes = require("./routes/me");
 const adminRoutes = require("./routes/admin");
 const clueRoutes = require("./routes/clues");
 const shopRoutes = require("./routes/shop");
+const inboxRoutes = require("./routes/inbox");
+const GameState = require("./models/GameState");
+const { initializeRealtime } = require("./services/realtime");
+const { startStatusExpirationScheduler } = require("./services/statusExpiration");
 
 const app = express();
+const server = http.createServer(app);
 const rootDir = path.join(__dirname, "..");
 const staticOptions = {
   dotfiles: "ignore",
@@ -25,6 +31,7 @@ app.use("/api/me", meRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/clues", clueRoutes);
 app.use("/api/shop", shopRoutes);
+app.use("/api/inbox", inboxRoutes);
 
 app.use(express.static(rootDir, staticOptions));
 
@@ -51,8 +58,11 @@ app.use((error, req, res, next) => {
 
 async function start() {
   await connectDB();
+  await GameState.getSingleton();
+  initializeRealtime(server);
+  startStatusExpirationScheduler();
 
-  app.listen(env.PORT, () => {
+  server.listen(env.PORT, () => {
     console.log(`Outlandia server listening on http://localhost:${env.PORT}`);
   });
 }

@@ -12,6 +12,8 @@ const PLACEHOLDER_FACTIONS = [
 
 const AUTH_TOKEN_STORAGE_KEY = "outlandiaAuthToken";
 const LEGACY_CHARACTER_STORAGE_KEY = "loggedInCharacter";
+const SILVER_PER_GOLD = 5;
+let socketClientLoadPromise = null;
 
 const PLACEHOLDER_CHARACTER_SEEDS = [
   ["gm_01", "Placeholder GM 01", "GM", "GMs"],
@@ -102,7 +104,56 @@ function createCharacterDetails(
 
 const CHARACTERS_DETAILED = {};
 
+function normalizeCurrencyAmount(value) {
+  return Math.max(0, Math.floor(Number(value || 0)));
+}
+
+function normalizeCurrency(value) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return {
+      gold: normalizeCurrencyAmount(value.gold),
+      silver: normalizeCurrencyAmount(value.silver),
+    };
+  }
+
+  const legacyTotalSilver = normalizeCurrencyAmount(value);
+
+  return {
+    gold: Math.floor(legacyTotalSilver / SILVER_PER_GOLD),
+    silver: legacyTotalSilver % SILVER_PER_GOLD,
+  };
+}
+
+function currency(gold = 0, silver = 0) {
+  return {
+    gold: normalizeCurrencyAmount(gold),
+    silver: normalizeCurrencyAmount(silver),
+  };
+}
+
+function currencyValueInSilver(value) {
+  const normalized = normalizeCurrency(value);
+
+  return normalized.gold * SILVER_PER_GOLD + normalized.silver;
+}
+
+function formatCurrency(value) {
+  const normalized = normalizeCurrency(value);
+  const parts = [];
+
+  if (normalized.gold) {
+    parts.push(`${normalized.gold} gold`);
+  }
+
+  if (normalized.silver || !parts.length) {
+    parts.push(`${normalized.silver} silver`);
+  }
+
+  return parts.join(" ");
+}
+
 document.addEventListener("alpine:init", () => {
+  installInboxShell();
   Alpine.store("auth", createAuthStore());
   Alpine.data("characterSelector", characterSelector);
   Alpine.data("charactersDisplay", charactersDisplay);
@@ -110,6 +161,107 @@ document.addEventListener("alpine:init", () => {
   Alpine.data("adminDashboard", adminDashboard);
   Alpine.data("shopPage", shopPage);
 });
+
+function installInboxShell() {
+  document.querySelectorAll(".navbar-nav").forEach((nav) => {
+    if (nav.querySelector(".inbox-nav-item")) {
+      return;
+    }
+
+    const inboxItem = document.createElement("li");
+    inboxItem.className = "nav-item inbox-nav-item";
+    inboxItem.setAttribute("x-show", "$store.auth.loggedIn");
+    inboxItem.setAttribute("x-cloak", "");
+    inboxItem.innerHTML = `
+      <a class="nav-link inbox-nav-link" href="#" @click.prevent="$store.auth.openInbox()">
+        <span>Inbox</span>
+        <span
+          class="inbox-unread-badge"
+          x-show="$store.auth.unreadInboxCount > 0"
+          x-text="$store.auth.unreadInboxCount"
+          aria-label="Unread inbox messages"
+          x-cloak
+        ></span>
+      </a>
+    `;
+
+    const leaveItem = Array.from(nav.children).find((item) => (
+      item.textContent || ""
+    ).toLowerCase().includes("leave character"));
+
+    nav.insertBefore(inboxItem, leaveItem || null);
+  });
+
+  if (document.getElementById("playerInboxShell")) {
+    return;
+  }
+
+  const inboxShell = document.createElement("div");
+  inboxShell.id = "playerInboxShell";
+  inboxShell.setAttribute("x-show", "$store.auth.showInbox");
+  inboxShell.setAttribute("x-transition.opacity", "");
+  inboxShell.setAttribute("x-cloak", "");
+  inboxShell.setAttribute("@keydown.escape.window", "$store.auth.closeInbox()");
+  inboxShell.className = "inbox-overlay";
+  inboxShell.innerHTML = `
+    <section
+      class="inbox-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="player-inbox-title"
+      @click.outside="$store.auth.closeInbox()"
+    >
+      <div class="inbox-panel-header">
+        <div>
+          <p class="dossier-kicker mb-1">Private Notices</p>
+          <h2 id="player-inbox-title" class="section-title mb-0">Inbox</h2>
+        </div>
+        <button type="button" class="inbox-close" @click="$store.auth.closeInbox()" aria-label="Close inbox">x</button>
+      </div>
+
+      <p class="text-muted mb-3" x-show="$store.auth.isInboxLoading">Gathering sealed messages...</p>
+      <p class="text-danger mb-3" x-show="$store.auth.inboxError" x-text="$store.auth.inboxError"></p>
+
+      <div class="inbox-message-list" x-show="!$store.auth.isInboxLoading">
+        <template x-if="!$store.auth.inboxMessages.length">
+          <p class="text-muted mb-0">No private messages yet.</p>
+        </template>
+        <template x-for="message in $store.auth.inboxMessages" :key="message.id">
+          <article class="inbox-message" :class="{ 'is-unread': !message.read }">
+            <div class="inbox-message-head">
+              <span class="inbox-message-type" x-text="$store.auth.formatInboxType(message.type)"></span>
+              <time class="inbox-message-time" :datetime="message.timestamp" x-text="$store.auth.formatInboxTime(message.timestamp)"></time>
+            </div>
+            <h3 class="inbox-message-title" x-text="message.title"></h3>
+            <p class="inbox-message-body" x-text="message.body"></p>
+          </article>
+        </template>
+      </div>
+    </section>
+  `;
+  document.body.appendChild(inboxShell);
+}
+
+function loadSocketClient() {
+  if (window.io) {
+    return Promise.resolve(window.io);
+  }
+
+  if (socketClientLoadPromise) {
+    return socketClientLoadPromise;
+  }
+
+  socketClientLoadPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "/socket.io/socket.io.js";
+    script.async = true;
+    script.onload = () => resolve(window.io);
+    script.onerror = () => reject(new Error("Realtime client is unavailable."));
+    document.head.appendChild(script);
+  });
+
+  return socketClientLoadPromise;
+}
 
 function createAuthStore(){
   return{
@@ -122,6 +274,13 @@ function createAuthStore(){
     isRestoringSession: false,
     isLoggingIn: false,
     showLogoutConfirm: false,
+    showInbox: false,
+    inboxMessages: [],
+    unreadInboxCount: 0,
+    isInboxLoading: false,
+    inboxError: "",
+    socket: null,
+    realtimeConnected: false,
 
     async init() {
       this.showLogoutConfirm = false;
@@ -180,6 +339,7 @@ function createAuthStore(){
 
         const data = await response.json();
         this.character = data.character;
+        await this.afterAuthenticated();
       } catch (error) {
         this.clearSession();
       } finally {
@@ -216,6 +376,7 @@ function createAuthStore(){
         this.authToken = data.token;
         this.character = data.character;
         localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, data.token);
+        await this.afterAuthenticated();
         alert(`Login successful! Welcome, ${data.character.name}.`);
       } catch (error) {
         this.showLoginError("Unable to reach the login service. Please try again.");
@@ -227,6 +388,229 @@ function createAuthStore(){
     showLoginError(message) {
       this.error = message;
       alert(message);
+    },
+
+    async afterAuthenticated() {
+      await this.loadInboxPreview();
+      this.connectRealtime();
+    },
+
+    async loadInboxPreview() {
+      if (!this.authToken) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/inbox?markRead=false", {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load inbox messages.");
+        }
+
+        this.inboxMessages = data.messages || [];
+        this.unreadInboxCount = Number(data.unreadCount || 0);
+      } catch (error) {
+        this.inboxError = error.message || "Unable to load inbox messages.";
+      }
+    },
+
+    async openInbox() {
+      if (!this.authToken) {
+        return;
+      }
+
+      this.showInbox = true;
+      this.isInboxLoading = true;
+      this.inboxError = "";
+
+      try {
+        const response = await fetch("/api/inbox", {
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to open inbox.");
+        }
+
+        this.inboxMessages = data.messages || [];
+        this.unreadInboxCount = 0;
+      } catch (error) {
+        this.inboxError = error.message || "Unable to open inbox.";
+      } finally {
+        this.isInboxLoading = false;
+      }
+    },
+
+    closeInbox() {
+      this.showInbox = false;
+    },
+
+    async markInboxRead() {
+      if (!this.authToken) {
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/inbox/mark-read", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.authToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({}),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to mark inbox messages read.");
+        }
+
+        this.inboxMessages = this.inboxMessages.map((message) => ({
+          ...message,
+          read: true,
+          readAt: message.readAt || new Date().toISOString(),
+        }));
+        this.unreadInboxCount = Number(data.unreadCount || 0);
+      } catch (error) {
+        this.inboxError = error.message || "Unable to mark inbox messages read.";
+      }
+    },
+
+    connectRealtime() {
+      if (!this.authToken || this.socket) {
+        return;
+      }
+
+      loadSocketClient()
+        .then((io) => {
+          if (!this.authToken || this.socket) {
+            return;
+          }
+
+          this.socket = io({
+            auth: {
+              token: this.authToken,
+            },
+          });
+
+          this.socket.on("connect", () => {
+            this.realtimeConnected = true;
+          });
+
+          this.socket.on("disconnect", () => {
+            this.realtimeConnected = false;
+          });
+
+          this.socket.on("connect_error", () => {
+            this.realtimeConnected = false;
+          });
+
+          this.socket.on("inbox:new", (payload) => {
+            this.handleRealtimeInboxMessage(payload);
+          });
+
+          this.socket.on("inbox:read", (payload) => {
+            this.handleRealtimeInboxRead(payload);
+          });
+
+          this.socket.on("status:update", (payload) => {
+            this.handleRealtimeStatusUpdate(payload);
+          });
+        })
+        .catch(() => {
+          this.realtimeConnected = false;
+        });
+    },
+
+    disconnectRealtime() {
+      if (this.socket) {
+        this.socket.disconnect();
+        this.socket = null;
+      }
+
+      this.realtimeConnected = false;
+    },
+
+    handleRealtimeInboxMessage(payload) {
+      const message = payload?.message;
+
+      if (!message?.id) {
+        return;
+      }
+
+      const existingIndex = this.inboxMessages.findIndex((item) => item.id === message.id);
+
+      if (existingIndex >= 0) {
+        this.inboxMessages.splice(existingIndex, 1, message);
+      } else {
+        this.inboxMessages.unshift(message);
+      }
+
+      if (this.showInbox) {
+        this.markInboxRead();
+      } else if (!message.read) {
+        this.unreadInboxCount += 1;
+      }
+    },
+
+    handleRealtimeInboxRead(payload) {
+      const readIds = new Set((payload?.messageIds || []).map((messageId) => String(messageId)));
+
+      this.inboxMessages = this.inboxMessages.map((message) => {
+        if (!readIds.size || readIds.has(message.id)) {
+          return {
+            ...message,
+            read: true,
+            readAt: message.readAt || new Date().toISOString(),
+          };
+        }
+
+        return message;
+      });
+      this.unreadInboxCount = Number(payload?.unreadCount || 0);
+    },
+
+    handleRealtimeStatusUpdate(payload) {
+      if (!this.character || payload?.characterId !== this.character.id) {
+        return;
+      }
+
+      this.character = {
+        ...this.character,
+        statuses: payload.statuses || [],
+      };
+    },
+
+    formatInboxType(type) {
+      return String(type || "system").replace(/-/g, " ");
+    },
+
+    formatInboxTime(timestamp) {
+      if (!timestamp) {
+        return "";
+      }
+
+      return new Date(timestamp).toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
+    },
+
+    formatInboxState(message) {
+      return JSON.stringify({
+        old: message.oldState || null,
+        new: message.newState || null,
+      }, null, 2);
     },
 
     requestLogout() {
@@ -245,10 +629,14 @@ function createAuthStore(){
     },
 
     clearSession() {
+      this.disconnectRealtime();
       this.authToken = "";
       localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
       localStorage.removeItem(LEGACY_CHARACTER_STORAGE_KEY);
       this.character = null;
+      this.inboxMessages = [];
+      this.unreadInboxCount = 0;
+      this.showInbox = false;
     }
   }
 }
@@ -429,7 +817,7 @@ function loggedInCharacterDetails() {
     },
 
     formatMoney(value) {
-      return `${Number(value || 0)} gold`;
+      return formatCurrency(value);
     },
 
     formatText(text) {
@@ -536,6 +924,7 @@ function adminDashboard() {
     clues: [],
     characterSearch: "",
     activeAdminTab: "overview",
+    isAdvancingRound: false,
 
     async init() {
       await Promise.all([
@@ -672,10 +1061,47 @@ function adminDashboard() {
       }
     },
 
-    updateMoney(characterId, money) {
+    async advanceRound() {
+      this.error = "";
+      this.notice = "";
+
+      if (!this.canAdvanceRound) {
+        this.error = "This admin character cannot advance rounds.";
+        return;
+      }
+
+      const currentRound = this.summary?.gameState?.currentRound || 1;
+      const confirmed = window.confirm(`Advance from round ${currentRound} to round ${currentRound + 1}?`);
+
+      if (!confirmed) {
+        return;
+      }
+
+      this.isAdvancingRound = true;
+
+      try {
+        const data = await this.adminRequest("/api/admin/round/advance", {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+
+        this.summary = {
+          ...this.summary,
+          gameState: data.gameState,
+        };
+        await this.refetchAdminState();
+        this.notice = `Round advanced to ${data.gameState.currentRound}.`;
+      } catch (error) {
+        this.error = error.message || "Unable to advance the round.";
+      } finally {
+        this.isAdvancingRound = false;
+      }
+    },
+
+    updateMoney(characterId, gold, silver) {
       return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/money`, {
         method: "PATCH",
-        body: JSON.stringify({ money: Number(money) }),
+        body: JSON.stringify({ money: currency(gold, silver) }),
       }));
     },
 
@@ -705,11 +1131,28 @@ function adminDashboard() {
       }));
     },
 
-    addStatus(characterId, statusName, statusNote) {
+    addStatus(characterId, statusName, statusNote, expiresAt) {
       return this.mutate(() => this.adminRequest(`/api/admin/characters/${characterId}/statuses`, {
         method: "POST",
-        body: JSON.stringify({ name: statusName, note: statusNote }),
+        body: JSON.stringify({
+          name: statusName,
+          note: statusNote,
+          expiresAt: expiresAt ? new Date(expiresAt).toISOString() : undefined,
+        }),
       }));
+    },
+
+    formatDateTime(value) {
+      if (!value) {
+        return "";
+      }
+
+      return new Date(value).toLocaleString([], {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      });
     },
 
     removeStatus(characterId, statusId) {
@@ -746,6 +1189,10 @@ function adminDashboard() {
 
     get roundAdvancers() {
       return this.characters.filter((character) => character.canAdvanceRound);
+    },
+
+    get canAdvanceRound() {
+      return Boolean(this.summary?.adminCharacter?.canAdvanceRound || this.$store.auth.character?.canAdvanceRound);
     },
 
     get filteredCharacters() {
@@ -791,13 +1238,17 @@ function shopPage() {
     error: "",
     notice: "",
     purchasedClues: {},
+    poisonTargets: [],
+    selectedTargets: {},
 
     async init() {
       this.$watch("$store.auth.character?.id", () => {
         this.loadPurchasedClues();
+        this.loadPoisonTargets();
       });
       await this.loadShopEntries();
       await this.loadPurchasedClues();
+      await this.loadPoisonTargets();
     },
 
     async loadShopEntries() {
@@ -846,6 +1297,31 @@ function shopPage() {
       }
     },
 
+    async loadPoisonTargets() {
+      if (!this.loggedIn) {
+        this.poisonTargets = [];
+        this.selectedTargets = {};
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/shop/targets?effect=poison", {
+          headers: {
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to load poison targets.");
+        }
+
+        this.poisonTargets = data.targets || [];
+      } catch (error) {
+        this.error = error.message || "Unable to load poison targets.";
+      }
+    },
+
     get itemEntries() {
       return this.entries.filter((entry) => entry.type === "item");
     },
@@ -863,11 +1339,19 @@ function shopPage() {
     },
 
     get currentMoney() {
-      return Number(this.loggedInCharacter?.money || 0);
+      return normalizeCurrency(this.loggedInCharacter?.money);
     },
 
     formatPrice(value) {
-      return `${Number(value || 0)} gold`;
+      return formatCurrency(value);
+    },
+
+    isPoisonEntry(entry) {
+      return entry?.itemTemplate?.itemId === "sample-poison";
+    },
+
+    targetLabel(target) {
+      return `${target.name} - ${target.player} - ${target.faction}`;
     },
 
     async purchase(entry) {
@@ -875,20 +1359,31 @@ function shopPage() {
       this.notice = "";
 
       if (!this.loggedIn) {
-        alert("Log in as a character before purchasing from the shop.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      if (this.isPoisonEntry(entry) && !this.selectedTargets[entry.id]) {
+        alert("Choose who will receive the poison.");
         return;
       }
 
       this.isPurchasing = true;
 
       try {
+        const payload = { shopId: entry.id };
+
+        if (this.isPoisonEntry(entry)) {
+          payload.targetCharacterId = this.selectedTargets[entry.id];
+        }
+
         const response = await fetch("/api/shop/purchase", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.$store.auth.authToken}`,
           },
-          body: JSON.stringify({ shopId: entry.id }),
+          body: JSON.stringify(payload),
         });
         const data = await response.json();
 
@@ -898,6 +1393,7 @@ function shopPage() {
 
         this.$store.auth.character = data.character;
         this.notice = data.message || "Purchase complete.";
+        this.selectedTargets[entry.id] = "";
 
         if (data.clue) {
           this.purchasedClues = {
@@ -915,7 +1411,7 @@ function shopPage() {
     },
 
     canAfford(entry) {
-      return this.currentMoney >= Number(entry.price || 0);
+      return currencyValueInSilver(this.currentMoney) >= currencyValueInSilver(entry.price);
     },
 
     hasPurchasedClue(entry) {
@@ -932,7 +1428,7 @@ function shopPage() {
 
     purchaseLabel(entry) {
       if (!this.loggedIn) {
-        return "Log in to purchase";
+        return "Log in to buy";
       }
 
       if (this.hasPurchasedClue(entry)) {

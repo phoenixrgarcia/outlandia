@@ -189,10 +189,10 @@ const characterSchema = new mongoose.Schema(
       type: [relationshipSchema],
       default: [],
     },
+    // Stored as separate gold and silver. Shop spending treats 5 silver as 1 gold.
     money: {
-      type: Number,
-      default: 0,
-      min: 0,
+      type: mongoose.Schema.Types.Mixed,
+      default: () => ({ gold: 0, silver: 0 }),
     },
     isAdmin: {
       type: Boolean,

@@ -57,7 +57,7 @@
             <p class="subtitle archive-subtitle">Private goods and purchasable clues</p>
             <div class="divider"></div>
             <p class="archive-intro mt-3 mb-0">
-                Browse placeholder wares and spend character gold. Shop clues are private to the buyer and separate from the public Court Archive.
+                Browse placeholder wares and spend character silver or gold. Shop clues are private to the buyer and separate from the public Court Archive.
             </p>
         </section>
 
@@ -71,8 +71,9 @@
             </div>
             <div class="shop-wallet-value">
                 <span x-show="loggedIn" x-text="formatPrice(currentMoney)" x-cloak></span>
-                <span x-show="!loggedIn" x-cloak>Log in to buy</span>
+                <a href="index.html" class="shop-wallet-login" x-show="!loggedIn" x-cloak>Log in to buy</a>
             </div>
+            <p class="shop-currency-rate mb-0">Exchange: 5 silver = 1 gold.</p>
         </section>
 
         <section class="dark-card border-court rounded-3 p-4 text-center" x-show="isLoading" x-cloak>
@@ -109,6 +110,20 @@
                             <h3 class="card-title mb-3" x-text="entry.name"></h3>
                             <p class="character-blurb mb-4" x-text="entry.description"></p>
                             <p class="shop-entry-note mb-4" x-show="entry.itemTemplate?.note" x-text="entry.itemTemplate?.note"></p>
+                            <div class="mb-4" x-show="isPoisonEntry(entry)" x-cloak>
+                                <label class="form-label" :for="`poison-target-${entry.id}`">Target</label>
+                                <select
+                                    class="form-control dark-select"
+                                    :id="`poison-target-${entry.id}`"
+                                    x-model="selectedTargets[entry.id]"
+                                    :disabled="!loggedIn || isPurchasing"
+                                >
+                                    <option value="">Choose a character</option>
+                                    <template x-for="target in poisonTargets" :key="target.id">
+                                        <option :value="target.id" x-text="targetLabel(target)"></option>
+                                    </template>
+                                </select>
+                            </div>
                             <button
                                 type="button"
                                 class="btn btn-court w-100"

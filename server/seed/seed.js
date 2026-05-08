@@ -6,6 +6,7 @@ const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const GameState = require("../models/GameState");
 const ShopEntry = require("../models/ShopEntry");
+const { currency } = require("../utils/currency");
 
 const PLACEHOLDER_CHARACTER_SEEDS = [
   ["gm_01", "Placeholder GM 01", "GM", "GMs"],
@@ -77,21 +78,21 @@ const PLACEHOLDER_SHOP_CLUES = [
     title: "TODO Private Shop Clue 01",
     summary: "TODO placeholder preview for a private clue available from the shop.",
     body: "TODO Private Shop Clue Placeholder: Replace this with final purchased clue text after writers provide approved content.",
-    price: 20,
+    price: currency(4, 0),
   },
   {
     clueId: "shop-private-clue-02",
     title: "TODO Private Shop Clue 02",
     summary: "TODO placeholder preview for a second private clue available from the shop.",
     body: "TODO Private Shop Clue Placeholder: This clue should remain private to the buyer when purchase behavior is implemented.",
-    price: 35,
+    price: currency(7, 0),
   },
   {
     clueId: "shop-private-clue-03",
     title: "TODO Private Shop Clue 03",
     summary: "TODO placeholder preview for a higher-cost private clue.",
     body: "TODO Private Shop Clue Placeholder: This is seeded only to prove shop list behavior.",
-    price: 50,
+    price: currency(10, 0),
   },
 ];
 
@@ -101,7 +102,7 @@ const PLACEHOLDER_SHOP_ENTRIES = [
     type: "item",
     name: "TODO Consumable Item 01",
     description: "TODO placeholder shop item description.",
-    price: 10,
+    price: currency(2, 0),
     itemTemplate: {
       itemId: "todo-consumable-item-01",
       name: "TODO Consumable Item 01",
@@ -115,7 +116,7 @@ const PLACEHOLDER_SHOP_ENTRIES = [
     type: "item",
     name: "TODO Consumable Item 02",
     description: "TODO placeholder shop item description.",
-    price: 25,
+    price: currency(5, 0),
     itemTemplate: {
       itemId: "todo-consumable-item-02",
       name: "TODO Consumable Item 02",
@@ -125,15 +126,15 @@ const PLACEHOLDER_SHOP_ENTRIES = [
     sortOrder: 20,
   },
   {
-    shopId: "shop-item-03",
+    shopId: "shop-poison-01",
     type: "item",
-    name: "TODO Consumable Item 03",
-    description: "TODO placeholder shop item description.",
-    price: 40,
+    name: "Sample Poison",
+    description: "Test item for Phase 4 notifications. Choose a non-GM target to receive the Poisoned status.",
+    price: currency(1, 0),
     itemTemplate: {
-      itemId: "todo-consumable-item-03",
-      name: "TODO Consumable Item 03",
-      note: "TODO replace with final item effect notes.",
+      itemId: "sample-poison",
+      name: "Sample Poison",
+      note: "Testing only: applies Poisoned to a selected non-GM target.",
       quantity: 1,
     },
     sortOrder: 30,
@@ -194,7 +195,9 @@ function createPlaceholderCharacter(seed, index, passwordHash) {
         note: "TODO replace with final relationship note.",
       },
     ],
-    money: index === 0 ? 0 : 25 + index * 5,
+    money: index === 0
+      ? currency(0, 0)
+      : currency(5 + index, 3 + index),
     isAdmin,
     canAdvanceRound: index === 0,
     isDead,
@@ -246,7 +249,7 @@ async function seed() {
     revealedByCharacterId: "",
     ownerCharacterId: "",
     purchaserCharacterIds: [],
-    price: 0,
+    price: currency(0, 0),
     tags: ["TODO", "global-placeholder"],
     source: "phase-1-placeholder-seed",
   }));
@@ -310,6 +313,7 @@ async function seed() {
       $setOnInsert: {
         key: "main",
         currentRound: 1,
+        roundStartedAt: new Date(),
         statuses: [],
       },
     },
