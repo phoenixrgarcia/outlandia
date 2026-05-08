@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const GameState = require("../models/GameState");
+const ShopEntry = require("../models/ShopEntry");
 const { requireAuth, requireAdmin, requireRoundAdvancer } = require("../middleware/auth");
 const { logAdminAction } = require("../services/eventLog");
 const { createAndEmitInboxMessage } = require("../services/inbox");
@@ -94,6 +95,40 @@ function normalizeInventory(items) {
       quantity: Math.max(0, Number(item.quantity ?? 1)),
     }))
     .filter((item) => item.name);
+}
+
+function addInventoryItem(character, itemTemplate) {
+  const template = itemTemplate || {};
+  const itemId = String(template.itemId || "").trim().toLowerCase();
+  const name = String(template.name || "").trim();
+  const quantity = Math.max(1, Number(template.quantity || 1));
+
+  if (!name) {
+    return null;
+  }
+
+  const existingItem = character.inventory.find((item) => (
+    itemId && item.itemId === itemId
+  ));
+
+  if (existingItem) {
+    existingItem.quantity = Number(existingItem.quantity || 0) + quantity;
+    if (template.note && !existingItem.note) {
+      existingItem.note = template.note;
+    }
+    return existingItem;
+  }
+
+  const newItem = {
+    itemId,
+    name,
+    note: String(template.note || "").trim(),
+    quantity,
+    canUse: template.canUse !== false,
+  };
+
+  character.inventory.push(newItem);
+  return newItem;
 }
 
 async function findCharacterOr404(characterId, res) {
@@ -190,6 +225,32 @@ router.get("/clues", requireAuth, requireAdmin, ensureDatabase, async (req, res,
     return res.json({
       currentRound,
       clues: clues.map(toAdminClue),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.get("/shop-items", requireAuth, requireAdmin, ensureDatabase, async (req, res, next) => {
+  try {
+    const entries = await ShopEntry.find({
+      active: true,
+      type: "item",
+      itemTemplate: { $exists: true },
+      "itemTemplate.name": { $ne: "" },
+    })
+      .sort({ category: 1, sortOrder: 1, name: 1 })
+      .select("shopId category name description itemTemplate")
+      .lean();
+
+    return res.json({
+      items: entries.map((entry) => ({
+        id: entry.shopId,
+        category: entry.category,
+        name: entry.name,
+        description: entry.description,
+        itemTemplate: entry.itemTemplate,
+      })),
     });
   } catch (error) {
     return next(error);
@@ -334,6 +395,72 @@ router.patch("/characters/:id/inventory", requireAuth, requireAdmin, ensureDatab
 
     return res.json({
       character: toAdminCharacter(character.toObject()),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.post("/characters/:id/inventory/shop-item", requireAuth, requireAdmin, ensureDatabase, async (req, res, next) => {
+  try {
+    const shopId = String(req.body.shopId || "").trim().toLowerCase();
+
+    if (!shopId) {
+      return res.status(400).json({
+        error: "Choose a shop item to grant.",
+      });
+    }
+
+    const [character, shopEntry] = await Promise.all([
+      findCharacterOr404(req.params.id, res),
+      ShopEntry.findOne({
+        shopId,
+        active: true,
+        type: "item",
+      }).lean(),
+    ]);
+
+    if (!character) {
+      return null;
+    }
+
+    if (!shopEntry?.itemTemplate?.name) {
+      return res.status(404).json({
+        error: "Shop item not found.",
+      });
+    }
+
+    const previousInventory = character.inventory.map((item) => item.toObject ? item.toObject() : item);
+    const grantedItem = addInventoryItem(character, shopEntry.itemTemplate);
+
+    if (!grantedItem) {
+      return res.status(400).json({
+        error: "Shop item is missing its item template.",
+      });
+    }
+
+    await character.save();
+    await logAdminAction(req, {
+      action: "inventory.shop_item.granted",
+      targetType: "character",
+      targetId: character.characterId,
+      details: {
+        shopId: shopEntry.shopId,
+        item: grantedItem.toObject ? grantedItem.toObject() : grantedItem,
+        previousInventory,
+        nextInventory: character.inventory.map((item) => item.toObject ? item.toObject() : item),
+      },
+    });
+    await createAndEmitInboxMessage({
+      characterId: character.characterId,
+      title: "Item Added",
+      body: `${grantedItem.name} has been added to your inventory by a GM.`,
+      type: "admin",
+    });
+
+    return res.json({
+      character: toAdminCharacter(character.toObject()),
+      item: grantedItem,
     });
   } catch (error) {
     return next(error);

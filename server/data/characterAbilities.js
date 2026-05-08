@@ -137,7 +137,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Detain/Release",
       description:
-        "Roll d6 and choose between: Detain - Prevent a player from acting for that amount of time. OR Release - Free someone's movement when they are frozen. Cost: 10 Gold, gain 1 suspicion.",
+        "Roll d20. On 12+, choose between Detain or Release, then roll d6 for duration: 1-2 = 2 minutes, 3-4 = 4 minutes, 5-6 = 6 minutes. Cost: 10 Gold, gain 1 suspicion.",
       cost: currency(10, 0),
     },
     handlers: { passive: {}, active: { todo: "roll d6. Display result" } },
@@ -157,7 +157,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Duel of Honor",
       description:
-        "Challenge to a duel; roll a d20. Loser gives the winner 10 Gold OR 1 Favor. Cost: 5 Gold",
+        "Challenge a player to a duel. You roll d20 in the app; the target is notified to roll d20 in person with a GM. Loser gives the winner 10 Gold OR 1 Favor. Cost: 5 Gold",
       cost: currency(5, 0),
     },
     handlers: { passive: {}, active: {} },
@@ -200,7 +200,7 @@ const CHARACTER_ABILITIES = {
     },
     active: {
       name: "Experimental Draft Potion",
-      description: "Apply a modifier to a target's d20 roll. Cost: 8 Gold",
+      description: "Target rolls d6: 1-2 = fail next roll automatically, 3-4 = +3 bonus to roll, 5-6 = +6 bonus to roll. Cost: 8 Gold",
       cost: currency(8, 0),
     },
     handlers: {
@@ -231,7 +231,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Salt Hex of Unluck",
       description:
-        "Target may choose: Accept a curse giving disadvantage on their next d20 roll. Or resist publicly and roll d6. Apply curse through GM. Cost: 5 Gold, or 1 Favor",
+        "Opponent rolls d6: 4+ = hex has no effect, 1-3 = gain 1 suspicion and disadvantage. Cost: 5 Gold, or 1 Favor",
     },
     handlers: { passive: {}, active: {} },
   },
@@ -240,7 +240,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Chaos Surge",
       description:
-        "Roll a d6 and increase or double your next bribe/interrogation reward. Cost: 5 Gold",
+        "Roll d6: 1-3 = +2 to next bribe/interrogation reward, 4-6 = double next bribe/interrogation reward. Cost: 5 Gold",
       cost: currency(5, 0),
     },
     handlers: {
@@ -305,7 +305,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Divine Challenge",
       description:
-        "Force a contested d20 between two players. The loser pays you gold based on a d6 roll . Cost: 10 Gold",
+        "Force a contested d20 between two players. Loser pays you based on d6: 6 = 12 Gold and 1 item if available, 3-5 = 10 Gold, 1-2 = 8 Gold. Cost: 10 Gold",
       cost: currency(10, 0),
     },
     handlers: { passive: {}, active: { todo: "add d6 roll" } },
@@ -379,7 +379,7 @@ const CHARACTER_ABILITIES = {
     passive: {
       name: "Pity Trade",
       description:
-        "Roll d6; each nearby player gives you that much silver. Transactions done through GM",
+        "Roll d6; each nearby player gives you that much silver. 1 = 1 Silver, 2 = 2 Silver, and so on. Transactions done through GM",
     },
     active: { name: "", description: "" },
     handlers: { passive: {}, active: {} },
@@ -388,12 +388,12 @@ const CHARACTER_ABILITIES = {
     passive: {
       name: "Slip Through",
       description:
-        "Move unseen unless someone rolls a successful d6 against you. 1-2, they detec you, 3-4 avoid detection for 3 minutes, 5-6 no detection.",
+        "If anyone tries to detect you, roll d6. 1-2 = they detect you, 3-4 = avoid detection for the next 3 minutes, 5-6 = no detection.",
     },
     active: {
       name: "Pickpocket",
       description:
-        "Attempt to steal gold and items. 16-20: success. 10-15: victim is notified of pickpocketing. 1-9: failure and gain 1 suspicion.",
+        "Attempt to steal gold and items. d20: 16-20 = clean break, 10-15 = victim is notified, <10 = fail. On success, d6 payout: 1-3 = 4 Gold, 4-5 = 7 Gold, 6 = 8 Gold and 1 item in possession if available.",
     },
     handlers: { passive: {}, active: { todo: "roll d20 and do result" } },
   },
@@ -414,7 +414,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Pickpocket",
       description:
-        "Attempt to steal gold and items. 16-20: success. 10-15: victim is notified of pickpocketing. 1-9: failure and gain 1 suspicion.",
+        "Attempt to steal gold and items. d20: 16-20 = clean break, 10-15 = victim is notified, <10 = fail. On success, d6 payout: 1-3 = 4 Gold, 4-5 = 7 Gold, 6 = 8 Gold and 1 item in possession if available.",
     },
     handlers: { passive: {}, active: { todo: "roll d20 and do result" } },
   },
@@ -441,7 +441,7 @@ const CHARACTER_ABILITIES = {
     active: {
       name: "Plunder",
       description:
-        "Roll a d6 and steal gold from a player based on the result. Cost: 10 Gold and gain 1 Suspicion token",
+        "Roll d6 and steal from a player: 6 = 12 Gold and 1 item if available, 3-5 = 10 Gold, 1-2 = 8 Gold. Cost: 10 Gold and gain 1 Suspicion token",
       cost: currency(10, 0),
     },
     handlers: { passive: {}, active: { todo: "roll d6 and apply result" } },
@@ -469,6 +469,7 @@ function serializeAbility(ability) {
   return {
     name: ability.name || "",
     description: ability.description || "",
+    cost: ability.cost || null,
   };
 }
 

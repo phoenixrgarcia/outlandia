@@ -21,6 +21,15 @@ const inventoryItemSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    clueId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    canUse: {
+      type: Boolean,
+      default: true,
+    },
     quantity: {
       type: Number,
       default: 1,

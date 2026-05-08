@@ -10,6 +10,7 @@ const adminRoutes = require("./routes/admin");
 const clueRoutes = require("./routes/clues");
 const shopRoutes = require("./routes/shop");
 const inboxRoutes = require("./routes/inbox");
+const abilityRoutes = require("./routes/abilities");
 const GameState = require("./models/GameState");
 const { initializeRealtime } = require("./services/realtime");
 const { startStatusExpirationScheduler } = require("./services/statusExpiration");
@@ -32,6 +33,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/clues", clueRoutes);
 app.use("/api/shop", shopRoutes);
 app.use("/api/inbox", inboxRoutes);
+app.use("/api/abilities", abilityRoutes);
 
 app.use(express.static(rootDir, staticOptions));
 
@@ -62,8 +64,8 @@ async function start() {
   initializeRealtime(server);
   startStatusExpirationScheduler();
 
-  server.listen(env.PORT, () => {
-    console.log(`Outlandia server listening on http://localhost:${env.PORT}`);
+  server.listen(env.PORT, env.HOST, () => {
+    console.log(`Outlandia server listening on http://${env.HOST}:${env.PORT}`);
   });
 }
 

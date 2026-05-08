@@ -294,6 +294,7 @@
                                     moneyGold: normalizeCurrency(character.money).gold,
                                     moneySilver: normalizeCurrency(character.money).silver,
                                     inventoryValue: inventoryText(character),
+                                    grantShopItemId: '',
                                     statusName: '',
                                     statusNote: '',
                                     statusExpiresAt: ''
@@ -382,6 +383,34 @@
                       >
                         Save Inventory
                       </button>
+                      <div class="mt-3">
+                        <label
+                          class="form-label"
+                          :for="`grant-shop-item-${character.id}`"
+                          >Grant Shop Item</label
+                        >
+                        <select
+                          class="form-control dark-select mb-2"
+                          :id="`grant-shop-item-${character.id}`"
+                          x-model="grantShopItemId"
+                        >
+                          <option value="">Choose a shop item</option>
+                          <template x-for="item in shopItems" :key="item.id">
+                            <option
+                              :value="item.id"
+                              x-text="`${item.name} - ${item.category}`"
+                            ></option>
+                          </template>
+                        </select>
+                        <button
+                          class="btn btn-court btn-sm"
+                          type="button"
+                          :disabled="!grantShopItemId"
+                          @click="grantShopItem(character.id, grantShopItemId); grantShopItemId = ''"
+                        >
+                          Add Item
+                        </button>
+                      </div>
                     </div>
 
                     <div class="col-12 col-lg-4">
