@@ -1,5 +1,7 @@
 const express = require("express");
+const fs = require("fs");
 const mongoose = require("mongoose");
+const path = require("path");
 const Character = require("../models/Character");
 const Clue = require("../models/Clue");
 const EventLog = require("../models/EventLog");
@@ -13,6 +15,7 @@ const { toSafeLoggedInCharacter } = require("../utils/characterPayload");
 const { canAffordCurrency, normalizeCurrency, spendCurrency } = require("../utils/currency");
 
 const router = express.Router();
+const PURCHASE_CLUES_PATH = path.join(__dirname, "../../agent/clues-for-purchase.txt");
 
 function scaledPrice(entry, round) {
   const basePrice = normalizeCurrency(entry.price);
@@ -74,6 +77,174 @@ function toPurchasedClue(clue) {
 
 function normalizeShopId(shopId) {
   return String(shopId || "").trim().toLowerCase();
+}
+
+function slugify(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function isPurchaseClueHeader(line) {
+  const trimmedLine = String(line || "").trim();
+
+  return Boolean(trimmedLine) && /\s+-\s+.*\bIN SHOP\b/i.test(trimmedLine);
+}
+
+function parsePurchaseClueRequirement(metadata) {
+  const joinedMetadata = metadata.join(" ").toLowerCase();
+
+  if (joinedMetadata.includes("medical knowledge")) {
+    return {
+      type: "medical",
+      label: "medical knowledge",
+    };
+  }
+
+  if (joinedMetadata.includes("magic") || joinedMetadata.includes("alchemy")) {
+    return {
+      type: "magic_or_alchemy",
+      label: "magic or alchemy knowledge",
+    };
+  }
+
+  return null;
+}
+
+function parsePurchaseClues() {
+  if (!fs.existsSync(PURCHASE_CLUES_PATH)) {
+    return [];
+  }
+
+  const lines = fs.readFileSync(PURCHASE_CLUES_PATH, "utf8").split(/\r?\n/);
+  const clues = [];
+  let currentClue = null;
+
+  lines.forEach((line) => {
+    const trimmedLine = line.trim();
+
+    if (isPurchaseClueHeader(trimmedLine)) {
+      if (currentClue) {
+        clues.push(currentClue);
+      }
+
+      const headerParts = trimmedLine
+        .replace(/:$/, "")
+        .split(/\s+-\s+/)
+        .map((part) => part.trim())
+        .filter(Boolean);
+      const title = headerParts.shift() || "Secret Note";
+      const metadata = headerParts.filter((part) => (
+        !/^(pink|orange|green)$/i.test(part) && !/^in shop$/i.test(part)
+      ));
+
+      currentClue = {
+        clueId: `secret-note-${slugify(title)}`,
+        title,
+        requirement: parsePurchaseClueRequirement(metadata),
+        bodyLines: [],
+      };
+      return;
+    }
+
+    if (currentClue && trimmedLine) {
+      currentClue.bodyLines.push(trimmedLine);
+    }
+  });
+
+  if (currentClue) {
+    clues.push(currentClue);
+  }
+
+  return clues.map((clue) => ({
+    ...clue,
+    body: clue.bodyLines.join("\n"),
+  })).filter((clue) => clue.body);
+}
+
+function characterHasPurchaseClueRequirement(character, requirement) {
+  if (!requirement) {
+    return true;
+  }
+
+  const className = String(character.class || "").toLowerCase();
+  const faction = String(character.faction || "").toLowerCase();
+
+  if (requirement.type === "medical") {
+    return (
+      faction.includes("alchemical") ||
+      className.includes("alchemist") ||
+      className.includes("botanist")
+    );
+  }
+
+  if (requirement.type === "magic_or_alchemy") {
+    return (
+      faction.includes("alchemical") ||
+      faction.includes("magicians") ||
+      faction.includes("clergy") ||
+      /(alchemist|botanist|witch|sorcerer|warlock|druid|cleric|magic|mage)/i.test(className)
+    );
+  }
+
+  return true;
+}
+
+function readableSecretNoteBody(character, clue) {
+  if (characterHasPurchaseClueRequirement(character, clue.requirement)) {
+    return clue.body;
+  }
+
+  return [
+    `This note requires ${clue.requirement.label} to read.`,
+    "Find someone with that background, then bring that person with you to a GM to receive the full clue.",
+  ].join("\n");
+}
+
+async function getAssignedSecretNoteClueIds() {
+  const characters = await Character.find({
+    "inventory.itemId": /^secret-note-/,
+  })
+    .select("inventory")
+    .lean();
+  const assignedClueIds = new Set();
+
+  characters.forEach((character) => {
+    (character.inventory || []).forEach((item) => {
+      if (item.clueId) {
+        assignedClueIds.add(item.clueId);
+      }
+    });
+  });
+
+  return assignedClueIds;
+}
+
+async function createSecretNoteInventoryItem(character) {
+  const clues = parsePurchaseClues();
+  const assignedClueIds = await getAssignedSecretNoteClueIds();
+  const availableClues = clues.filter((clue) => !assignedClueIds.has(clue.clueId));
+
+  if (!availableClues.length) {
+    return null;
+  }
+
+  const clue = availableClues[Math.floor(Math.random() * availableClues.length)];
+  const item = {
+    itemId: clue.clueId,
+    clueId: clue.clueId,
+    name: `Secret Note: ${clue.title}`,
+    note: readableSecretNoteBody(character, clue),
+    quantity: 1,
+    canUse: false,
+  };
+
+  character.inventory.push(item);
+  return item;
 }
 
 function ensureDatabase(req, res, next) {
@@ -206,6 +377,19 @@ async function getShopRound() {
 }
 
 async function getStockForEntry(entry, round) {
+  if (entry.shopId === "secret-note") {
+    const totalClues = parsePurchaseClues().length;
+    const assignedClueIds = await getAssignedSecretNoteClueIds();
+    const totalPurchased = assignedClueIds.size;
+
+    return {
+      totalPurchased,
+      roundPurchased: totalPurchased,
+      remainingTotal: Math.max(0, totalClues - totalPurchased),
+      remainingThisRound: null,
+    };
+  }
+
   const [totalPurchased, roundPurchased] = await Promise.all([
     entry.stockTotal
       ? EventLog.countDocuments({
@@ -487,11 +671,15 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
         });
       }
 
-      const purchasedItem = incrementInventory(character, entry.itemTemplate);
+      const purchasedItem = entry.shopId === "secret-note"
+        ? await createSecretNoteInventoryItem(character)
+        : incrementInventory(character, entry.itemTemplate);
 
       if (!purchasedItem) {
         return res.status(400).json({
-          error: "Shop item is missing its item template.",
+          error: entry.shopId === "secret-note"
+            ? "No secret notes are available right now."
+            : "Shop item is missing its item template.",
         });
       }
 
@@ -510,6 +698,7 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
           price: purchasePrice,
           round,
           favorRequired: entry.favorRequired || 0,
+          secretNoteClueId: purchasedItem.clueId || "",
           previousMoney,
           nextMoney: normalizeCurrency(character.money),
         },
@@ -517,7 +706,9 @@ router.post("/purchase", requireAuth, ensureDatabase, async (req, res, next) => 
       await createAndEmitInboxMessage({
         characterId: character.characterId,
         title: "Item Purchased",
-        body: `${purchasedItem.name} has been added to your inventory.`,
+        body: entry.shopId === "secret-note"
+          ? "A Secret Note has been added to your inventory."
+          : `${purchasedItem.name} has been added to your inventory.`,
         type: "shop",
         oldState: {
           money: previousMoney,

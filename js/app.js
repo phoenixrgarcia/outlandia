@@ -836,16 +836,23 @@ function loggedInCharacterDetails() {
       clues: false,
     },
     selectedInventoryTargets: {},
+    selectedAbilityTargets: ["", "", ""],
     poisonTargets: [],
+    abilityTargets: [],
     isUsingItem: false,
+    isUsingAbility: false,
     useNotice: "",
     useError: "",
+    abilityNotice: "",
+    abilityError: "",
 
     async init() {
       this.$watch("$store.auth.character?.id", () => {
         this.loadPoisonTargets();
+        this.loadAbilityTargets();
       });
       await this.loadPoisonTargets();
+      await this.loadAbilityTargets();
     },
 
     get character() {
@@ -861,6 +868,10 @@ function loggedInCharacterDetails() {
 
       if (section === "inventory" && this.sections.inventory) {
         this.loadPoisonTargets();
+      }
+
+      if (section === "abilities" && this.sections.abilities) {
+        this.loadAbilityTargets();
       }
     },
 
@@ -888,16 +899,165 @@ function loggedInCharacterDetails() {
       }
     },
 
+    async loadAbilityTargets() {
+      if (!this.$store.auth.loggedIn) {
+        this.abilityTargets = [];
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/shop/targets?effect=poison", {
+          headers: {
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+        });
+        const data = await response.json();
+
+        this.abilityTargets = response.ok ? data.targets || [] : [];
+      } catch (error) {
+        this.abilityTargets = [];
+      }
+    },
+
     isPoisonInventoryItem(item) {
       return item?.itemId === "poison-vial";
     },
 
     canUseInventoryItem(item) {
-      return Boolean(item?.itemId);
+      return Boolean(item?.itemId) && item.canUse !== false;
     },
 
     targetLabel(target) {
       return `${target.name} - ${target.player} - ${target.faction}`;
+    },
+
+    activeAbilityTargetRules() {
+      const ability = this.character?.abilities?.active;
+      const text = `${ability?.name || ""} ${ability?.description || ""}`.toLowerCase();
+      const name = ability?.name || "";
+
+      if (!ability?.name) {
+        return { min: 0, max: 0 };
+      }
+
+      if (name === "Divine Challenge") {
+        return { min: 2, max: 2 };
+      }
+
+      if (["Duel of Honor", "Pickpocket", "Plunder", "Salt Hex of Unluck"].includes(name)) {
+        return { min: 1, max: 1 };
+      }
+
+      if (text.includes("force two players") || text.includes("two players") || text.includes("2 players")) {
+        return { min: 2, max: 2 };
+      }
+
+      if (text.includes("group (3 max)") || text.includes("3 max")) {
+        return { min: 1, max: 3 };
+      }
+
+      if (
+        text.includes("choose a player") ||
+        text.includes("target") ||
+        text.includes("another player") ||
+        text.includes("a player")
+      ) {
+        return { min: 1, max: 1 };
+      }
+
+      return { min: 0, max: 0 };
+    },
+
+    activeAbilityTargetCount() {
+      return this.activeAbilityTargetRules().max;
+    },
+
+    activeAbilityRequiredTargetCount() {
+      return this.activeAbilityTargetRules().min;
+    },
+
+    abilityTargetSlots() {
+      return Array.from({ length: this.activeAbilityTargetCount() }, (_, index) => index);
+    },
+
+    canUseActiveAbility() {
+      return Boolean(this.character?.abilities?.active?.name);
+    },
+
+    canUsePassiveAbility() {
+      const ability = this.character?.abilities?.passive;
+      const text = `${ability?.name || ""} ${ability?.description || ""}`.toLowerCase();
+
+      return Boolean(ability?.name) && (
+        text.includes("roll") ||
+        ability.name === "Pity Trade" ||
+        ability.name === "Slip Through"
+      );
+    },
+
+    async useActiveAbility() {
+      await this.useAbility("active");
+    },
+
+    async usePassiveAbility() {
+      await this.useAbility("passive");
+    },
+
+    async useAbility(abilityType) {
+      this.abilityNotice = "";
+      this.abilityError = "";
+
+      if (
+        (abilityType === "active" && !this.canUseActiveAbility()) ||
+        (abilityType === "passive" && !this.canUsePassiveAbility()) ||
+        this.isUsingAbility
+      ) {
+        return;
+      }
+
+      const targetCharacterIds = abilityType === "active"
+        ? this.selectedAbilityTargets
+          .slice(0, this.activeAbilityTargetCount())
+          .filter(Boolean)
+        : [];
+      const requiredTargetCount = abilityType === "active"
+        ? this.activeAbilityRequiredTargetCount()
+        : 0;
+
+      if (targetCharacterIds.length < requiredTargetCount) {
+        this.abilityError = requiredTargetCount === 1
+          ? "Choose a target for this ability."
+          : `Choose ${requiredTargetCount} targets for this ability.`;
+        return;
+      }
+
+      this.isUsingAbility = true;
+
+      try {
+        const response = await fetch(`/api/abilities/${abilityType}/use`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.$store.auth.authToken}`,
+          },
+          body: JSON.stringify({ targetCharacterIds }),
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Unable to use ability.");
+        }
+
+        this.$store.auth.character = data.character;
+        this.selectedAbilityTargets = ["", "", ""];
+        this.abilityNotice = data.result?.abilityName
+          ? `${data.result.abilityName}: ${data.result.message}`
+          : data.result?.message || "Ability used.";
+      } catch (error) {
+        this.abilityError = error.message || "Unable to use ability.";
+      } finally {
+        this.isUsingAbility = false;
+      }
     },
 
     async useInventoryItem(item) {
@@ -950,7 +1110,7 @@ function loggedInCharacterDetails() {
       }
 
       if (typeof text === "object" && !Array.isArray(text)) {
-        return this.escapeHtml(this.formatListItem(text));
+        return this.escapeHtml(this.formatListItem(text)).replace(/\n/g, "<br>");
       }
 
       if (Array.isArray(text)) {

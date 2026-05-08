@@ -16,6 +16,7 @@ const PHASE_CLUE_FILES = [
   { round: 2, fileName: "phase2-clues.txt" },
   { round: 3, fileName: "phase3-clues.txt" },
 ];
+const PURCHASE_CLUES_FILE = path.join(__dirname, "../../agent/clues-for-purchase.txt");
 
 function slugify(value) {
   return String(value || "")
@@ -32,6 +33,18 @@ function normalizeClueTitle(value) {
     .trim()
     .replace(/:$/, "")
     .trim();
+}
+
+function countPurchaseClues() {
+  if (!fs.existsSync(PURCHASE_CLUES_FILE)) {
+    return 0;
+  }
+
+  return fs
+    .readFileSync(PURCHASE_CLUES_FILE, "utf8")
+    .split(/\r?\n/)
+    .filter((line) => /\s+-\s+.*\bIN SHOP\b/i.test(line.trim()))
+    .length;
 }
 
 function normalizeClueMetadata(parts) {
@@ -249,7 +262,7 @@ const PLACEHOLDER_SHOP_ENTRIES = [
   { shopId: "false-alibi", type: "item", category: "Information", availableToRound: 2, name: "False Alibi", description: "Ignore one accusation or interrogation result.", price: currency(19, 0), itemTemplate: { itemId: "false-alibi", name: "False Alibi", note: "Use to ignore one accusation or interrogation result.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified that you are using False Alibi.", consumeOnUse: true }, sortOrder: 140 },
   { shopId: "erase-record", type: "item", category: "Information", availableToRound: 2, name: "Erase Record", description: "Remove 1 suspicion OR negate the Scribe's effect.", price: currency(19, 0), itemTemplate: { itemId: "erase-record", name: "Erase Record", note: "Use to remove 1 suspicion OR negate the Scribe's effect.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to remove 1 suspicion or negate the Scribe's effect.", suspicionDelta: -1, consumeOnUse: true }, sortOrder: 150 },
   { shopId: "rumor-card", type: "item", category: "Information", availableToRound: 2, name: "Rumor Card", description: "Reach into the rumor box to receive a random clue about a player.", price: currency(35, 0), itemTemplate: { itemId: "rumor-card", name: "Rumor Card", note: "Use to receive a random clue about a player from the rumor box.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide a Rumor Card clue.", consumeOnUse: true }, sortOrder: 160 },
-  { shopId: "secret-note", type: "item", category: "Information", availableToRound: 2, name: "Secret Note", description: "Reveal a small leak of information.", price: currency(45, 0), itemTemplate: { itemId: "secret-note", name: "Secret Note", note: "Use to reveal a small leak of information.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide a Secret Note.", consumeOnUse: true }, sortOrder: 170 },
+  { shopId: "secret-note", type: "item", category: "Information", availableToRound: 2, name: "Secret Note", description: "Reveal a small leak of information.", price: currency(45, 0), stockTotal: countPurchaseClues(), itemTemplate: { itemId: "secret-note", name: "Secret Note", note: "Use to reveal a small leak of information.", quantity: 1 }, useDefinition: { action: "gm_notice", message: "A GM has been notified to provide a Secret Note.", consumeOnUse: true }, sortOrder: 170 },
   { shopId: "forgery", type: "item", category: "Information", name: "Forgery", description: "Plant a misleading clue in another area. Roll d20. 12+ success. On failure, gain 1 suspicion and the target area is flagged as tampered.", price: currency(50, 0), availableToRound: 3, stockTotal: 2, itemTemplate: { itemId: "forgery", name: "Forgery", note: "Roll d20 to plant a misleading clue in another area.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. GM has been notified to place the forgery with no alert.", failureMessage: "Failure. GM has been notified that you gain 1 suspicion and the target area is tampered.", suspicionDeltaOnFailure: 1, notifyGmAlways: true, consumeOnUse: true }, sortOrder: 180 },
   { shopId: "cursed-trinket", type: "item", category: "Temporary Abilities & Debuffs", availableToRound: 2, name: "Cursed Trinket", description: "May grant insight or backfire dramatically. Roll d20: 12+ positive effect. On failure, gain suspicion or carry cumbersome object for the rest of the game.", price: currency(0, 15), itemTemplate: { itemId: "cursed-trinket", name: "Cursed Trinket", note: "Roll d20. 12+ success for positive effect.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. GM has been notified to provide a player secret.", failureMessage: "Failure. GM has been notified to assign suspicion or a cumbersome object.", suspicionDeltaOnFailure: 1, notifyGmAlways: true, consumeOnUse: true }, sortOrder: 210 },
   { shopId: "sneak-cloak", type: "item", category: "Temporary Abilities & Debuffs", availableToRound: 2, name: "Sneak Cloak", description: "Move between rooms unnoticed. Roll d20: 12+ success. On failure, all players are given notice of your action. Talk to GM.", price: currency(0, 20), itemTemplate: { itemId: "sneak-cloak", name: "Sneak Cloak", note: "Roll d20 to move between rooms unnoticed.", quantity: 1 }, useDefinition: { action: "roll", die: 20, successAt: 12, successMessage: "Success. You may move between rooms unnoticed.", failureMessage: "Failure. GM has been notified to announce your action.", notifyGmOnFailure: true, consumeOnUse: true }, sortOrder: 220 },

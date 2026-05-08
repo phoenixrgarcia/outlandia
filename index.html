@@ -280,10 +280,48 @@
                                     <div class="detail-chip detail-chip-ability">
                                         <h3 class="detail-chip-title">Passive</h3>
                                         <p class="mb-0" x-html="formatAbility(character?.abilities?.passive)"></p>
+                                        <button
+                                            type="button"
+                                            class="btn btn-court btn-sm mt-3"
+                                            x-show="canUsePassiveAbility()"
+                                            :disabled="isUsingAbility"
+                                            @click="usePassiveAbility()"
+                                            x-text="isUsingAbility ? 'Using...' : 'Use Passive'"
+                                        ></button>
                                     </div>
                                     <div class="detail-chip detail-chip-ability">
                                         <h3 class="detail-chip-title">Active</h3>
                                         <p class="mb-0" x-html="formatAbility(character?.abilities?.active)"></p>
+                                        <div class="shop-notice mt-3" x-show="abilityNotice" x-cloak>
+                                            <p class="mb-0" x-text="abilityNotice"></p>
+                                        </div>
+                                        <div class="alert alert-danger mt-3 mb-0" x-show="abilityError" x-cloak>
+                                            <p class="mb-0" x-text="abilityError"></p>
+                                        </div>
+                                        <template x-for="slot in abilityTargetSlots()" :key="`ability-target-${slot}`">
+                                            <div class="mt-3">
+                                                <label class="form-label" :for="`ability-target-select-${slot}`" x-text="activeAbilityTargetCount() > 1 ? `Target ${slot + 1}${slot >= activeAbilityRequiredTargetCount() ? ' (optional)' : ''}` : 'Target'"></label>
+                                                <select
+                                                    class="form-control dark-select"
+                                                    :id="`ability-target-select-${slot}`"
+                                                    x-model="selectedAbilityTargets[slot]"
+                                                    :disabled="isUsingAbility"
+                                                >
+                                                    <option value="">Choose a character</option>
+                                                    <template x-for="target in abilityTargets" :key="target.id">
+                                                        <option :value="target.id" x-text="targetLabel(target)"></option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </template>
+                                        <button
+                                            type="button"
+                                            class="btn btn-court btn-sm mt-3"
+                                            x-show="canUseActiveAbility()"
+                                            :disabled="isUsingAbility"
+                                            @click="useActiveAbility()"
+                                            x-text="isUsingAbility ? 'Using...' : 'Use Ability'"
+                                        ></button>
                                     </div>
                                 </div>
                             </div>
